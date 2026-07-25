@@ -3,139 +3,288 @@
  * VisionAiPage
  * =========================================
  *
- * Es la pantalla base de Vision AI.
+ * Pantalla base de Vision AI.
  *
  * Finalidad:
  * - permitir seleccionar cultivo;
- * - simular subida de imagen;
- * - ejecutar análisis visual mock vía service;
- * - mostrar predicción, confianza, métricas y recomendación.
-*/
+ * - seleccionar o simular imagen;
+ * - ejecutar análisis visual;
+ * - mostrar estado idle, analyzing, result, fallback o error;
+ * - dejar claro que el resultado es preliminar.
+ */
 
 import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
+
 import { getCropProfiles } from "../../crops/services/cropProfilesService";
-import type { CropProfile, CropType } from "../../crops/types/cropProfile.types";
+import type {
+  CropProfile,
+  CropType,
+} from "../../crops/types/cropProfile.types";
+
 import { VisionResultCard } from "../components/VisionResultCard";
 import { analyzeVisionImage } from "../services/visionAIService";
-import type { VisionInspection } from "../types/visionAi.types";
+
+import type {
+  VisionAnalysisResult,
+  VisionAnalysisStatus,
+} from "../types/visionAi.types";
+
 import "../vision-ai.css";
 
+const DEFAULT_FIELD_ID = "field-001";
+const DEFAULT_ZONE_ID = "zone-03";
+const DEFAULT_IMAGE_FILE_NAME = "orange-zone-03-reference.jpg";
+
 export function VisionAiPage() {
-   const [profiles, setProfiles] = useState<ReadonlyArray<CropProfile>>([]);
-   const [selectedCropType, setSelectedCropType] = useState<CropType>("ORANGE");
-   const [imageFileName, setImageFileName] = useState("orange-zone-03.jpg");
-   const [result, setResult] = useState<VisionInspection | null>(null);
-   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [profiles, setProfiles] = useState<ReadonlyArray<CropProfile>>([]);
 
-   // Carga los perfiles de cultivo para alimentar el sector de cultivos.
+  const [selectedCropType, setSelectedCropType] =
+    useState<CropType>("ORANGE");
 
-    useEffect(() => {
-      async function loadProfiles() {
-        const data = await getCropProfiles();
-        setProfiles(data);
-      }
+  const [imageFileName, setImageFileName] = useState(
+    DEFAULT_IMAGE_FILE_NAME
+  );
 
-      void loadProfiles();
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(
+    null
+  );
 
-    }, []);
+  const [analysisResult, setAnalysisResult] =
+    useState<VisionAnalysisResult | null>(null);
 
-    async function handleAnalyze() {
-      setIsAnalyzing(true);
+  const [analysisStatus, setAnalysisStatus] =
+    useState<VisionAnalysisStatus>("IDLE");
 
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(
+    null
+  );
+
+  /**
+   * Carga perfiles de cultivos.
+   *
+   * Funcionamiento:
+   * - obtiene perfiles desde cropProfilesService;
+   * - llena el selector de cultivos;
+   * - si falla, mantiene ORANGE como default para no romper demo.
+   */
+  useEffect(() => {
+    async function loadProfiles() {
       try {
-        const analysis = await analyzeVisionImage({
-          cropType: selectedCropType,
-          fieldId: "field-001",
-          zoneId: "zone-03",
-          imageFileName,
-        });
+        const data = await getCropProfiles();
 
-        setResult(analysis);
-      } finally {
-        setIsAnalyzing(false);
+        setProfiles(data);
+      } catch {
+        setFeedbackMessage(
+          "No se pudieron cargar perfiles. Se mantiene ORANGE como cultivo demo."
+        );
       }
     }
 
-    function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
-       const file = event.target.files?.[0];
+    void loadProfiles();
+  }, []);
 
-       if (!file) return;
+  /**
+   * Ejecuta análisis visual.
+   *
+   * Funcionamiento:
+   * - cambia estado a ANALYZING;
+   * - envía cultivo, field, zone y archivo al service;
+   * - el service intenta backend y usa fallback si falla;
+   * - actualiza estado según source: BACKEND o FALLBACK.
+   */
+  async function handleAnalyze() {
+    setAnalysisStatus("ANALYZING");
+    setFeedbackMessage(null);
 
-       setImageFileName(file.name);
+    try {
+      const result = await analyzeVisionImage({
+        cropType: selectedCropType,
+        fieldId: DEFAULT_FIELD_ID,
+        zoneId: DEFAULT_ZONE_ID,
+        imageFileName,
+        imageFile: selectedImageFile,
+      });
+
+      setAnalysisResult(result);
+
+      if (result.source === "FALLBACK") {
+        setAnalysisStatus("FALLBACK");
+        setFeedbackMessage(
+          "Backend no disponible. Se muestra análisis preliminar local controlado."
+        );
+
+        return;
+      }
+
+      setAnalysisStatus("RESULT");
+      setFeedbackMessage("Análisis visual generado desde backend.");
+    } catch {
+      setAnalysisStatus("ERROR");
+      setFeedbackMessage("No se pudo ejecutar el análisis visual.");
     }
+  }
 
-    return (
-        <section className="visionAiPage" aria-labelledby="vision-ai-title">
-            <header className="visionAiHero">
-                <div>
-                    <p className="visionAiHero__eyebrow">Vision AI</p>
-                    <h1 id="vision-ai-title">Análisis visual preliminar</h1>
-                    <span>
-                       Simula el flujo de imagen, cultivo, predicción, confianza, métricas
-                       visuales y recomendación asociada. No representa diagnóstico
-                       definitivo.
-                    </span>
-                </div>
-            </header>
+  /**
+   * Maneja selección de imagen.
+   *
+   * Funcionamiento:
+   * - toma el primer archivo seleccionado;
+   * - guarda referencia real del archivo;
+   * - guarda nombre para trazabilidad visual;
+   * - limpia resultado anterior para evitar confusión.
+   */
+  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
 
-            <section className="visionAiGrid">
-                <article className="visionAiPanel">
-                    <header>
-                       <p>Input visual</p>
-                       <h2>Simular análisis</h2>
-                    </header>
+    if (!file) return;
 
-                    <label className="visionAiField">
-                        <span>Crop type</span>
+    setSelectedImageFile(file);
+    setImageFileName(file.name);
+    setAnalysisResult(null);
+    setAnalysisStatus("IDLE");
+    setFeedbackMessage("Imagen seleccionada. Lista para análisis preliminar.");
+  }
 
-                        <select
-                        value={selectedCropType}
-                        onChange={(event) =>
-                            setSelectedCropType(event.target.value as CropType)
-                        }>
-                           {profiles.map((profile) => (
-                              <option key={profile.cropType} value={profile.cropType}>
-                                {profile.displayName} — {profile.cropType}
-                              </option>
-                            ))}
-                        </select>
-                    </label>
+  /**
+   * Maneja cambio de cultivo.
+   *
+   * Funcionamiento:
+   * - actualiza cropType;
+   * - limpia resultado previo;
+   * - evita mostrar análisis de otro cultivo.
+   */
+  function handleCropChange(event: ChangeEvent<HTMLSelectElement>) {
+    setSelectedCropType(event.target.value as CropType);
+    setAnalysisResult(null);
+    setAnalysisStatus("IDLE");
+    setFeedbackMessage("Cultivo actualizado. Ejecuta un nuevo análisis.");
+  }
 
-                    <label className="visionAiField">
-                        <span>Image file</span>
+  const isAnalyzing = analysisStatus === "ANALYZING";
 
-                        <input type="file" accept="image/*" onChange={handleImageChange} />
-                    </label>
+  return (
+    <section className="visionAiPage" aria-labelledby="vision-ai-title">
+      <header className="visionAiHero">
+        <div>
+          <p className="visionAiHero__eyebrow">Vision AI</p>
 
-                    <div className="visionAiMockPreview">
-                        <span>Selected file</span>
-                        <strong>{imageFileName}</strong>
-                        <small>Mock upload. No real image processing yet.</small>
-                    </div>
+          <h1 id="vision-ai-title">Análisis visual preliminar</h1>
 
-                    <button
-                      type="button"
-                      className="visionAiButton"
-                      disabled={isAnalyzing}
-                      onClick={handleAnalyze}
-                    >
-                      {isAnalyzing ? "Analyzing..." : "Run mock analysis"}
-                    </button>
-                </article>
+          <span>
+            Selecciona un cultivo y una imagen para generar una lectura visual
+            preliminar con predicción, confianza, evidencia y recomendación.
+          </span>
+        </div>
+      </header>
 
-                {result ? (
-                <VisionResultCard result={result} />) : (
-                    <article className="visionAiEmptyState">
-                       <p>Esperando análisis visual</p>
-                       <span>
-                        Selecciona un cultivo, simula una imagen y ejecuta el análisis
-                        mock.
-                       </span>
-                    </article>
-                )} 
-            </section>
+      {feedbackMessage && (
+        <section
+          className={`visionAiStatusBanner visionAiStatusBanner--${analysisStatus.toLowerCase()}`}
+        >
+          <p>{feedbackMessage}</p>
         </section>
-    );
+      )}
 
+      <section className="visionAiGrid">
+        <article className="visionAiPanel">
+          <header>
+            <p>Entrada visual</p>
+            <h2>Preparar análisis</h2>
+          </header>
 
+          <label className="visionAiField">
+            <span>Crop type</span>
+
+            <select value={selectedCropType} onChange={handleCropChange}>
+              {profiles.length === 0 && (
+                <option value="ORANGE">Naranjo — ORANGE</option>
+              )}
+
+              {profiles.map((profile) => (
+                <option key={profile.cropType} value={profile.cropType}>
+                  {profile.displayName} — {profile.cropType}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="visionAiField">
+            <span>Image file</span>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </label>
+
+          <div className="visionAiMockPreview">
+            <span>Archivo de referencia</span>
+
+            <strong>{imageFileName}</strong>
+
+            <small>
+              Entrada visual preliminar. Requiere validación técnica en campo.
+            </small>
+          </div>
+
+          <button
+            type="button"
+            className="visionAiButton"
+            disabled={isAnalyzing}
+            onClick={handleAnalyze}
+          >
+            {isAnalyzing
+              ? "Analizando imagen..."
+              : "Ejecutar análisis preliminar"}
+          </button>
+        </article>
+
+        {analysisStatus === "ANALYZING" && (
+          <article className="visionAiEmptyState visionAiEmptyState--analyzing">
+            <p>Analizando imagen</p>
+
+            <span>
+              AgroVision está procesando la entrada visual y preparando una
+              respuesta preliminar.
+            </span>
+          </article>
+        )}
+
+        {analysisStatus === "ERROR" && (
+          <article className="visionAiEmptyState visionAiEmptyState--error">
+            <p>Error de análisis</p>
+
+            <span>
+              No fue posible completar el análisis visual. Revisa backend,
+              endpoint o formato de respuesta.
+            </span>
+          </article>
+        )}
+
+        {(analysisStatus === "IDLE" || !analysisResult) &&
+          analysisStatus !== "ANALYZING" &&
+          analysisStatus !== "ERROR" && (
+            <article className="visionAiEmptyState">
+              <p>Esperando análisis visual</p>
+
+              <span>
+                Selecciona un cultivo, usa una imagen de referencia y ejecuta
+                un análisis preliminar. No se emitirá diagnóstico definitivo.
+              </span>
+            </article>
+          )}
+
+        {analysisResult &&
+          (analysisStatus === "RESULT" || analysisStatus === "FALLBACK") && (
+            <VisionResultCard
+              result={analysisResult.inspection}
+              source={analysisResult.source}
+              fallbackReason={analysisResult.fallbackReason}
+            />
+          )}
+      </section>
+    </section>
+  );
 }
