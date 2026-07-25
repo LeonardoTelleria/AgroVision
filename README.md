@@ -39,7 +39,7 @@
 
 
 **Tabla de Contenidos**
-- [Desafío del País](#-desafío-del-país)
+- [Desafío Principal](#-desafío-principal)
 - [Problema y Propuesta de Valor](#-problema-y-propuesta-de-valor)
 - [Arquitectura](#-diagrama-de-arquitectura)
 - [Flujo Prescriptivo](#-flujo-prescriptivo-del-sistema)
@@ -58,7 +58,7 @@
 
 ---
 
-## 🏆 Desafío del País
+## 🏆 Desafío Principal
 
 | Campo | Descripción |
 |---|---|
