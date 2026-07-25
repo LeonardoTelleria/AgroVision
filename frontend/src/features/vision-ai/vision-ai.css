@@ -312,6 +312,151 @@
   line-height: 1.55;
 }
 
+/* =========================================
+   Vision AI Status Banner
+   ========================================= */
+
+.visionAiStatusBanner {
+  padding: 14px 18px;
+
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 18px;
+  background: rgba(18, 24, 20, 0.82);
+}
+
+.visionAiStatusBanner p {
+  margin: 0;
+
+  color: #c8d0c4;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.visionAiStatusBanner--fallback {
+  border-color: rgba(255, 184, 77, 0.32);
+  background: rgba(255, 184, 77, 0.07);
+}
+
+.visionAiStatusBanner--error {
+  border-color: rgba(255, 95, 95, 0.32);
+  background: rgba(255, 95, 95, 0.07);
+}
+
+.visionAiStatusBanner--result {
+  border-color: rgba(183, 255, 23, 0.28);
+  background: rgba(183, 255, 23, 0.07);
+}
+
+/* =========================================
+   Vision AI Source / Notices
+   ========================================= */
+
+.visionSourceBadge {
+  width: max-content;
+  height: max-content;
+
+  padding: 8px 12px;
+  font-size: 0.74rem;
+  font-weight: 950;
+
+  border-radius: 999px;
+}
+
+.visionSourceBadge--backend {
+  color: #081006;
+  background: #b7ff17;
+}
+
+.visionSourceBadge--fallback {
+  color: #081006;
+  background: #ffb84d;
+}
+
+.visionResultCard__notice,
+.visionResultCard__fallbackNotice {
+  display: grid;
+  gap: 6px;
+
+  padding: 14px;
+  border-radius: 18px;
+}
+
+.visionResultCard__notice {
+  border: 1px solid rgba(145, 231, 255, 0.24);
+  background: rgba(145, 231, 255, 0.065);
+}
+
+.visionResultCard__fallbackNotice {
+  border: 1px solid rgba(255, 184, 77, 0.28);
+  background: rgba(255, 184, 77, 0.07);
+}
+
+.visionResultCard__notice strong,
+.visionResultCard__fallbackNotice strong {
+  color: #f4f7ef;
+  font-size: 0.84rem;
+  font-weight: 950;
+}
+
+.visionResultCard__notice p,
+.visionResultCard__fallbackNotice p {
+  margin: 0;
+
+  color: #c8d0c4;
+  line-height: 1.5;
+}
+
+/* =========================================
+   Vision Signals
+   ========================================= */
+
+.visionSignalList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.visionSignalBadge {
+  display: grid;
+  gap: 4px;
+
+  min-width: 120px;
+  padding: 10px 12px;
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.visionSignalBadge span {
+  color: #8d988d;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.visionSignalBadge strong {
+  color: #f4f7ef;
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+/* =========================================
+   Vision Empty States
+   ========================================= */
+
+.visionAiEmptyState--analyzing {
+  border-color: rgba(183, 255, 23, 0.28);
+}
+
+.visionAiEmptyState--error {
+  border-color: rgba(255, 95, 95, 0.32);
+}
+
+.visionAiEmptyState--error p {
+  color: #ffb84d;
+}
+
+
 @media (max-width: 1080px) {
   .visionAiGrid {
     grid-template-columns: 1fr;

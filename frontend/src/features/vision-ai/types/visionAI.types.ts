@@ -3,7 +3,11 @@
 * =========================================
 *
 * Tipos para análisis visual preliminar.
-* El objetivo no es diagnosticar enfermedades, sino detectar señales visuales compatibles con estrés, deterioro o anomalía agrícola.
+*
+* Finalidad:
+* - definir el contrato visual que consume la UI;
+* - representar predicción, confianza, métricas y evidencia;
+* - diferenciar resultado real de backend vs fallback local;
 *
 * Regla:
 * - AI Service analiza imagen.
@@ -28,6 +32,18 @@ export type VisionEvidenceStatus =
   | "WATCH"
   | "WARNING"
   | "CRITICAL";
+
+
+//Indica de donde salio el resultado mostrado , sea backend o fallback.
+export type VisionAnalysisSource = "BACKEND" | "FALLBACK";
+
+// Estados visuales dentro de la pagina , sirve para que la pantalla no quede en blanco.
+export type VisionAnalysisStatus =
+  | "IDLE"
+  | "ANALYZING"
+  | "RESULT"
+  | "FALLBACK"
+  | "ERROR";
 
 // métricas visuales explicables.
 // todas son opcionales porque algunos análisis pueden no devolver cada métrica.
@@ -59,22 +75,47 @@ export interface VisionInspection {
 
     readonly prediction: VisionPrediction;
     readonly confidence: number;
-
     readonly visualMetrics: VisualMetrics;
 
     readonly explanation: string;
     readonly recommendedAction: string;
 
     readonly evidence: ReadonlyArray<VisionEvidenceItem>;
-
     readonly createdAt: string;
 }
 
-// Payload conceptual para una futura request.
-// El archivo real se mandará como FormData cuando backend esté listo.
+
+/**
+* Request usada por el frontend para pedir análisis.
+*
+* imageFile:
+* Se usa si el usuario selecciona una imagen real.
+*
+* imageFileName:
+* Permite mantener flujo simulado aunque no se suba archivo.
+*/
 export interface VisionAnalyzeRequest {
     readonly cropType: CropType;
     readonly fieldId: string;
     readonly zoneId?: string | null;
     readonly imageFileName: string;
+    readonly imageFile: File | null;
+}
+
+
+//Resultado final que recibe la pagina.
+// no se coloca dentro de `VisionInspection`para poder indicar si la respuesta vino del backend o de fallback como respaldo 
+export interface VisionAnalysisResult {
+    readonly inspection: VisionInspection;
+    readonly source: VisionAnalysisSource;
+    readonly fallbackReason?: string | null;
+}
+
+
+export interface ApiResponse<T> {
+    readonly success: boolean;
+    readonly data: T | null;
+    readonly message?: string;
+    readonly error?: string;
+    readonly timestamp: string;
 }
