@@ -1,54 +1,59 @@
-# Checklist de Evidencias — Preclasificación
+# Checklist de evidencias — preclasificación
 
 **Caso oficial de demo:** `field-001` · `zone-03` · `ORANGE` · riesgo `HIGH`
-**Fecha de entrega:** 22/jul/2026
-**Estado general:** listo para demo, con incidencias históricas resueltas y registradas.
 
-## Pantallas y flujo funcional
+**Propósito:** confirmar que cada pantalla y contrato crítico tiene evidencia lista para la demo interna, o un bloqueo explícito.
+**Corte de esta matriz:** 24/jul/2026.
 
-| Capa                 | Estado   | Validación crítica                                                                                                         |
-| -------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard            | Alineado | Expone `field-001`, zona crítica `zone-03`, cultivo `ORANGE`, health score 35, NDVI 0.24, humedad 28% y temperatura 38 °C. |
-| Alertas              | Alineado | Las alertas activas pertenecen a `zone-03` y contienen evidencia y acción recomendada.                                     |
-| Recomendaciones      | Alineado | La recomendación prioritaria se relaciona con la alerta y con la evidencia multifuente del mismo caso.                     |
-| Reporte prescriptivo | Alineado | Consolida caso, alertas, recomendaciones, evidencia y acciones del notebook.                                               |
-| Notebook             | Alineado | `fn-001`, `fn-002` y `fn-003` cubren inspección, riego y seguimiento para `field-001` / `zone-03`.                         |
+## Matriz de evidencias por módulo
 
-## Endpoints de demo
+| Módulo | Pantalla / alcance | Endpoint o fuente | Captura esperada | JSON / resultado esperado | Responsable | Estado | Bloqueo o condición |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Frontend | Dashboard | `GET /api/dashboard/summary` | `dashboard-zone-03.png` | Caso `field-001` / `zone-03`, `ORANGE`, score 35, NDVI 0.24, humedad 28 % y 38 °C | Brandon | Pendiente de evidencia | La pantalla usa `dashboardMock` como fallback/control de demo; falta captura y smoke documentado del endpoint. |
+| Frontend | Alerts | `GET /api/alerts` | `alerts-zone-03.png` | Alertas activas de `zone-03`, incluida evidencia multifuente | Brandon | Pendiente de captura | El servicio tiene fallback local; la captura debe identificar si se hizo contra API o fallback. |
+| Frontend | Recommendations | `GET /api/recommendations` | `recommendations-zone-03.png` | Recomendación prioritaria de riego/inspección para `zone-03` con evidencia relacionada | Brandon | Pendiente de captura | El servicio tiene fallback local; la captura debe identificar si se hizo contra API o fallback. |
+| Frontend | Reports | `GET /api/reports/prescriptive/zone-03` | `reports-zone-03.png` | `report-zone-03-001`, alertas, recomendaciones, acciones tomadas y pendientes | Brandon | Pendiente de captura | El servicio tiene fallback local; la captura debe identificar si se hizo contra API o fallback. |
+| Frontend | Vision AI | `POST /api/vision/analyze` o mock controlado | `vision-ai-zone-03.png` | Señales `visualAnomaly`, `dryAreaDetected` y `chlorosisDetected` con fuente `VISION` | Brandon | Pendiente de captura | La UI usa `visionAIMock`; no representa una inferencia de modelo real. |
+| Frontend | Crops | `GET /api/crops/profiles` | No requerida para el recorrido oficial | Perfiles de cultivo disponibles para el caso `ORANGE` | Brandon | Listo sin captura | Smoke test registrado como PASS; no es una pantalla del recorrido oficial. |
+| Backend | Contratos críticos | Dashboard, alerts, recommendations, reports y crops | No aplica | Respuestas bajo contrato `ApiResponse` y datos del caso oficial | Leo | Parcialmente verificado | `SMOKE_TEST_RESULTS.md` registra PASS para alerts, recommendations, reports y crops; falta registrar el smoke de `GET /api/dashboard/summary`. |
+| AI Service | Análisis visual | `POST /api/vision/analyze` | `vision-ai-zone-03.png` | Respuesta `ApiResponse` con evidencia visual compatible | Leo | Verificado como mock | Smoke registrado como PASS, pero el servicio devuelve respuesta simulada; falta captura de la interacción si se mostrará en demo. |
+| Reportes | Reporte prescriptivo | `GET /api/reports/prescriptive/zone-03` | `reports-zone-03.png` | Evidencia, `activeAlerts`, recomendaciones, `actionsTaken` y `pendingActions` | Jorge | Contrato documentado | El enlace Notebook → reporte se realiza por `zoneId`, no por `alertId`/`recommendationId`; no bloquea la demo interna. |
+| Notebook | Trazabilidad de campo | `GET /api/field-notebook/zone/zone-03` | No requerida; puede adjuntarse captura de apoyo | `fn-001`, `fn-002` y `fn-003`, con responsable, fecha y evidencia | Jorge | Verificado | Smoke registrado como PASS. La captura del notebook no forma parte de los cinco archivos obligatorios. |
+| Documentación | Matriz, mapa, smoke y estructura de reportes | Archivos en `docs/` | README de estructura de capturas | Referencias a rutas, contratos, condiciones y responsables | Marvin | Listo | No hay bloqueo documental abierto; las capturas pendientes deben enlazarse desde el README. |
 
-| Endpoint                                | Estado | Evidencia crítica                                                                  |
-| --------------------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| `GET /api/dashboard/summary`            |        | Devuelve la zona crítica y resumen prescriptivo de `field-001` / `zone-03`.        |
-| `GET /api/alerts`                       |        | Alertas activas de la zona con evidencia multifuente.                              |
-| `GET /api/recommendations`              |        | Recomendación de riego para el caso demo.                                          |
-| `GET /api/reports/prescriptive/zone-03` |        | Incluye acciones tomadas y pendientes con responsable, fecha y evidencia asociada. |
-| `GET /api/field-notebook/zone/zone-03`  |        | Devuelve los eventos de notebook con responsable, fecha, acción y evidencia.       |
+## Asociación obligatoria pantalla → fuente
 
-## Vision AI — Evidencia visual (`zone-03`, `ORANGE`)
+| Pantalla | Endpoint o fuente oficial |
+| --- | --- |
+| Dashboard | `GET /api/dashboard/summary` |
+| Alerts | `GET /api/alerts` |
+| Recommendations | `GET /api/recommendations` |
+| Reports | `GET /api/reports/prescriptive/zone-03` |
+| Vision AI | `POST /api/vision/analyze` o mock controlado documentado |
+| Crops | `GET /api/crops/profiles` |
 
-| Campo                  | Detalle                                                                                                                                                                                                                                                                                                                                                    |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Pantalla**           | Notebook de campo (`fn-001`) y Reporte prescriptivo (`/reports/prescriptive/zone-03`), donde se muestra la evidencia con `source: "VISION"`.                                                                                                                                                                                                               |
-| **Endpoint/mock**      | `zoneInsightMock.ts` (`ins-003`) → evidencia `VISION` (`visualAnomaly`, `dryAreaDetected`, `chlorosisDetected`). `fieldNotebookMock.ts` (`fn-001`) → evidencia visual + relación con `alertId` / `recommendationId` / `reportId`. `GET /api/reports/prescriptive/zone-03` → consolida la evidencia en el reporte.                                          |
-| **Captura**            | Fotografía de campo con clorosis y áreas secas (`evid-fn-001`, `url: https://example.org/evidence/fn-001.jpg`).                                                                                                                                                                                                                                            |
-| **Limitación técnica** | La evidencia Vision AI en `ZoneInsight` es simulada (mock); no proviene de un modelo de visión real conectado en este momento. El reporte prescriptivo enlaza el notebook por `zoneId`, no por `alertId`/`recommendationId` de forma directa — ajuste pendiente si se requiere trazabilidad estricta por ID (ver nota en `ideathon-demo-evidence-map.md`). |
+## Faltantes y bloqueos por responsable
 
-- [x] Vision AI identificado como entrada visual del flujo (no pantalla aislada).
-- [x] Evidencia `source: "VISION"` presente en `ZoneInsight` y en `fieldNotebookMock`.
-- [x] Relación con alerta (`alert-zone-03-visual_anomaly`) documentada en `fn-001`.
-- [x] Relación con recomendación (`rec-zone-03-visual_anomaly`) documentada en `fn-001`.
-- [x] Relación con reporte (`report-zone-03-001`) documentada en `fn-001`.
+| Responsable | Falta exacta | Impacto | Cierre esperado |
+| --- | --- | --- | --- |
+| Brandon | Capturar y adjuntar/compartir las cinco pantallas sugeridas; indicar en cada una si usa API o fallback/mock. | No impide recorrer la UI, pero falta evidencia visual para la demo. | Añadir los archivos o sus enlaces conforme a `screenshots/README.md`. |
+| Leo | Ejecutar y registrar el smoke de `GET /api/dashboard/summary` con código HTTP y muestra JSON/redacción de campos clave. | El endpoint de entrada no tiene prueba registrada en `SMOKE_TEST_RESULTS.md`. | Actualizar el resultado de smoke. |
+| Jorge | No hay bloqueo para la demo interna. El cruce estricto Notebook → alerta/recomendación por ID queda como mejora posterior. | Sin impacto en el recorrido actual. | Solo abordar si se exige trazabilidad estricta por ID. |
+| Marvin | No hay bloqueo documental abierto en el alcance de esta matriz. | Sin impacto actual. | Verificar que los enlaces de capturas se mantengan cuando se reciban. |
 
-## Trazabilidad de acciones
+## Evidencia existente de referencia
 
-- [x] `fn-001`: inspección visual tomada; responsable, fecha y fotografía asociada.
-- [x] `fn-002`: riego correctivo tomado; responsable, fecha y lectura de sensor asociada.
-- [x] `fn-003`: seguimiento pendiente; responsable, fecha objetivo y nota de campo asociada.
-- [x] El reporte conserva esas acciones y su evidencia, sin inventar acciones fuera del notebook.
+- [Smoke test de backend](../backend/SMOKE_TEST_RESULTS.md): PASS documentado para crops, alerts, recommendations, reports, notebook y Vision AI mock.
+- [Estructura de reportes](../reports/REPORTS_STRUCTURE.md): contrato del reporte prescriptivo y evidencia `VISION`.
+- [Mapa oficial de demo](../backend/ideathon-demo-evidence-map.md): secuencia de presentación y condiciones de evidencia.
+- [Guía de capturas](screenshots/README.md): nombres, contenido mínimo y forma de enlazar archivos pesados.
 
-## Control de inconsistencias
+## Checklist para Trello
 
-- [x] Las métricas antiguas del Dashboard y el identificador de finca fueron revisados: `farm-001` identifica la finca y no reemplaza `field-001`.
-- [x] El ejemplo de estructura de reportes usa el caso oficial de demo.
-- [x] El contrato frontend/backend de reporte conserva los campos de acciones y su evidencia.
-- [x] Las incidencias y responsables están registradas en [DEMO_INCONSISTENCIES.md](DEMO_INCONSISTENCIES.md).
+- [x] El checklist agrupa evidencias por frontend, backend, AI Service, reportes, notebook y documentación.
+- [x] Cada pantalla crítica queda vinculada a endpoint o fuente de datos.
+- [x] Cada evidencia tiene responsable, estado y bloqueo si existe.
+- [x] El mapa de demo explica el recorrido oficial completo.
+- [ ] Se subió evidencia a Discord y Trello.
+
+> La última casilla permanece pendiente: este repositorio no aporta evidencia verificable de publicación en Discord o Trello.
