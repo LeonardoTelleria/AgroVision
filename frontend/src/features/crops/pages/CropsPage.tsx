@@ -60,19 +60,16 @@ export function CropsPage() {
                 <p>Cargando perfiles de cultivo...</p>
             </div>
         )}
-
         {errorMessage && (
             <div className="cropsState cropsState--error">
                 <p>{errorMessage}</p>
             </div>
         )}
-
         {!isLoading && !errorMessage && profiles.length === 0 && (
             <div className="cropsState">
             <p>No hay perfiles de cultivo disponibles.</p>
             </div>
         )}
-
         {!isLoading && !errorMessage && profiles.length > 0 && (
             <section className="cropsGrid" aria-label="Perfiles de cultivo">
             {profiles.map((profile) => (
