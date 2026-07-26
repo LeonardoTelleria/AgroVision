@@ -35,6 +35,21 @@ Un NDVI persistentemente bajo no constituye un diagnóstico definitivo por sí s
 
 ---
 
+## Diferencia entre estado de evidencia y riesgo final
+
+Los estados `NORMAL`, `WATCH`, `WARNING` y `CRITICAL` describen la severidad individual de una evidencia o factor.
+
+El `RiskLevel` representa la evaluación general de la zona:
+
+- LOW
+- MEDIUM
+- HIGH
+- CRITICAL
+
+Por lo tanto, una zona puede presentar evidencias individuales en estado `CRITICAL` y mantener un `RiskLevel` general `HIGH`, ya que la evaluación final depende de la combinación y contexto de las evidencias disponibles.
+
+---
+
 ## NDWI (Normalized Difference Water Index)
 
 Indicador de contenido hídrico de la cobertura vegetal.
