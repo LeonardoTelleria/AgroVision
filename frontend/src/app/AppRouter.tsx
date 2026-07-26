@@ -135,7 +135,7 @@ export function AppRouter({ activePath }: AppRouterProps) {
   }
 
   if (activePath === "/recommendations") {
-      return <RecommendationsPage />;
+    return <RecommendationsPage />;
   }
   if (activePath === '/reports') {
     return <ReportsPage />;

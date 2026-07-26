@@ -26,9 +26,14 @@ import { VegetationSummaryCard } from "../components/VegetationSummaryCard";
 import { VisionSummaryCard } from "../components/VisionSummaryCard";
 import { getDashboardData } from "../services/dashboardService";
 import type { DashboardData } from "../types/dashboard.types";
+import { DemoFlowActions } from "../components/DemoFlowActions";
 import "../dashboard.css";
 
 export function DashboardPage() {
+
+  const DEMO_FIELD_ID = "field-001";
+  const DEMO_CROP_TYPE = "ORANGE";
+
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -154,6 +159,13 @@ export function DashboardPage() {
           <small>NDVI simulado: {summary.vegetation.ndvi ?? "N/A"}</small>
         </article>
       </section>
+
+      <DemoFlowActions
+        fieldId={DEMO_FIELD_ID}
+        zoneId={summary.intelligence.mostAffectedZoneId ?? "zone-03"}
+        cropType={DEMO_CROP_TYPE}
+        riskLevel={formatRiskLabel(summary.intelligence.dominantRisk)}
+      />
 
       <section className="dashboardMainGrid">
         <article className="dashboardPanel dashboardPanel--wide">
