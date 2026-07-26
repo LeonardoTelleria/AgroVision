@@ -1,101 +1,236 @@
-# Limitaciones del Análisis Visual
+# AI Limitations
 
 ## Objetivo
 
-Este documento describe el alcance y las limitaciones del módulo de análisis visual de AgroVision.
+Describir el alcance, las limitaciones y las condiciones de uso del módulo de análisis visual de AgroVision.
 
-El AI Service implementado en esta versión del proyecto proporciona una clasificación visual preliminar basada en reglas heurísticas con el propósito de demostrar la arquitectura de integración del sistema. Sus resultados constituyen evidencia de apoyo para el motor prescriptivo y no deben interpretarse como diagnósticos agronómicos definitivos.
+El AI Service implementado en esta versión proporciona una **clasificación visual preliminar basada en reglas heurísticas** para demostrar la integración de análisis visual dentro del flujo prescriptivo.
+
+Sus resultados constituyen evidencia de apoyo y no deben interpretarse como diagnósticos agronómicos definitivos.
 
 ---
 
 # Alcance Actual
 
-El módulo de análisis visual permite identificar únicamente señales compatibles con las siguientes categorías:
+El módulo puede generar señales compatibles con las siguientes categorías:
 
-- HEALTHY
-- WATER_STRESS
-- CHLOROSIS
-- DRY_AREA
-- LEAF_SPOT
-- UNKNOWN
+* `HEALTHY`
+* `WATER_STRESS`
+* `CHLOROSIS`
+* `DRY_AREA`
+* `LEAF_SPOT`
+* `UNKNOWN`
 
-Estas categorías representan observaciones visuales preliminares y no confirman la presencia de enfermedades o condiciones específicas del cultivo.
+Estas categorías representan observaciones visuales preliminares.
+
+La clasificación de una imagen no confirma por sí sola la presencia de:
+
+* enfermedades;
+* plagas;
+* deficiencias nutricionales;
+* estrés hídrico;
+* u otras condiciones agronómicas específicas.
 
 ---
 
 # Limitaciones
 
-## No constituye un diagnóstico definitivo
+## 1. Vision AI es preliminar
 
-Las predicciones generadas representan una interpretación preliminar de patrones visuales observados en una imagen.
+El análisis visual actual utiliza reglas heurísticas para demostrar el flujo de integración.
 
-La clasificación obtenida debe considerarse una señal inicial que requiere validación mediante inspección técnica en campo.
+No representa un modelo de visión agrícola entrenado con un conjunto de datos productivo.
 
----
-
-## No sustituye la evaluación de un especialista
-
-El sistema no reemplaza el criterio de ingenieros agrónomos ni la inspección directa del cultivo.
-
-Las recomendaciones generadas tienen como finalidad apoyar la toma de decisiones y deben complementarse con observaciones de campo cuando sea necesario.
+Por lo tanto, las predicciones deben considerarse **señales compatibles** con determinados patrones visuales.
 
 ---
 
-## Análisis visual preliminar
+## 2. No constituye un diagnóstico definitivo
 
-El AI Service utiliza reglas heurísticas simples para simular un flujo de análisis visual.
+Una clasificación como:
 
-En esta versión del proyecto no se emplean modelos de aprendizaje profundo ni redes neuronales entrenadas sobre datos agrícolas reales.
+```text
+CHLOROSIS
+```
 
----
+no significa que el sistema haya confirmado una enfermedad o deficiencia específica.
 
-## Confianza de las predicciones
+Del mismo modo:
 
-Los valores de confianza asociados a cada predicción son estimaciones heurísticas utilizadas para demostrar el funcionamiento del sistema.
+```text
+WATER_STRESS
+DRY_AREA
+LEAF_SPOT
+```
 
-Estos valores no representan probabilidades estadísticas ni métricas de precisión de un modelo de inteligencia artificial entrenado.
-
----
-
-## Integración con evidencia multifuente
-
-La predicción visual constituye únicamente una fuente de evidencia dentro del flujo prescriptivo.
-
-Antes de generar una evaluación de riesgo, el sistema combina información proveniente de:
-
-- Sensores
-- Clima
-- Imágenes satelitales
-- Historial del cultivo
-- Mapeo
-- Análisis visual
-
-Esto permite reducir la dependencia de una única fuente de información.
+representan categorías visuales preliminares que deben ser corroboradas mediante otras fuentes de evidencia y, cuando sea necesario, inspección técnica.
 
 ---
 
-## Capa satelital simulada
+## 3. No sustituye la evaluación técnica
 
-La información satelital utilizada durante la demostración corresponde a datos simulados con fines académicos.
+El sistema no reemplaza el criterio de profesionales agrícolas ni la inspección directa del cultivo.
 
-La arquitectura fue diseñada para permitir la integración futura con proveedores reales de imágenes satelitales.
+Las recomendaciones generadas por AgroVision tienen como finalidad apoyar la toma de decisiones.
+
+Las acciones correctivas deben validarse técnicamente antes de su aplicación cuando las condiciones lo requieran.
 
 ---
 
-# Trabajo Futuro
+## 4. No utiliza actualmente un modelo agrícola entrenado
 
-La arquitectura del AI Service fue diseñada para facilitar futuras mejoras, entre ellas:
+En esta versión:
 
-- Integración de modelos de visión por computadora entrenados con imágenes agrícolas.
-- Incorporación de conjuntos de datos reales para mejorar la precisión de las predicciones.
-- Ajuste dinámico de niveles de confianza.
-- Soporte para nuevas categorías de anomalías visuales.
-- Integración con servicios de inferencia basados en inteligencia artificial.
+* no se utiliza una red neuronal entrenada con imágenes agrícolas reales;
+* no se reportan métricas productivas de precisión;
+* las categorías visuales se obtienen mediante reglas heurísticas;
+* los niveles de confianza son valores demostrativos.
+
+Por esta razón, los resultados no deben presentarse como métricas de precisión de un modelo de inteligencia artificial entrenado.
+
+---
+
+## 5. Valores de confianza
+
+Los valores de confianza utilizados por el AI Service son estimaciones heurísticas.
+
+No representan:
+
+* probabilidades estadísticas calibradas;
+* precisión del modelo;
+* sensibilidad;
+* especificidad;
+* desempeño validado en campo.
+
+Su finalidad actual es demostrar cómo una futura integración de modelos de IA podría transportar información de confianza dentro del flujo.
+
+---
+
+# Integración con Evidencia Multifuente
+
+La salida visual no se utiliza como única fuente para construir el análisis prescriptivo.
+
+El sistema puede combinar información proveniente de:
+
+* sensores;
+* clima;
+* índices vegetativos;
+* historial;
+* mapeo;
+* análisis visual.
+
+El objetivo de esta arquitectura es mantener la trazabilidad entre las diferentes señales disponibles y evitar depender exclusivamente de una clasificación visual.
+
+La evidencia visual puede reforzar otras señales cuando existe correspondencia entre ellas.
+
+---
+
+# Capa Satelital Simulada
+
+La información satelital utilizada en la demostración corresponde a **evidencia simulada**.
+
+Los valores de:
+
+* NDVI;
+* NDWI;
+* GNDVI;
+
+se utilizan para demostrar cómo una futura fuente satelital puede integrarse al flujo prescriptivo.
+
+Actualmente no debe describirse esta información como datos provenientes de un satélite real ni como imágenes obtenidas desde un proveedor satelital operativo.
+
+---
+
+# Preparación para Integraciones Futuras
+
+La arquitectura mantiene separados los módulos de análisis y las fuentes de evidencia para facilitar futuras integraciones.
+
+Entre las posibles extensiones se encuentran:
+
+* modelos de visión por computadora entrenados con imágenes agrícolas reales;
+* conjuntos de datos agrícolas validados;
+* modelos calibrados para cultivos específicos;
+* métricas de desempeño verificadas;
+* fuentes satelitales reales;
+* proveedores externos de imágenes;
+* servicios de inferencia especializados.
+
+La incorporación futura de estas capacidades requerirá validación independiente antes de utilizar sus resultados como evidencia productiva.
+
+---
+
+# Uso Correcto de los Resultados
+
+Los resultados del AI Service deben expresarse como:
+
+* **señales compatibles**;
+* **evidencia visual preliminar**;
+* **riesgo estimado**;
+* **observaciones que requieren validación técnica**.
+
+Debe evitarse afirmar que el sistema:
+
+* diagnostica enfermedades;
+* detecta plagas con precisión validada;
+* garantiza la recuperación del cultivo;
+* confirma una causa agronómica específica;
+* utiliza imágenes satelitales reales cuando se trate de la capa simulada.
+
+---
+
+# Relación con el Flujo Prescriptivo
+
+El análisis visual representa una fuente adicional de evidencia:
+
+```text
+Imagen
+  ↓
+Vision AI Service
+  ↓
+Clasificación visual preliminar
+  ↓
+EvidenceItem(VISION)
+  ↓
+EvidenceFusionService
+  ↓
+Evaluación multifuente
+  ↓
+Riesgo estimado
+  ↓
+Alerta
+  ↓
+Recomendación
+  ↓
+Validación técnica
+```
+
+La decisión final no debe fundamentarse exclusivamente en la clasificación visual.
+
+---
+
+# Validación Técnica en Campo
+
+Las recomendaciones de AgroVision deben considerarse herramientas de apoyo.
+
+Cuando una evaluación indica condiciones de riesgo, la validación técnica puede incluir:
+
+* inspección directa;
+* revisión de humedad del suelo;
+* revisión del sistema de riego;
+* comprobación de condiciones ambientales;
+* revisión de síntomas visibles;
+* comparación con otras fuentes de evidencia.
+
+Las medidas correctivas deben aplicarse de acuerdo con la evaluación técnica correspondiente.
 
 ---
 
 # Conclusión
 
-El análisis visual implementado en AgroVision debe entenderse como una fuente adicional de evidencia dentro del flujo prescriptivo del sistema.
+El AI Service actual demuestra la integración de análisis visual dentro de una arquitectura prescriptiva multifuente.
 
-Las decisiones finales se fundamentan en la combinación de múltiples fuentes de información y no exclusivamente en la clasificación visual obtenida.
+Su función actual es generar **evidencia visual preliminar**, no realizar diagnósticos agronómicos definitivos.
+
+La capa satelital utilizada durante la demostración es **simulada**, mientras que la arquitectura se encuentra preparada para una futura integración con fuentes reales.
+
+Toda recomendación derivada de las señales del sistema debe interpretarse como **apoyo a la toma de decisiones** y puede requerir **validación técnica en campo** antes de ejecutar acciones correctivas.
