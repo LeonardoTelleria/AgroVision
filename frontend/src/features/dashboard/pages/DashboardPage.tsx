@@ -32,7 +32,9 @@ import "../dashboard.css";
 export function DashboardPage() {
 
   const DEMO_FIELD_ID = "field-001";
+  const DEMO_ZONE_ID = "zone-03";
   const DEMO_CROP_TYPE = "ORANGE";
+
 
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -129,6 +131,30 @@ export function DashboardPage() {
           </small>
         </aside>
       </header>
+
+      <section className="dashboardDemoContext" aria-label="Caso demo activo">
+        <article>
+          <span>Field</span>
+          <strong>{DEMO_FIELD_ID}</strong>
+        </article>
+
+        <article>
+          <span>Zone</span>
+          <strong>
+            {summary.intelligence.mostAffectedZoneId ?? DEMO_ZONE_ID}
+          </strong>
+        </article>
+
+        <article>
+          <span>Crop</span>
+          <strong>{DEMO_CROP_TYPE}</strong>
+        </article>
+
+        <article>
+          <span>Risk</span>
+          <strong>{formatRiskLabel(summary.intelligence.dominantRisk)}</strong>
+        </article>
+      </section>
 
       <section className="dashboardMetricGrid" aria-label="Resumen ejecutivo">
         <article className="dashboardMetricCard dashboardMetricCard--risk">

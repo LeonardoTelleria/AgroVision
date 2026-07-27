@@ -548,6 +548,98 @@
   outline-offset: 3px;
 }
 
+/* =========================================
+   Dashboard Demo Context
+   ========================================= */
+
+/**
+ * Bloque compacto para mostrar el caso demo oficial.
+ * Refuerza consistencia entre Dashboard, Alerts, Recommendations,
+ * Reports y Vision AI.
+ */
+.dashboardDemoContext {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/**
+ * Cada item muestra una parte clave del caso:
+ * field, zone, crop o risk.
+ */
+.dashboardDemoContext article {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid rgba(183, 255, 23, 0.16);
+  border-radius: 20px;
+  background: rgba(18, 24, 20, 0.82);
+}
+
+/**
+ * Label técnico de cada dato.
+ */
+.dashboardDemoContext span {
+  color: #8d988d;
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/**
+ * Valor principal del dato.
+ */
+.dashboardDemoContext strong {
+  color: #f4f7ef;
+  font-size: 1.08rem;
+  font-weight: 950;
+}
+
+/* =========================================
+   Dashboard Responsive Polish
+   ========================================= */
+
+/**
+ * Reduce columnas cuando no hay espacio horizontal suficiente.
+ */
+@media (max-width: 1180px) {
+  .dashboardMetricGrid,
+  .dashboardDemoContext {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboardMainGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/**
+ * Evita que el hero se rompa en tablet.
+ */
+@media (max-width: 860px) {
+  .dashboardHero {
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: auto;
+  }
+
+  .dashboardHero__status {
+    width: 100%;
+    flex: none;
+  }
+}
+
+/**
+ * Una columna en pantallas pequeñas.
+ */
+@media (max-width: 620px) {
+  .dashboardMetricGrid,
+  .dashboardDemoContext {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1280px) {
   .dashboardDemoFlow__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

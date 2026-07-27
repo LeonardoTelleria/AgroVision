@@ -301,4 +301,7 @@
   .alertsHero {
     border-radius: 26px;
   }
+  .alertCard {
+    padding: 18px;
+  }
 }

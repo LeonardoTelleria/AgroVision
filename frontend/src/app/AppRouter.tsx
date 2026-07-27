@@ -27,7 +27,7 @@ import { CropsPage } from '../features/crops/pages/CropsPage';
 import { VisionAiPage } from '../features/vision-ai/pages/VisionAiPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
 import { AlertsPage } from '../features/alerts/pages/AlertsPage';
-import { RecommendationsPage } from '../features/recommendations/pages/RecommendantionsPage';
+import { RecommendationsPage } from '../features/recommendations/pages/RecommendationsPage';
 
 /** AppRouterPath  define las rutas permitidsas.
  * así se evita navegar por rutas no existentes de forma accidental.

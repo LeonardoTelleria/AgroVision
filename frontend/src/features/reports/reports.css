@@ -368,4 +368,8 @@
   .reportActionItem div {
     flex-direction: column;
   }
+
+  .prescriptiveReportCard, .reportPanel {
+    padding: 18px;
+  }
 }
