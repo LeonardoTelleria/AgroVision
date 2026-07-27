@@ -1,297 +1,370 @@
-# VEGETATION_RISK_RULES.md
+# Vegetation Risk Rules
 
 ## Objetivo
 
-Definir las reglas heurísticas utilizadas por AgroVision para interpretar índices de vegetación y transformarlos en evidencia utilizable por el motor prescriptivo.
+Definir las reglas heurísticas utilizadas por AgroVision para interpretar índices de vegetación y otras señales agrícolas, transformándolas en evidencia utilizable por el motor prescriptivo.
 
-Estas reglas no representan diagnósticos agronómicos definitivos. Los resultados generados deben interpretarse como señales preliminares que pueden requerir validación mediante inspección técnica en campo.
+Estas reglas representan **señales preliminares y riesgos estimados**. No constituyen diagnósticos agronómicos definitivos y pueden requerir validación mediante inspección técnica en campo.
 
 ---
 
-# Índices Utilizados
+# 1. NDVI
 
-## NDVI (Normalized Difference Vegetation Index)
+**Normalized Difference Vegetation Index**
 
-Indicador de vigor vegetal y actividad fotosintética.
+El NDVI se utiliza como indicador de vigor vegetal y actividad fotosintética.
 
-| Rango       | Interpretación         | Riesgo |
-| ----------- | ---------------------- | ------ |
-| < 0.30      | Vigor vegetal muy bajo | HIGH   |
-| 0.30 - 0.49 | Vigor reducido         | MEDIUM |
-| 0.50 - 0.69 | Vigor moderado         | WATCH  |
-| >= 0.70     | Vegetación saludable   | LOW    |
+| Rango         | Interpretación         | Estado   |
+| ------------- | ---------------------- | -------- |
+| `< 0.30`      | Vigor vegetal muy bajo | CRITICAL |
+| `0.30 – 0.49` | Vigor reducido         | WARNING  |
+| `0.50 – 0.69` | Vigor moderado         | WATCH    |
+| `>= 0.70`     | Vegetación estable     | NORMAL   |
 
-### Justificación Técnica
+### Interpretación
 
-El NDVI representa el nivel de actividad fotosintética y el vigor general de la vegetación. Valores bajos indican una disminución de biomasa activa y una menor capacidad del cultivo para mantener un crecimiento saludable.
+Valores bajos de NDVI representan una señal compatible con reducción del vigor vegetal. Esta señal adquiere mayor relevancia cuando coincide con otros indicadores de deterioro.
 
-Un NDVI persistentemente bajo no constituye un diagnóstico definitivo por sí solo, pero incrementa el nivel de riesgo cuando coincide con evidencia adicional proveniente de sensores, índices de humedad, análisis visual o tendencias históricas.
-
-### Acción Recomendada
+### Acción de apoyo
 
 * Revisar disponibilidad hídrica.
-* Verificar condiciones nutricionales.
-* Realizar inspección visual cuando existan evidencias adicionales.
+* Correlacionar con humedad del suelo.
+* Revisar evidencia visual.
+* Validar condiciones en campo cuando exista evidencia adicional.
 
 ---
 
-## NDWI (Normalized Difference Water Index)
+# 2. NDWI
 
-Indicador de contenido hídrico de la cobertura vegetal.
+**Normalized Difference Water Index**
 
-| Rango       | Interpretación                       | Riesgo |
-| ----------- | ------------------------------------ | ------ |
-| < 0.15      | Déficit hídrico severo               | HIGH   |
-| 0.15 - 0.24 | Posible reducción de agua disponible | MEDIUM |
-| 0.25 - 0.39 | Monitoreo recomendado                | WATCH  |
-| >= 0.40     | Disponibilidad hídrica adecuada      | LOW    |
+El NDWI se utiliza como indicador relacionado con el contenido hídrico de la cobertura vegetal.
 
-### Justificación Técnica
+| Rango         | Interpretación                          | Estado   |
+| ------------- | --------------------------------------- | -------- |
+| `< 0.15`      | Contenido hídrico muy bajo              | CRITICAL |
+| `0.15 – 0.24` | Posible reducción del contenido hídrico | WARNING  |
+| `0.25 – 0.39` | Condición que requiere seguimiento      | WATCH    |
+| `>= 0.40`     | Condición hídrica estable               | NORMAL   |
 
-El NDWI estima el contenido de agua presente en la cobertura vegetal. Valores bajos pueden indicar una reducción de la disponibilidad hídrica o un incremento del estrés por déficit de agua.
+### Interpretación
 
-Cuando un NDWI reducido coincide con baja humedad del suelo, temperaturas elevadas o una disminución del vigor vegetal, aumenta la confianza del análisis prescriptivo al sugerir la presencia de estrés hídrico.
+Valores bajos de NDWI representan una señal compatible con reducción del contenido hídrico de la vegetación.
 
-### Acción Recomendada
+La señal se refuerza cuando coincide con humedad de suelo baja, temperaturas elevadas o tendencia negativa.
+
+### Acción de apoyo
 
 * Revisar sistema de riego.
 * Verificar humedad del suelo.
-* Correlacionar con temperatura y precipitación.
+* Correlacionar con temperatura y otras evidencias disponibles.
+* Validar técnicamente antes de aplicar medidas correctivas.
 
 ---
 
-## GNDVI (Green Normalized Difference Vegetation Index)
+# 3. GNDVI
 
-Indicador relacionado con actividad clorofílica y estado nutricional.
+**Green Normalized Difference Vegetation Index**
 
-| Rango       | Interpretación                             | Riesgo |
-| ----------- | ------------------------------------------ | ------ |
-| < 0.25      | Actividad clorofílica severamente reducida | HIGH   |
-| 0.25 - 0.39 | Posible deterioro fisiológico              | MEDIUM |
-| 0.40 - 0.59 | Nivel aceptable con observación            | WATCH  |
-| >= 0.60     | Condición favorable                        | LOW    |
+El GNDVI se utiliza como indicador relacionado con actividad clorofílica y estado fisiológico.
 
-### Justificación Técnica
+| Rango         | Interpretación                     | Estado   |
+| ------------- | ---------------------------------- | -------- |
+| `< 0.25`      | Actividad clorofílica muy reducida | CRITICAL |
+| `0.25 – 0.39` | Posible deterioro fisiológico      | WARNING  |
+| `0.40 – 0.59` | Condición que requiere observación | WATCH    |
+| `>= 0.60`     | Condición favorable                | NORMAL   |
 
-El GNDVI está relacionado con la actividad clorofílica y el estado fisiológico del cultivo. Valores bajos pueden reflejar una disminución en la capacidad fotosintética, deficiencias nutricionales o procesos de deterioro vegetal.
+### Interpretación
 
-Cuando este índice presenta valores reducidos junto con NDVI y NDWI bajos, refuerza la evidencia de pérdida de vigor del cultivo y aumenta el nivel de confianza del análisis.
+Valores bajos de GNDVI representan una señal compatible con reducción de actividad clorofílica o deterioro fisiológico.
 
-### Acción Recomendada
+Por sí solo, el índice no permite determinar la causa específica del cambio observado.
 
-* Revisar fertilización.
-* Verificar signos de clorosis.
-* Correlacionar con inspección visual.
+### Acción de apoyo
+
+* Revisar evidencia visual.
+* Correlacionar con NDVI y NDWI.
+* Revisar condiciones nutricionales cuando corresponda.
+* Realizar validación técnica en campo.
 
 ---
 
-# Interpretación de Vigor Vegetal
+# 4. Humedad del Suelo
 
-## HIGH
+La humedad del suelo se utiliza para identificar posibles condiciones de déficit hídrico.
 
-Condiciones compatibles con deterioro significativo del cultivo.
+Los estados se interpretan mediante los umbrales definidos por el motor de riesgo:
 
-### Evidencia Típica
+| Humedad    | Estado   |
+| ---------- | -------- |
+| `> 50%`    | NORMAL   |
+| `40 – 50%` | WATCH    |
+| `30 – 39%` | WARNING  |
+| `< 30%`    | CRITICAL |
 
-* NDVI bajo.
-* GNDVI bajo.
-* Presencia de clorosis.
-* Tendencia negativa persistente.
+Una humedad baja no demuestra por sí sola una condición agronómica específica. Su utilidad aumenta cuando coincide con NDWI bajo, deterioro de vigor o evidencia visual.
 
-### Riesgo
+---
 
-HIGH
+# 5. Anomalía Visual
 
-### Acción
+La evidencia visual puede incluir señales como:
 
-Priorizar inspección técnica en campo y validar las condiciones detectadas antes de aplicar medidas correctivas.
+* `visualAnomaly`
+* `dryAreaDetected`
+* `chlorosisDetected`
+
+Estas señales representan observaciones visuales preliminares.
+
+### Interpretación
+
+Una anomalía visual puede reforzar la evidencia proveniente de sensores o índices vegetativos cuando existe correspondencia entre las señales.
+
+Por ejemplo:
+
+```text
+DryAreaDetected = true
++
+NDWI bajo
+```
+
+puede interpretarse como evidencia preliminar compatible con déficit hídrico localizado.
+
+La observación visual no constituye por sí misma un diagnóstico definitivo de enfermedad, plaga u otra condición específica.
+
+---
+
+# 6. Tendencia Histórica
+
+La métrica:
+
+`vegetationTrend`
+
+permite observar cambios relativos en el comportamiento de la vegetación.
+
+Una tendencia negativa representa una señal compatible con deterioro progresivo cuando se mantiene durante varios ciclos de observación.
+
+Ejemplo:
+
+```text
+vegetationTrend = -35%
+status = WARNING
+```
+
+La tendencia histórica debe interpretarse junto con las condiciones actuales y no como evidencia aislada de una causa específica.
+
+---
+
+# 7. Combinación de Evidencia Multifuente
+
+El motor prescriptivo no depende exclusivamente de un índice.
+
+Las señales se combinan para reforzar o debilitar la interpretación de riesgo.
+
+Ejemplos:
+
+### Estrés hídrico potencial
+
+```text
+NDWI bajo
++
+Humedad de suelo baja
+```
+
+Interpretación:
+
+**Señales compatibles con estrés hídrico.**
+
+---
+
+### Estrés hídrico reforzado
+
+```text
+NDWI bajo
++
+Humedad de suelo baja
++
+Temperatura elevada
+```
+
+Interpretación:
+
+La combinación refuerza la evidencia compatible con condiciones de estrés hídrico.
+
+---
+
+### Reducción de vigor
+
+```text
+NDVI bajo
++
+GNDVI bajo
+```
+
+Interpretación:
+
+Evidencia compatible con reducción del vigor vegetal o deterioro fisiológico.
+
+---
+
+### Anomalía visual compatible
+
+```text
+GNDVI bajo
++
+ChlorosisDetected = true
+```
+
+Interpretación:
+
+Señales visuales y espectrales compatibles con reducción de actividad clorofílica.
+
+No debe interpretarse como diagnóstico definitivo de una enfermedad o deficiencia específica.
+
+---
+
+### Área seca compatible
+
+```text
+DryAreaDetected = true
++
+NDWI bajo
+```
+
+Interpretación:
+
+Evidencia preliminar compatible con déficit hídrico localizado.
+
+---
+
+# 8. Interpretación de Riesgo
+
+La combinación de evidencia contribuye a la evaluación general de la zona.
+
+## LOW
+
+Condiciones estables y ausencia de señales relevantes de deterioro.
+
+Ejemplo de evidencia:
+
+* NDVI alto.
+* NDWI adecuado.
+* GNDVI adecuado.
+* Humedad del suelo estable.
+* Sin anomalías visuales.
+* Tendencia histórica estable.
+
+Acción:
+
+**Continuar monitoreo rutinario.**
 
 ---
 
 ## MEDIUM
 
-Condiciones compatibles con estrés moderado.
+Presencia de señales moderadas que justifican observación y seguimiento.
 
-### Acción
+Ejemplo:
 
-Realizar inspección preventiva y reforzar el monitoreo durante los siguientes ciclos de observación.
+* NDVI en rango de observación.
+* NDWI en rango de observación.
+* Humedad ligeramente reducida.
+* Tendencia histórica negativa moderada.
 
-### Evidencia Típica
+Acción:
 
-* NDVI intermedio.
-* Disminución gradual de índices.
-* Tendencia negativa reciente.
-
-### Riesgo
-
-MEDIUM
-
-### Acción
-
-Monitoreo reforzado y validación en campo.
+**Realizar inspección preventiva y reforzar el monitoreo.**
 
 ---
 
-## LOW
+## HIGH
 
-Vegetación saludable y estable.
+Presencia de múltiples señales compatibles con deterioro significativo.
 
-### Evidencia Típica
-
-* NDVI alto.
-* NDWI adecuado.
-* Sin anomalías visuales.
-
-### Riesgo
-
-LOW
-
-### Acción
-
-Continuar monitoreo rutinario.
-
----
-
-## UNKNOWN
-
-Información insuficiente para determinar el estado vegetativo.
-
-### Acción
-
-Solicitar nueva captura satelital o actualización de datos.
-
----
-# Reglas de Evidencia Multifuente
-
-## Estrés Hídrico Potencial
-
-### Condiciones
-
-* NDWI bajo.
-* Humedad de suelo baja.
-
-### Interpretación
-
-Señales compatibles con estrés hídrico.
-
-### Acción
-
-Revisar cobertura de riego e inspeccionar la zona.
-
----
-
-## Estrés Hídrico Potencial Reforzado
-
-### Condiciones
-
-* NDWI bajo.
-* Temperatura elevada.
-
-### Interpretación
-
-Mayor probabilidad de reducción de disponibilidad hídrica.
-
-### Acción
-
-Priorizar evaluación de infraestructura de riego.
-
----
-
-## Reducción de Vigor Vegetal
-
-### Condiciones
+Ejemplo:
 
 * NDVI bajo.
+* NDWI bajo.
 * GNDVI bajo.
+* Humedad del suelo baja.
+* Anomalía visual.
+* Tendencia histórica negativa.
 
-### Interpretación
+Acción:
 
-Posible deterioro fisiológico o nutricional.
-
-### Acción
-
-Realizar inspección agronómica.
-
----
-
-## Clorosis Compatible
-
-### Condiciones
-
-* GNDVI bajo.
-* ChlorosisDetected = true
-
-### Interpretación
-
-Patrones visuales compatibles con reducción de actividad clorofílica.
-
-### Acción
-
-Verificar estado nutricional y realizar inspección en campo.
+**Priorizar inspección técnica y validar las condiciones antes de aplicar medidas correctivas.**
 
 ---
 
-## Área Seca Detectada
+# 9. Caso de Evidencia Integrada
 
-### Condiciones
+El escenario `zone-03` representa el caso de mayor riesgo utilizado en la demo.
 
-* DryAreaDetected = true
-* NDWI bajo
+Presenta:
 
-### Interpretación
+```text
+NDVI  = 0.24 → CRITICAL
+NDWI  = 0.12 → CRITICAL
+GNDVI = 0.22 → CRITICAL
+Soil Moisture = 28% → CRITICAL
+Temperature = 38 °C → WARNING
+Visual anomalies → WARNING
+Vegetation trend = -35% → WARNING
+Mapping risk → WARNING
+```
 
-Evidencia preliminar compatible con déficit hídrico localizado.
+La coincidencia de estas señales representa evidencia multifuente consistente con **deterioro severo de la vegetación asociado a estrés hídrico**.
 
-### Acción
+El resultado del escenario es:
 
-Validación visual y revisión de cobertura de riego.
+```text
+Risk Level = HIGH
+Health Score = 35
+```
+
+Este resultado es un **riesgo estimado** y requiere validación técnica.
 
 ---
----
 
-# Regla Integrada de Deterioro de Vegetación
+# 10. Relación entre Evidencia y Riesgo
 
-## Condiciones
+Las reglas deben interpretarse de forma acumulativa y contextual.
 
-Las siguientes condiciones deben evaluarse de manera conjunta:
+Una señal aislada puede producir únicamente un estado de observación, mientras que varias señales concordantes pueden justificar un nivel de riesgo mayor.
 
-- NDVI clasificado como **LOW**.
-- NDWI clasificado como **LOW**.
-- GNDVI clasificado como **LOW**.
+El principio general es:
 
-Cuando esta combinación esté respaldada por evidencia adicional (por ejemplo, humedad del suelo reducida, anomalías visuales o tendencia histórica negativa), el motor prescriptivo deberá considerar que existe una alta probabilidad de deterioro de la vegetación.
+```text
+Evidencia aislada
+      ↓
+Señal preliminar
 
-### Interpretación
+Evidencia concordante
+      ↓
+Mayor soporte para la evaluación
 
-La coincidencia de índices bajos de vigor vegetal (NDVI), contenido hídrico (NDWI) y actividad clorofílica (GNDVI) representa evidencia consistente de reducción del desempeño fisiológico del cultivo.
+Evidencia multifuente consistente
+      ↓
+Riesgo estimado más elevado
 
-Estas señales no constituyen un diagnóstico definitivo, pero incrementan el nivel de confianza del análisis cuando son corroboradas mediante evidencia multifuente.
+Riesgo estimado
+      ↓
+Alerta / recomendación
 
-### Riesgo Estimado
+Recomendación
+      ↓
+Validación técnica en campo
+```
 
-**HIGH**
-
-### Evidencia Complementaria
-
-La confianza del análisis aumenta cuando además se detecta una o más de las siguientes condiciones:
-
-- Humedad del suelo clasificada como **WARNING** o **CRITICAL**.
-- Temperatura elevada.
-- Anomalías visuales compatibles con estrés vegetal.
-- Tendencia histórica negativa de la vegetación.
-- Riesgo espacial identificado mediante análisis de mapeo.
-
-### Acción Recomendada
-
-- Priorizar inspección técnica en campo.
-- Verificar cobertura y funcionamiento del sistema de riego.
-- Confirmar la humedad del suelo mediante mediciones locales.
-- Aplicar medidas correctivas únicamente después de validar la evidencia obtenida en campo.
+La combinación de evidencias no debe interpretarse como una garantía de que una causa específica sea la responsable del deterioro observado.
 
 ---
 
 # Consideraciones
 
-AgroVision utiliza reglas heurísticas orientadas a soporte de decisiones.
+AgroVision utiliza reglas heurísticas orientadas al soporte de decisiones.
 
-Los resultados generados representan evidencia preliminar y no sustituyen la evaluación técnica realizada por personal especializado.
+Los resultados representan **evidencia preliminar y riesgos estimados**. No sustituyen una evaluación agronómica especializada.
+
+Las acciones correctivas deben validarse técnicamente cuando la situación lo requiera.

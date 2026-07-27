@@ -19,7 +19,7 @@ El objetivo principal es convertir:
                      │
                   WEATHER
                      │
-                 SATELLITE
+          SATELLITE (SIMULATED)
                      │
                   HISTORY
                      │
@@ -46,15 +46,21 @@ El objetivo principal es convertir:
             ZoneInsightService
                      │
                 ZoneInsight
-                ├────────────► AlertGenerationService
-                │                    ↓
-                │             AgriculturalAlert[]
-                │
-                └────────────► RecommendationGenerationService
-                                     ↓
-                              Recommendation[]
-                                     ↓
-                                 Dashboard
+                     │
+        ┌────────────┴────────────┐
+        ↓                         ↓
+AlertGenerationService    RecommendationGenerationService
+        ↓                         ↓
+AgriculturalAlert[]       Recommendation[]
+                                  │
+                                  ↓
+                            FieldNotebook
+                                  │
+                                  ↓
+                       PrescriptiveReportService
+                                  │
+                                  ↓
+                              Dashboard
 ```
 
 ---
