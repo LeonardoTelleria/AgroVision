@@ -458,18 +458,15 @@
 
 
 @media (max-width: 1080px) {
-  .visionAiGrid {
-    grid-template-columns: 1fr;
-  }
-
+  .visionAiGrid,
   .visionResultCard__metrics {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 640px) {
-  .visionResultCard__metrics {
-    grid-template-columns: 1fr;
+  .visionAiButton {
+    width: 100%;
   }
 
   .visionAiHero {
