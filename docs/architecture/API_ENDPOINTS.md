@@ -83,7 +83,7 @@ Este endpoint proporciona información satelital utilizada para evaluar vigor ve
         "gndvi": 0.71
       },
       "interpretation": {
-        "vigorLevel": "VIGOR_EXCEPCIONAL",
+        "vigorLevel": "HIGH",
         "anomalyDetected": false
       },
       "capturedAt": "2026-06-29T14:00:00Z"
