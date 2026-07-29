@@ -307,7 +307,8 @@ La documentación anterior hablaba de un modelo más amplio con campos de audito
 
 ## 10. Versionado
 
+- **v2.2** (2026-07-28): Contrato contrastado con la respuesta HTTP real de `GET /api/reports/prescriptive/zone-03`: 14 propiedades principales, 10 evidencias, 4 alertas, 4 recomendaciones, 2 acciones realizadas y 1 pendiente.
 - **v2.1** (2026-07-22): Corrección de `reportId` y `summary` (sí existen en el modelo real); corrección de estructuras de `PrescriptiveAlertSummary`, `PrescriptiveRecommendationSummary`, `PrescriptiveActionLog` y `PrescriptivePendingAction` para reflejar los campos reales; se documenta evidencia visual preliminar (`source: "VISION"`).
 - **v2.0** (2026-07-20): Documentación alineada con la estructura real del backend actual.
 
-**Última actualización:** 2026-07-22
+**Última actualización:** 2026-07-28

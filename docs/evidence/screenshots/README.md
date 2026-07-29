@@ -29,3 +29,11 @@ dashboard-zone-03.png — enlace: <URL> — capturada por: <nombre> — fecha: <
 ```
 
 No incluir credenciales, tokens, datos personales ni URLs privadas no autorizadas en las capturas.
+
+## Evidencia sin pantalla
+
+El Notebook no tiene una pantalla propia en el frontend. Su evidencia para el recorrido oficial es la respuesta JSON de `GET /api/field-notebook/zone/zone-03`, junto con el PASS registrado en `docs/backend/SMOKE_TEST_RESULTS.md`. No se debe inventar una captura de interfaz para este paso.
+
+## Estado de entrega
+
+Las cinco capturas continúan pendientes hasta que se agregue el archivo o un enlace verificable con responsable, fecha y fuente. La publicación en Discord y Trello también permanece pendiente y debe confirmarse fuera del repositorio.
