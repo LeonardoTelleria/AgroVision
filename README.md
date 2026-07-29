@@ -197,16 +197,16 @@ sequenceDiagram
 
 | Componente | Tecnología | Justificación Técnica de Eficiencia |
 |---|---|---|
-| **Frontend** | React 19 + Vite | Permite construir una interfaz modular, rápida y mantenible. Vite acelera el ciclo de desarrollo y reduce fricción en demo. |
+| **Frontend** | React + Vite | Permite construir una interfaz modular, rápida y mantenible. Vite acelera el ciclo de desarrollo y reduce fricción en demo. |
 | **Lenguaje Frontend** | TypeScript | Reduce incompatibilidades con contratos de datos y evita errores silenciosos entre servicios, adapters y componentes. |
-| **Render técnico** | SVG + CSS modular | Ideal para mapping 2D, capas visuales, overlays de riesgo, trayectorias, plantas, obstáculos y puntos críticos. |
+| **Render técnico** | SVG + CSS modular | Ideal para implementar mapping 2D básico, capas visuales, overlays de riesgo, trayectorias, plantas, obstáculos y puntos críticos. |
 | **Backend API** | Node.js + Express + TypeScript | Stack flexible, rápido de auditar y apropiado para endpoints modulares en un hackathon avanzado. |
 | **Validación de datos** | Zod | Permite validar contratos, requests y respuestas críticas antes de llegar al frontend. |
 | **ORM / Datos** | Prisma + PostgreSQL | Base preparada para persistencia real, relaciones entre cultivos, reportes, alertas, usuarios y zonas agrícolas. |
 | **Mocks controlados** | JSON / TypeScript mock services | Permiten simular escenarios agrícolas de forma reproducible mientras se integran sensores o datos reales. |
 | **IA visual** | Python + OpenCV | Permite análisis explicable de imágenes usando métricas visuales interpretables y defendibles ante jurado técnico. |
 | **AI Service** | FastAPI | Expone análisis visual como microservicio independiente, desacoplado del backend principal. |
-| **Contratos** | TypeScript interfaces + Markdown técnico | Crean una fuente de verdad entre backend, frontend e IA para evitar rupturas de integración. |
+| **Contratos** | TypeScript interfaces | Crean una fuente de verdad entre backend, frontend e IA para evitar rupturas de integración. |
 | **Control de versiones** | Git + GitHub + Pull Requests | Permite trazabilidad, revisión por ramas, control de conflictos y colaboración por módulo. |
 | **Diseño de producto** | CSS tokens + componentes reutilizables | Mantiene consistencia visual, escalabilidad de interfaz y velocidad de construcción. |
 
@@ -300,7 +300,7 @@ AgroVision no depende de un LLM para funcionar. Sin embargo, aplica principios d
 | Git | `2.40+` | Control de versiones |
 | PostgreSQL | `15+` | Base de datos con Prisma |
 | VS Code | Última estable | Desarrollo |
-| GitKraken / GitHub Desktop | Opcional | Gestión visual de ramas |
+| GitKraken `(opcional)`/ GitHub Desktop | Opcional | Gestión visual de ramas |
 
 ---
 
@@ -685,12 +685,12 @@ interface ApiResponse<T> {
 
 | Punto | Declaración |
 |---|---|
-| Diagnóstico fitosanitario | No se promete diagnóstico definitivo |
+| Diagnóstico fitosanitario | No se promete un diagnóstico definitivo durante esta fase de proyecto |
 | Satélite real | No se integra Sentinel ni Google Earth Engine en esta versión |
 | IA | Se usa como análisis preliminar explicable |
-| Mapping | Es simulación técnica visual, no SLAM real |
-| Hardware | El MVP no depende de rover de reconocimiento físico o  sensores para demostrar valor |
-| Decisión final | La recomendación apoya, no sustituye al productor o técnico |
+| Mapping | Es simulación técnica visual, no SLAM real todavía |
+| Hardware | El MVP no depende de rover de reconocimiento físico o  sensores especializados todavía para demostrar valor |
+| Decisión final | La recomendación apoya y mejora decisiones críticas, no sustituye al productor o técnico especialista del campo |
 
 ---
 
