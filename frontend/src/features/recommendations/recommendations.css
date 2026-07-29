@@ -328,4 +328,8 @@
   .recommendationsHero {
     border-radius: 26px;
   }
+
+  .recommendationCard {
+    padding: 18px;
+  }
 }
