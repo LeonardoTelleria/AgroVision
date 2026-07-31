@@ -704,9 +704,8 @@ El estado verificable de la demo se mantiene en:
 - [`docs/backend/ideathon-demo-evidence-map.md`](docs/backend/ideathon-demo-evidence-map.md): recorrido oficial de la demo.
 - [`docs/backend/SMOKE_TEST_RESULTS.md`](docs/backend/SMOKE_TEST_RESULTS.md): endpoints comprobados y condiciones de ejecución.
 - [`docs/reports/REPORTS_STRUCTURE.md`](docs/reports/REPORTS_STRUCTURE.md): contrato real del reporte prescriptivo.
-- [`docs/evidence/screenshots/README.md`](docs/evidence/screenshots/README.md): capturas requeridas y registro de evidencias externas.
 
-El Notebook se demuestra mediante su endpoint y JSON, ya que no tiene una pantalla dedicada. La visión se presenta como análisis preliminar simulado, no como un modelo agrícola entrenado.
+El Notebook se demuestra mediante su endpoint y JSON, ya que no tiene una pantalla dedicada. La visión se presenta como análisis preliminar simulado, no como un modelo agrícola entrenado al menos no en esta fase del proyecto aún.
 
 ```bash
 git status --short
