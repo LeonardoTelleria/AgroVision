@@ -99,7 +99,7 @@ En el sector agropecuario nacional, muchos productores toman decisiones crítica
 | **Clima** | Estimar condiciones que elevan riesgo hídrico, térmico o fúngico |
 | **Sensores y telemetría** | Incorporar lecturas de campo como humedad, temperatura, pH o variables futuras |
 | **Historial agrícola** | Dar contexto a eventos pasados, reportes y evolución por zonas estratégicas |
-| **Mapping 2D** | Visualizar trayectoria, detecciones, cobertura y puntos críticos |
+| **Mapping 2D** | Visualizar trayectorias, cobertura del terreno y puntos críticos dentro del campo|
 | **Capa satelital simulada** | Representar vigor vegetal, NDVI/NDWI/GNDVI simulados y anomalías por zona |
 
 El sistema transforma esa información en:
@@ -735,7 +735,7 @@ git push -u origin feat/nombre-del-cambio
 
 | Integrante | Rol principal en Hackathon | Responsabilidades clave | GitHub |
 |---|---|---|---|
-| **Brandon Reynaldo Rodríguez Téllez** | Coordinador deequipo / Diseñador Gráfico / Dev | Coordinación general, diseño visual, experiencia de usuario, frontend, contrato de datos e integración técnica | [@Brando-1510](https://github.com/Brando-1510) |
+| **Brandon Reynaldo Rodríguez Téllez** | Coordinador de equipo / Diseñador Gráfico / Dev | Coordinación general, diseño visual, experiencia de usuario, frontend, contrato de datos e integración técnica | [@Brando-1510](https://github.com/Brando-1510) |
 | **Leonardo Antonio Tellería Trujillo** | Developer | Backend, servicios, endpoints, estructura API, integración técnica | [@LeonardoTelleria](https://github.com/LeonardoTelleria) |
 | **Jorge Luis Antón Henández** | Developer | Backend, frontend, repositorio principal, módulos técnicos, lógica de análisis y soporte de integración | [@luis-hdz7](https://github.com/luis-hdz7) |
 | **Marvin Osvaldo Solís Hernández** | Comunicador | Comunicación estratégica, pitch, narrativa, validación del problema y defensa ante jurado | [@OsvaldoZzz](https://github.com/OsvaldoZzz) |
