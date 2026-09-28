@@ -28,18 +28,25 @@ import { VisionAiPage } from '../features/vision-ai/pages/VisionAiPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
 import { AlertsPage } from '../features/alerts/pages/AlertsPage';
 import { RecommendationsPage } from '../features/recommendations/pages/RecommendationsPage';
+import { MappingPage } from "../features/mapping/pages/MappingPage";
+import { FieldNotebookPage } from "../features/field-notebook/pages/FieldNotebookPage";
+
+/* Importacion de iconos */
+import HomeIcon from "../assets/icons/home-03.svg"
+import CropIcon from "../assets/icons/cultivo-icon.svg"
+import VisionIcon from "../assets/icons/vision-icon.svg"
+import MappingIcon from "../assets/icons/location-icon.svg"
+import RecommendationIcon from "../assets/icons/recomendation-icon.svg"
+import AlertsIcon from "../assets/icons/alert-icon.svg"
+import ReportIcon from "../assets/icons/reports-icon.svg"
+import FieldNotebookIcon from "../assets/icons/notebook-icon.svg"
+
 
 /** AppRouterPath  define las rutas permitidsas.
  * así se evita navegar por rutas no existentes de forma accidental.
  */
 
-export type AppRoutePath =
-  | '/dashboard'
-  | '/crops'
-  | '/alerts'
-  | '/recommendations'
-  | '/reports'
-  | '/vision-ai';
+export type AppRoutePath = "/dashboard" | "/crops" | "/mapping" | "/vision-ai" | "/alerts" | "/recommendations" | "/reports" | "/field-notebook";
 
 /** RouteDefinition define cada ruta base del sistema.
  *
@@ -58,6 +65,7 @@ export interface RouteDefinition {
   readonly label: string;
   readonly title: string;
   readonly description: string;
+  readonly icon: string;
 }
 
 /** Ruta base/principal del sistema
@@ -72,42 +80,57 @@ export const ROUTES: ReadonlyArray<RouteDefinition> = [
     path: '/dashboard',
     label: 'Dashboard',
     title: 'Dashboard',
-    description: 'Pantalla principal del sistema',
+    description: 'Pantalla principal del sistema', 
+    icon: HomeIcon,
   },
   {
     path: '/crops',
     label: 'Cultivos',
     title: 'Cultivos',
-    description:
-      'Módulo para perfiles de cultivos estratégicos, riesgos principales y métricas importantes.',
+    description: 'Módulo para perfiles de cultivos estratégicos, riesgos principales y métricas importantes.',
+    icon: CropIcon,
   },
   {
     path: '/alerts',
     label: 'Alertas',
     title: 'Alertas',
-    description:
-      'Módulo para eventos criticos, evidencias, severidad, fuente y acciones recomendadas',
+    description: 'Módulo para eventos criticos, evidencias, severidad, fuente y acciones recomendadas',
+    icon: AlertsIcon,
   },
   {
     path: '/recommendations',
     label: 'Recomendaciones',
     title: 'Recomendaciones',
-    description:
-      'Módulos para recomendaciones accionables inteligentes basadas en razón, urgencia e impacto esperado',
+    description: 'Módulos para recomendaciones accionables inteligentes basadas en razón, urgencia e impacto esperado',
+    icon: RecommendationIcon
   },
   {
     path: '/reports',
     label: 'Reportes',
     title: 'Reportes',
-    description:
-      'Módulo para informes y reportes técnicos, productivos y ejecutivos basados en evidencias y trazabilidad',
+    description: 'Módulo para informes y reportes técnicos, productivos y ejecutivos basados en evidencias y trazabilidad',
+    icon: ReportIcon
   },
   {
     path: '/vision-ai',
     label: 'Vision AI',
     title: 'Vision AI',
-    description:
-      'Módulo para análisis visual preliminar con predicción, confianza, métricas y explicación.',
+    description: 'Módulo para análisis visual preliminar con predicción, confianza, métricas y explicación.',
+    icon: VisionIcon
+  },
+  {
+    path: "/mapping",
+    label: "Mapping",
+    title: "Mapping",
+    description: "Mapa operativo y análisis espacial del terreno.",
+    icon: MappingIcon
+  },
+  {
+    path: "/field-notebook",
+    label: "Cuaderno de campo",
+    title: "Cuaderno de campo",
+    description: "Registro operativo de inspecciones, acciones, responsables y evidencias.",
+    icon: FieldNotebookIcon
   },
 ];
 
@@ -118,28 +141,16 @@ interface AppRouterProps {
 // Renderiza la página correspondiente.
 // Si la ruta aún no tiene feature, renderiza placeholder.
 export function AppRouter({ activePath }: AppRouterProps) {
-  if (activePath === '/dashboard') {
-    return <DashboardPage />;
-  }
+  
+  if (activePath === "/dashboard") return <DashboardPage />;
+  if (activePath === "/crops") return <CropsPage />;
+  if (activePath === "/mapping") return <MappingPage />;
+  if (activePath === "/vision-ai") return <VisionAiPage />;
+  if (activePath === "/alerts") return <AlertsPage />;
+  if (activePath === "/recommendations") return <RecommendationsPage />;
+  if (activePath === "/reports") return <ReportsPage />;
+  if (activePath === "/field-notebook") return <FieldNotebookPage />;
 
-  if (activePath === '/crops') {
-    return <CropsPage />;
-  }
-
-  if (activePath === '/vision-ai') {
-    return <VisionAiPage />;
-  }
-
-  if (activePath === '/alerts') {
-    return <AlertsPage />;
-  }
-
-  if (activePath === "/recommendations") {
-    return <RecommendationsPage />;
-  }
-  if (activePath === '/reports') {
-    return <ReportsPage />;
-  }
 
   const activeRoute = getRouteDefinition(activePath);
 

@@ -3,332 +3,265 @@
  * MappingPage
  * =========================================
  *
- * Página principal del módulo Mapping 2D.
+ * Refactor visual basado en Figma.
  *
- * Integra entregables de:
+ * Se mantienen:
+ * - service;
+ * - adapter;
+ * - mock fallback;
+ * - useSimulationPlayback;
+ * - playbackData;
+ * - recarga de simulación.
  *
- * Frontend 1:
- * - layout general;
- * - controles;
- * - telemetría;
- * - resumen;
- * - organización visual.
- *
- * Frontend 2:
- * - render técnico;
- * - playback;
- * - rover;
- * - trayectoria;
- * - plantas;
- * - obstáculos;
- * - LiDAR sweep;
- * - datos backend-ready.
- *
- * Flujo:
- * mappingService
- *   ↓
- * mappingAdapter
- *   ↓
- * useSimulationPlayback
- *   ↓
- * TerrainCanvas + paneles
- * =========================================
+ * Se reemplaza únicamente la antigua
+ * presentación rover-first.
  */
 
 import { useEffect, useState } from "react";
-import { MapLegend } from "../components/MapLegend";
-import { TerrainCanvas } from "../components/TerrainCanvas";
+import { Panel } from "../../../shared/components/ui/Panel";
+import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
+import { TerrainCanvas, type MappingLayerVisibility } from "../components/TerrainCanvas";
 import { useSimulationPlayback } from "../hooks/useSimulationPlayback";
 import { adaptMappingData } from "../services/mappingAdapter";
-import { getMappingSimulation } from "../services/mappingServices";
 import { mappingMock } from "../services/mappingMock";
+import { getMappingSimulation } from "../services/mappingServices";
 import type { RenderSimulationData } from "../types/mappingRender.types";
-import { TechnicalDataLog } from "../components/TechnicalDataLog";
 import "../mapping.css";
 
+const DEFAULT_LAYERS: MappingLayerVisibility = {
+  boundary: true,
+  riskZones: true,
+  managementZones: true,
+  internalPaths: true,
+  samplingPoints: true,
+  hydrography: false,
+};
+
 export function MappingPage() {
-  /**
-   * Estado inicial con mock adaptado.
-   *
-   * Esto evita render vacío y evita romper reglas de hooks.
-   * Luego, si backend responde, reemplazamos esta data.
-   */
-  const [data, setData] = useState<RenderSimulationData>(() =>
-    adaptMappingData(mappingMock)
-  );
-
-  // Indica carga inicial o recarga manual.
+  const [data, setData] = useState<RenderSimulationData>(() => adaptMappingData(mappingMock));
   const [isLoading, setIsLoading] = useState(false);
+  const [visibleLayers, setVisibleLayers] = useState<MappingLayerVisibility>(DEFAULT_LAYERS);
 
   /**
-   * Hook de playback.
-   *
-   * Siempre se ejecuta porque data nunca es null.
-   * Esto evita errores de hooks condicionales.
+   * Playback continúa funcionando con los
+   * mismos datos utilizados anteriormente.
    */
-  const {
-    playbackData,
-    isPlaying,
-    progress,
-    currentFrame,
-    totalFrames,
-    start,
-    pause,
-    reset,
-  } = useSimulationPlayback(data);
+  const { playbackData, progress, currentFrame, totalFrames, reset } = useSimulationPlayback(data);
 
   useEffect(() => {
-    // Carga inicial preparada para backend.
     void loadSimulation();
   }, []);
 
+  /**
+   * Backend → adapter → render.
+   */
   async function loadSimulation() {
     setIsLoading(true);
 
-    // Puede venir del backend o del mock fallback.
-    const simulation = await getMappingSimulation();
-
-    // Adapter protege al render ante datos fuera de rango.
-    const adaptedSimulation = adaptMappingData(simulation);
-
-    setData(adaptedSimulation);
-    setIsLoading(false);
+    try {
+      const simulation = await getMappingSimulation();
+      setData(adaptMappingData(simulation));
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  function handleResetSimulation() {
-    // Reinicia playback visual.
+  /**
+   * Activa/desactiva una capa visual.
+   */
+  function toggleLayer(layer: keyof MappingLayerVisibility) {
+    setVisibleLayers((currentLayers) => ({
+      ...currentLayers,
+      [layer]: !currentLayers[layer],
+    }));
+  }
+
+  /**
+   * Centra/reinicia el playback operativo.
+   */
+  function handleCenterMap() {
     reset();
-
-    // Recarga datos por si backend actualizó la simulación.
-    void loadSimulation();
   }
-
-  const detectedPlantPercentage =
-    playbackData.plants.length > 0 ? Math.round((playbackData.stats.plantsDetected / playbackData.plants.length) * 100) : 0;
-
-/**
- * Métricas visibles.
- *
- * Se alimentan desde playbackData para mantener coherencia
- * con el estado visual actual.
- */
-  const metrics = [
-    {
-      icon: "🔋",
-      label: "Batería",
-      value: `${playbackData.rover.battery}%`,
-      helper: "Rover operativo",
-      meta: `${playbackData.rover.status} · θ ${Math.round(
-      playbackData.rover.angle)}°`,
-      percent: playbackData.rover.battery,
-    },
-    {
-      icon: "🌿",
-      label: "Plantas",
-      value: `${playbackData.stats.plantsDetected}/${playbackData.plants.length}`,
-      helper: "Clusters detectados",
-      meta: `${detectedPlantPercentage}% confirmación visual`,
-      percent: detectedPlantPercentage,
-    },
-    {
-      icon: "🛑",
-      label: "Obstáculos",
-      value: String(playbackData.stats.obstaclesDetected),
-      helper: "Alertas activas",
-      meta:
-      playbackData.stats.obstaclesDetected > 0
-        ? "Riesgo espacial detectado"
-        : "Sin riesgo visible",
-      percent: Math.min(playbackData.stats.obstaclesDetected * 25, 100),
-    },
-    {
-      icon: "📍",
-      label: "Recorrido",
-      value: `${playbackData.stats.distanceTraveled}m`,
-      helper: "Distancia simulada",
-      meta: `Frame ${currentFrame + 1}/${totalFrames} · ${progress}%`,
-      percent: playbackData.stats.inspectedPercentage,
-    },
-  ];
-
-  const steps = [
-    { label: "1. Datos", state: "done" },
-    { label: "2. Render 2D", state: "done" },
-    { label: "3. Playback", state: "active" },
-    { label: "4. Demo", state: "done" },
-  ] as const;
 
   return (
-    <section className="mappingDemoPage">
-      <header className="mappingTopbar">
-        <div className="brandCluster">
-          <span className="brandMark">AG</span>
+    <section className="avScreen mappingFigma">
+      <section className="mappingFigma__workspace">
+        {/* =====================================
+            MAPA PRINCIPAL
+            ===================================== */}
 
-          <div>
-            <strong>AGROVISION</strong>
-            <span>Sprint final · Mapeo 2D</span>
-          </div>
-        </div>
+        <Panel title="Mapa operativo del terreno" showInfo={false} className="mappingOperationalPanel">
+          <div className="mappingOperationalLayout">
+            <aside className="mappingLayerSelector">
+              <strong>Capas</strong>
 
-        <div className="topbarSearch">
-          Backend-ready: /api/mapping/simulation · /api/mapping/playback
-        </div>
+              <LayerToggle checked={visibleLayers.boundary} label="Límites del lote" onChange={() => toggleLayer("boundary")} />
+              <LayerToggle checked={visibleLayers.riskZones} label="Zonas de riesgo" onChange={() => toggleLayer("riskZones")} />
+              <LayerToggle checked={visibleLayers.managementZones} label="Zonas de manejo" onChange={() => toggleLayer("managementZones")} />
+              <LayerToggle checked={visibleLayers.internalPaths} label="Caminos internos" onChange={() => toggleLayer("internalPaths")} />
+              <LayerToggle checked={visibleLayers.samplingPoints} label="Puntos de muestreo" onChange={() => toggleLayer("samplingPoints")} />
+              <LayerToggle checked={visibleLayers.hydrography} label="Hidrografía" onChange={() => toggleLayer("hydrography")} />
 
-        <div className="roleBadge">
-          <span>FE</span>
-          <strong>Mapping Final</strong>
-          <small>UI + Render</small>
-        </div>
-      </header>
+              <button type="button" className="mappingManageLayers">Gestionar capas</button>
 
-      <main className="mappingShell">
-        <section className="heroPanel">
-          <div>
-            <p className="eyebrow">AgroVision / Demo final</p>
-            <h1>Rover Mapping System</h1>
-            <p>
-              Simulación técnica 2D con trayectoria progresiva, pose del rover,
-              nube de puntos, barrido LiDAR, plantas y obstáculos detectados.
-            </p>
-          </div>
-
-          <div className="heroActions">
-            <div className="stepRail">
-              {steps.map((step) => (
-                <div
-                  key={step.label}
-                  className={`stepChip stepChip--${step.state}`}
-                >
-                  <span />
-                  <strong>{step.label}</strong>
-                </div>
-              ))}
-            </div>
-
-            <div className="simulationControls panelGlass">
-              <button
-                type="button"
-                className="simulationButton primary"
-                onClick={isPlaying ? pause : start}
-              >
-                {isPlaying ? "Pausar" : "Iniciar"}
-              </button>
-
-              <button
-                type="button"
-                className="simulationButton secondary"
-                onClick={handleResetSimulation}
-              >
-                Reiniciar
-              </button>
-
-              <div className="playbackStatus">
-                <span>
-                  Frame {currentFrame + 1}/{totalFrames}
-                </span>
-                <strong>{progress}%</strong>
+              <div className="mappingMapControls">
+                <button type="button">+</button>
+                <button type="button">−</button>
+                <button type="button" onClick={handleCenterMap}>{/* SVG center */}</button>
               </div>
+            </aside>
+
+            <div className="mappingTerrainHost">
+              <TerrainCanvas data={playbackData} visibleLayers={visibleLayers} />
+
+              {isLoading && <span className="mappingLoadingBadge">Actualizando...</span>}
             </div>
           </div>
-        </section>
+        </Panel>
 
-        <section className="mappingLayout">
-          <section className="mapPanel panelGlass">
-            <div className="panelTitle">
-              <div>
-                <p className="panelKicker">Vista principal</p>
-                <h2>Plano XY de escaneo</h2>
-              </div>
+        {/* =====================================
+            COLUMNA DERECHA
+            ===================================== */}
 
-              <div className="panelActions">
-                <span className="liveDot" />
-                <span>{isLoading ? "Sincronizando..." : "Datos simulados"}</span>
-              </div>
+        <aside className="mappingFigma__side">
+          <Panel title="Zona seleccionada" showInfo={false} className="mappingSelectedZonePanel">
+            <div className="mappingInfoRows">
+              <MappingInfoRow label="Zona crítica" value="Riesgo alto" danger />
+              <MappingInfoRow label="Área aproximada" value="18.6 ha" />
+              <MappingInfoRow label="Cultivo predominante" value="Naranjo" />
+              <MappingInfoRow label="Pendiente promedio" value="6–12%" />
+              <MappingInfoRow label="Última evaluación" value="Hoy, 09:15" />
             </div>
 
-            {/* Render técnico de Frontend 2 con playback activo. */}
-            <TerrainCanvas data={playbackData} />
+            <button type="button" className="avTextAction mappingCenteredAction">Ver recomendaciones →</button>
+          </Panel>
 
-            {/* Telemetría debajo del render para ocupar mejor el espacio horizontal. */}
-            <section className="statusPanel statusPanel--wide panelGlass">
-              <div className="sidePanelHeader">
-                <div>
-                  <p className="panelKicker">📊 Estado</p>
-                  <h2>Telemetría</h2>
-                </div>
+          <Panel title="Resumen de ruta" showInfo={false}>
+            <div className="mappingInfoRows">
+              <MappingInfoRow label="Distancia total" value={`${playbackData.stats.distanceTraveled} m`} />
+              <MappingInfoRow label="Puntos de control" value={String(playbackData.stats.plantsDetected)} />
+              <MappingInfoRow label="Tiempo estimado" value={`${currentFrame + 1}/${totalFrames}`} />
+            </div>
 
-                <span className="statusPill">{playbackData.rover.status}</span>
-              </div>
+            <button type="button" className="avTextAction mappingCenteredAction">Ver detalle de ruta →</button>
+          </Panel>
 
-              <div className="metricsGrid metricsGrid--wide">
-                {metrics.map((metric) => (
-                  <article key={metric.label} className="metricCard">
-                    <span>
-                      {metric.icon} {metric.label}
-                    </span>
+          <Panel title="Eventos detectados" showInfo={false} headerAction={<button type="button" className="avTextAction">Ver todos</button>}>
+            <div className="mappingEvents">
+              <MappingEvent label="Estrés hídrico severo" time="Hoy, 09:30" tone="DANGER" />
+              <MappingEvent label="Riesgo de enfermedad foliar" time="Hoy, 09:15" tone="DANGER" />
+              <MappingEvent label="Compactación de suelo" time="Ayer, 16:40" tone="WARNING" />
+            </div>
+          </Panel>
+        </aside>
+      </section>
 
-                    <strong>{metric.value}</strong>
-                    <small>{metric.helper}</small>
-                    <p className="metricMeta">{metric.meta}</p>
+      {/* =====================================
+          FILA INFERIOR
+          ===================================== */}
 
-                    <div className="meterTrack">
-                      <span
-                        className="meterFill"
-                        style={{ width: `${metric.percent}%` }}
-                      />
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
+      <section className="mappingFigma__bottom">
+        <Panel title="Capas activas" showInfo={false}>
+          <div className="mappingActiveLayers">
+            <ActiveLayer color="lime" label="Límites del lote" active={visibleLayers.boundary} />
+            <ActiveLayer color="amber" label="Zonas de riesgo" active={visibleLayers.riskZones} />
+            <ActiveLayer color="green" label="Zonas de manejo" active={visibleLayers.managementZones} />
+            <ActiveLayer color="gray" label="Caminos internos" active={visibleLayers.internalPaths} />
+            <ActiveLayer color="yellow" label="Puntos de muestreo" active={visibleLayers.samplingPoints} />
+            <ActiveLayer color="blue" label="Hidrografía" active={visibleLayers.hydrography} />
+          </div>
+        </Panel>
 
-            <TechnicalDataLog
-              data={playbackData}
-              currentFrame={currentFrame}
-              totalFrames={totalFrames}
-              progress={progress}
-            />
-          </section>
+        <Panel title="Indicadores del terreno" showInfo={false}>
+          <div className="mappingIndicatorGrid">
+            <TerrainIndicator label="Pendiente promedio" value="7.8" unit="%" status="Moderada" />
+            <TerrainIndicator label="Elevación promedio" value="612" unit="m msnm" status="Normal" />
+            <TerrainIndicator label="Índice de vegetación (NDVI)" value="0.64" unit="" status="Moderado" />
+            <TerrainIndicator label="Humedad del suelo promedio" value="21" unit="%" status="Bajo" />
+          </div>
 
-          <aside className="sidePanel">
-            <MapLegend />
+          <button type="button" className="avTextAction mappingCenteredAction">Ver análisis completo →</button>
+        </Panel>
 
-            <section className="finalSummaryCard panelGlass">
-              <p className="panelKicker">📌 Resumen</p>
-              <h2>Resultado parcial</h2>
+        <Panel title="Acciones rápidas" showInfo={false}>
+          <div className="mappingQuickActions">
+            <QuickAction label="Medir distancia" />
+            <QuickAction label="Dibujar zona" />
+            <QuickAction label="Agregar punto de muestreo" />
+            <QuickAction label="Importar archivo (KML/Shape)" />
+            <QuickAction label="Generar reporte del mapa" />
+          </div>
+        </Panel>
+      </section>
 
-              <div className="summaryList">
-                <div>
-                  <span>🌿 Plantas detectadas</span>
-                  <strong>{playbackData.stats.plantsDetected}</strong>
-                </div>
-
-                <div>
-                  <span>🛑 Obstáculos</span>
-                  <strong>{playbackData.stats.obstaclesDetected}</strong>
-                </div>
-
-                <div>
-                  <span>📍 Área inspeccionada</span>
-                  <strong>{playbackData.stats.inspectedPercentage}%</strong>
-                </div>
-
-                <div>
-                  <span>🔋 Batería actual</span>
-                  <strong>{playbackData.rover.battery}%</strong>
-                </div>
-
-                <div>
-                  <span>🎞️ Playback</span>
-                  <strong>{progress}%</strong>
-                </div>
-              </div>
-            </section>
-          </aside>
-        </section>
-      </main>
+      <footer className="mappingSyncStatus">
+        <span>{/* SVG sync */}</span>
+        Los datos del mapa se actualizan automáticamente. Playback: {progress}%.
+      </footer>
     </section>
   );
 }
 
+function LayerToggle({ checked, label, onChange }: { readonly checked: boolean; readonly label: string; readonly onChange: () => void }) {
+  return (
+    <label className="mappingLayerToggle">
+      <input type="checkbox" checked={checked} onChange={onChange} />
+      <span>{/* SVG layer */}</span>
+      <strong>{label}</strong>
+    </label>
+  );
+}
 
+function MappingInfoRow({ label, value, danger = false }: { readonly label: string; readonly value: string; readonly danger?: boolean }) {
+  return (
+    <div className="mappingInfoRow">
+      <span className={danger ? "mappingInfoRow__icon is-danger" : "mappingInfoRow__icon"}>{/* SVG */}</span>
+      <strong>{label}</strong>
+      <p>{value}</p>
+    </div>
+  );
+}
+
+function MappingEvent({ label, time, tone }: { readonly label: string; readonly time: string; readonly tone: "DANGER" | "WARNING" }) {
+  return (
+    <div className="mappingEvent">
+      <span className={`mappingEvent__icon mappingEvent__icon--${tone.toLowerCase()}`}>△</span>
+      <strong>{label}</strong>
+      <time>{time}</time>
+      <b>›</b>
+    </div>
+  );
+}
+
+function ActiveLayer({ color, label, active }: { readonly color: string; readonly label: string; readonly active: boolean }) {
+  return (
+    <div className={active ? "mappingActiveLayer" : "mappingActiveLayer is-disabled"}>
+      <i className={`mappingActiveLayer__dot mappingActiveLayer__dot--${color}`} />
+      <span>{label}</span>
+      <small>{active ? "◉" : "○"}</small>
+      <b>⌄</b>
+    </div>
+  );
+}
+
+function TerrainIndicator({ label, value, unit, status }: { readonly label: string; readonly value: string; readonly unit: string; readonly status: string }) {
+  return (
+    <article className="mappingIndicator">
+      <span>{label}</span>
+      <i>{/* SVG indicator */}</i>
+      <strong>{value}</strong>
+      <small>{unit}</small>
+      <p>{status}</p>
+    </article>
+  );
+}
+
+function QuickAction({ label }: { readonly label: string }) {
+  return (
+    <button type="button" className="mappingQuickAction">
+      <span>{/* SVG */}</span>
+      <strong>{label}</strong>
+      <b>›</b>
+    </button>
+  );
+}

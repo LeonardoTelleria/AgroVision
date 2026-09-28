@@ -1,227 +1,292 @@
-/* =========================================
-   Crops Page
-   ========================================= */
-
-.cropsPage {
-  display: grid;
-  gap: 24px;
-}
-
-.cropsHero {
-  min-height: 320px;
-  display: grid;
-  align-content: end;
-
-  padding: clamp(28px, 5vw, 56px);
-  overflow: hidden;
-
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at 78% 18%, rgba(183, 255, 23, 0.2), transparent 34%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
-    rgba(18, 24, 20, 0.86);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
-}
-
-.cropsHero__eyebrow {
-  width: max-content;
-  margin: 0 0 14px;
-  padding: 8px 12px;
-
-  color: #b7ff17;
-  font-size: 0.72rem;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-
-  border: 1px solid rgba(183, 255, 23, 0.28);
-  border-radius: 999px;
-  background: rgba(183, 255, 23, 0.08);
-}
-
-.cropsHero h1 {
-  max-width: 900px;
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: clamp(3rem, 7vw, 7rem);
-  line-height: 0.86;
-  font-weight: 950;
-  letter-spacing: -0.085em;
-  text-transform: uppercase;
-}
-
-.cropsHero span {
-  display: block;
-  max-width: 720px;
-  margin-top: 18px;
-
-  color: #c8d0c4;
-  line-height: 1.65;
-}
-
-.cropsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.cropProfileCard {
-  min-width: 0;
-  display: grid;
-  gap: 18px;
-  align-content: start;
-
-  padding: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 82% 12%, rgba(183, 255, 23, 0.13), transparent 30%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
-    rgba(18, 24, 20, 0.82);
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.26);
-}
-
-.cropProfileCard__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.cropProfileCard__header p {
-  width: max-content;
-  margin: 0 0 8px;
-  padding: 6px 10px;
-
-  color: #081006;
-  font-size: 0.68rem;
-  font-weight: 950;
-  letter-spacing: 0.075em;
-
-  border-radius: 999px;
-  background: #b7ff17;
-}
-
-.cropProfileCard__header h2 {
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: clamp(1.5rem, 2vw, 2.15rem);
-  line-height: 0.95;
-  font-weight: 950;
-  letter-spacing: -0.06em;
-}
-
-.cropProfileCard__header span {
-  display: block;
-  margin-top: 6px;
-
-  color: #8d988d;
-  font-size: 0.84rem;
-  font-style: italic;
-}
-
-.cropProfileCard__header strong {
-  flex: 0 0 auto;
-
-  color: #b7ff17;
-  font-size: 0.78rem;
-  font-weight: 950;
-}
-
-.cropProfileCard__section {
-  display: grid;
+.cropsFigma {
   gap: 10px;
 }
 
-.cropProfileCard__section h3 {
-  margin: 0;
+.cropProfileStrip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
 
-  color: #f4f7ef;
-  font-size: 0.84rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  gap: 8px;
 }
 
-.cropProfileCard__chips,
-.cropProfileCard__metrics {
+.figmaCropCard {
+  min-width: 0;
+
+  padding: 8px;
+
+  border: 1px solid var(--av-border);
+  border-top: 2px solid var(--av-lime-500);
+  border-radius: 6px;
+
+  background: var(--av-neutral-50);
+
+  transition:
+    transform 130ms ease,
+    box-shadow 130ms ease;
+}
+
+.figmaCropCard:hover {
+  transform: translateY(-2px);
+
+  box-shadow: var(--av-shadow-card);
+}
+
+.figmaCropCard header {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+
+  gap: 6px;
+
+  padding-bottom: 6px;
+
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.figmaCropAvatar,
+.priorityCrop__image {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(circle, var(--av-lime-300), var(--av-green-300));
+}
+
+.figmaCropCard header strong {
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.62rem;
+}
+
+.figmaCropCard header button {
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.figmaCropRow,
+.figmaCropSensitivity {
+  min-height: 25px;
+
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 5px;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.49rem;
 }
 
-.cropProfileCard__chips span,
-.cropProfileCard__metrics span {
-  padding: 7px 10px;
+.figmaCropSensitivity div {
+  display: flex;
 
-  color: #c8d0c4;
-  font-size: 0.78rem;
-  font-weight: 750;
-  line-height: 1;
-
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.045);
+  gap: 3px;
 }
 
-.cropProfileCard__chips--risk span {
-  color: #ffdf9e;
-  border-color: rgba(255, 184, 77, 0.24);
+.figmaCropSensitivity i {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: var(--av-green-700);
 }
 
-.cropProfileCard__footer {
+.figmaCropAction,
+.cropsCenteredAction {
+  display: block;
+
+  margin: 7px auto 0;
+}
+
+.cropsFigma__middle {
   display: grid;
-  gap: 8px;
+  grid-template-columns: 1.25fr 0.9fr 0.95fr;
 
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  gap: 10px;
 }
 
-.cropProfileCard__footer small {
-  color: #b7ff17;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.cropRiskMatrix {
+  overflow: hidden;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
 }
 
-.cropProfileCard__footer p {
-  margin: 0;
+.cropRiskMatrix__head,
+.cropRiskMatrix__row {
+  min-height: 28px;
 
-  color: #c8d0c4;
-  line-height: 1.55;
-}
-
-.cropsState {
   display: grid;
-  place-items: center;
-  min-height: 220px;
+  grid-template-columns: 95px repeat(5, 1fr);
+  align-items: center;
 
-  color: #c8d0c4;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 28px;
-  background: rgba(18, 24, 20, 0.82);
+  gap: 3px;
+
+  padding: 0 6px;
+
+  border-bottom: 1px solid var(--av-border-soft);
 }
 
-.cropsState--error {
-  color: #ffb84d;
-  border-color: rgba(255, 184, 77, 0.32);
+.cropRiskMatrix__head {
+  color: var(--av-text-muted);
+
+  font-size: 0.43rem;
+
+  background: var(--av-neutral-100);
 }
 
-@media (max-width: 1180px) {
-  .cropsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.cropRiskMatrix__row strong {
+  color: var(--av-text-secondary);
+
+  font-size: 0.5rem;
+}
+
+.cropRiskDot {
+  width: 8px;
+  height: 8px;
+
+  justify-self: center;
+
+  border-radius: 50%;
+
+  background: var(--av-neutral-300);
+}
+
+.cropRiskDot--active {
+  background: var(--av-lime-600);
+}
+
+.cropRiskDot--warning {
+  background: var(--av-amber-400);
+}
+
+.priorityCrop {
+  display: grid;
+  gap: 5px;
+}
+
+.priorityCrop header {
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 3px;
+}
+
+.priorityCrop header strong {
+  font-family: var(--av-font-heading);
+  font-size: 0.65rem;
+}
+
+.priorityCrop > div {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 5px;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.47rem;
+}
+
+.priorityCrop > div strong {
+  color: var(--av-warning-text);
+}
+
+.priorityCrop aside {
+  margin-top: 4px;
+
+  padding: 7px;
+
+  border-radius: 5px;
+
+  background: var(--av-amber-50);
+}
+
+.priorityCrop aside strong {
+  color: var(--av-text-secondary);
+
+  font-size: 0.49rem;
+}
+
+.priorityCrop aside p {
+  margin: 2px 0 0;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.45rem;
+}
+
+.cropInsightList {
+  display: grid;
+
+  gap: 5px;
+}
+
+.cropInsight {
+  min-height: 48px;
+
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-items: center;
+
+  gap: 6px;
+
+  padding: 5px;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
+}
+
+.cropInsight > span {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 5px;
+
+  background: var(--av-lime-50);
+}
+
+.cropInsight strong {
+  color: var(--av-text);
+
+  font-size: 0.54rem;
+}
+
+.cropInsight p {
+  margin: 2px 0 0;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.44rem;
+}
+
+@media (max-width: 1000px) {
+  .cropProfileStrip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cropsFigma__middle {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cropsFigma__middle > :first-child {
+    grid-column: 1 / -1;
   }
 }
 
-@media (max-width: 720px) {
-  .cropsGrid {
+@media (max-width: 700px) {
+  .cropProfileStrip,
+  .cropsFigma__middle {
     grid-template-columns: 1fr;
-  }
-
-  .cropsHero {
-    border-radius: 26px;
   }
 }

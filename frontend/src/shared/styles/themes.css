@@ -1,0 +1,300 @@
+/**
+ * =========================================
+ * AgroVision Design System
+ * =========================================
+ *
+ * Valores trasladados del Design System
+ * presente en el archivo oficial de Figma.
+ */
+
+:root {
+  /* =========================================
+     BASE PRIMARIO
+     ========================================= */
+
+  --av-green-50: #80d5af;
+  --av-green-100: #4bbc8e;
+  --av-green-200: #29a073;
+  --av-green-300: #1a815c;
+  --av-green-400: #15674c;
+  --av-green-500: #155b44;
+  --av-green-600: #104434;
+  --av-green-700: #08261e;
+  --av-green-800: #061e17;
+  --av-green-900: #081512;
+  --av-green-1000: #040b0a; 
+
+
+  /* =========================================
+     BASE SECUNDARIO
+     ========================================= */
+
+  --av-teal-50: #5fe9d7;
+  --av-teal-100: #2ed3c2;
+  --av-teal-200: #15b7a9;
+  --av-teal-300: #0e938a;
+  --av-teal-400: #0f6f6a;
+  --av-teal-500: #125d5a;
+  --av-teal-600: #134e4c;
+  --av-teal-700: #042f2f;
+  --av-teal-800: #032323;
+  --av-teal-900: #021818;
+
+  /* =========================================
+     ACENTO PRIMARIO
+     ========================================= */
+
+  --av-lime-50: #fafde8;
+  --av-lime-100: #f1fbcc;
+  --av-lime-200: #e3f6a0;
+  --av-lime-300: #ceee68;
+  --av-lime-400: #b7e13a;
+  --av-lime-500: #a7d91e;
+  --av-lime-600: #769f11;
+  --av-lime-700: #5a7912;
+  --av-lime-800: #496014;
+  --av-lime-900: #1f2d06;
+
+  /* =========================================
+     ACENTO SECUNDARIO
+     ========================================= */
+
+  --av-amber-50: #fefbe8;
+  --av-amber-100: #fff6c2;
+  --av-amber-200: #ffeb88;
+  --av-amber-300: #ffd744;
+  --av-amber-400: #fec111;
+  --av-amber-500: #f6ad04;
+  --av-amber-600: #ce7f00;
+  --av-amber-700: #a45a04;
+  --av-amber-800: #87460c;
+  --av-amber-900: #733910;
+
+  /* =========================================
+     NEUTRALES
+     ========================================= */
+
+  --av-neutral-50: #f8faf8;
+  --av-neutral-100: #f1f5f2;
+  --av-neutral-200: #e4ece7;
+  --av-neutral-300: #d4ded8;
+  --av-neutral-400: #b7c6bf;
+  --av-neutral-500: #87938f;
+  --av-neutral-600: #5d6d68;
+  --av-neutral-700: #3f504a;
+  --av-neutral-800: #263631;
+  --av-neutral-900: #152a27;
+
+  /* =========================================
+     SEMÁNTICOS
+     ========================================= */
+
+  --av-success-hover: #69eda0;
+  --av-success: #30b76a;
+  --av-success-text: #21824b;
+
+  --av-danger-hover: #ff6b68;
+  --av-danger: #e31a16;
+  --av-danger-text: #a21512;
+
+  --av-warning-hover: #ef9a48;
+  --av-warning: #e0661a;
+  --av-warning-text: #b74d17;
+
+  --av-info-hover: #1da4da;
+  --av-info: #0e6a96;
+  --av-info-text: #0f5576;
+
+  /* =========================================
+     TYPOGRAPHY
+     ========================================= */
+
+  --av-font-heading: "Manrope", sans-serif;
+  --av-font-body: "Source Sans 3", sans-serif;
+
+  /* --av-font-heading:'Fredoka', sans-serif;
+  --av-font-body: 'Nunito Sans', sans-serif; */
+
+  /* =========================================
+     UI TOKENS
+     ========================================= 
+   Define las superficies principales de toda la aplicación:
+   página, tarjetas, paneles, bordes y navegación.
+   ========================================================= */
+
+  /* -------------------------------------------------------
+     FONDO PRINCIPAL DE LA APLICACIÓN
+     -------------------------------------------------------
+     Es el color que queda detrás de todas las tarjetas.
+     En el Figma el contenido principal es claro.
+     ------------------------------------------------------- */
+  --av-page: #f8faf8;
+
+
+  /* -------------------------------------------------------
+     SUPERFICIE PRINCIPAL DE TARJETAS
+     -------------------------------------------------------
+     Color base utilizado por las tarjetas blancas.
+     ------------------------------------------------------- */
+  --av-card: #fff;
+
+
+  /* -------------------------------------------------------
+     SUPERFICIE SECUNDARIA
+     -------------------------------------------------------
+     Fondo ligeramente más oscuro para:
+     tablas, filtros, pequeños contenedores y estados.
+     ------------------------------------------------------- */
+  --av-card-muted: #f1f5f2;
+
+
+  /* -------------------------------------------------------
+     BORDE PRINCIPAL
+     -------------------------------------------------------
+     Define el borde estándar de tarjetas y controles.
+     Debe ser visible pero muy discreto.
+     ------------------------------------------------------- */
+  --av-border: #d4ded8;
+
+
+  /* -------------------------------------------------------
+     BORDE SUAVE
+     -------------------------------------------------------
+     Se utiliza para separadores internos y divisiones
+     visuales donde un borde completo sería demasiado fuerte.
+     ------------------------------------------------------- */
+  --av-border-soft: #e4ece7;
+
+
+  /* -------------------------------------------------------
+     TEXTO PRINCIPAL
+     -------------------------------------------------------
+     Se utiliza para títulos y contenido de máxima jerarquía.
+     ------------------------------------------------------- */
+  --av-text: #152a27;
+
+
+  /* -------------------------------------------------------
+     TEXTO SECUNDARIO
+     -------------------------------------------------------
+     Se utiliza para etiquetas, valores y contenido secundario.
+     ------------------------------------------------------- */
+  --av-text-secondary: #3f504a;
+
+
+  /* -------------------------------------------------------
+     TEXTO ATENUADO
+     -------------------------------------------------------
+     Se utiliza para metadatos, fechas, descripciones y
+     elementos de menor jerarquía visual.
+     ------------------------------------------------------- */
+  --av-text-muted: #5d6d68;
+
+
+  /* -------------------------------------------------------
+     SUPERFICIE DE SIDEBAR
+     -------------------------------------------------------
+     Fondo principal de la navegación lateral.
+     ------------------------------------------------------- */
+  --av-sidebar: #001C17;
+
+
+  /* -------------------------------------------------------
+     SUPERFICIE SECUNDARIA DE SIDEBAR
+     -------------------------------------------------------
+     Variante ligeramente más clara utilizada dentro
+     de la navegación lateral.
+     ------------------------------------------------------- */
+  --av-sidebar-soft: #032323;
+
+
+  /* -------------------------------------------------------
+     SUPERFICIE OSCURA PARA TARJETAS DESTACADAS
+     -------------------------------------------------------
+     Inicio del degradado utilizado en superficies oscuras.
+     ------------------------------------------------------- */
+  --av-dark-card-start: #155b44;
+
+
+  /* -------------------------------------------------------
+     FIN DEL DEGRADADO OSCURO
+     ------------------------------------------------------- */
+  --av-dark-card-end: #061e17;
+
+
+  /* -------------------------------------------------------
+     ESTADO ACTIVO
+     -------------------------------------------------------
+     Color utilizado para indicar navegación o controles activos.
+     ------------------------------------------------------- */
+  --av-active: #0e938a;
+
+
+  /* -------------------------------------------------------
+     ANCHO DE SIDEBAR ABIERTA
+     -------------------------------------------------------
+     Mantiene visible logo, iconos y etiquetas.
+     ------------------------------------------------------- */
+  --av-sidebar-expanded: 250px;
+
+
+  /* -------------------------------------------------------
+     ANCHO DE SIDEBAR COLAPSADA
+     -------------------------------------------------------
+     Deja únicamente la navegación iconográfica.
+     ------------------------------------------------------- */
+  --av-sidebar-collapsed: 66px;
+
+
+  /* -------------------------------------------------------
+     ALTURA DE TOPBAR
+     -------------------------------------------------------
+     Barra superior compacta del Dashboard.
+     ------------------------------------------------------- */
+  --av-topbar-height: 60px;
+
+
+  /* -------------------------------------------------------
+     RADIO DE TARJETAS
+     -------------------------------------------------------
+     Controla la redondez estándar de paneles y cards.
+     ------------------------------------------------------- */
+  --av-radius-card: 9px;
+
+
+  /* -------------------------------------------------------
+     RADIO DE CONTROLES
+     -------------------------------------------------------
+     Botones, selectores, inputs y controles pequeños.
+     ------------------------------------------------------- */
+  --av-radius-control: 6px;
+
+
+  /* -------------------------------------------------------
+     RADIO DE BADGES
+     -------------------------------------------------------
+     Elementos pequeños de estado.
+     ------------------------------------------------------- */
+  --av-radius-badge: 4px;
+
+
+  /* -------------------------------------------------------
+     SOMBRA ESTÁNDAR DE TARJETAS
+     -------------------------------------------------------
+     Sombra muy ligera para separar una tarjeta clara
+     del fondo sin producir efecto "flotante" excesivo.
+     ------------------------------------------------------- */
+  --av-shadow-card: 0 2px 6px rgba(21, 42, 39, 0.10);
+  
+
+  /* -------------------------------------------------------
+     SOMBRA DE ELEMENTOS FLOTANTES
+     -------------------------------------------------------
+     Para popovers, dropdowns y elementos que realmente
+     necesitan sobresalir del contenido.
+     ------------------------------------------------------- */
+  --av-shadow-floating: 0 14px 38px rgba(21, 42, 39, 0.16);
+
+  
+}
+

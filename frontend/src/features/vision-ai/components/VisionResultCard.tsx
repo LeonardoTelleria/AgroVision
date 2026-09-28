@@ -12,158 +12,123 @@
  * - mostrar las acciones recomendadas.
 */
 
+
+import { Panel } from "../../../shared/components/ui/Panel";
+import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
 import type { VisionAnalysisSource, VisionInspection } from "../types/visionAi.types";
 
 interface VisionResultCardProps {
-    readonly result: VisionInspection;
-    readonly source: VisionAnalysisSource;
-    readonly fallbackReason?: string | null;
+  readonly result: VisionInspection;
+  readonly source: VisionAnalysisSource;
+  readonly fallbackReason?: string | null;
 }
-
-
-/**
- * Renderiza el resultado visual normalizado.
- *
- * Funcionamiento:
- * - recibe VisionInspection desde VisionAiPage;
- * - muestra si la fuente fue BACKEND o FALLBACK;
- * - muestra métricas visuales explicables;
-*/
 
 export function VisionResultCard({ result, source, fallbackReason }: VisionResultCardProps) {
-    // Se convierte confidence 0-1 a un porcentaje visual.
-    const confidencePercentage = Math.round(result.confidence * 100);
+  const confidencePercentage = normalizeConfidence(result.confidence);
 
-    // Se usa para "pintar" badge de la fuente.
-    const sourceClassName = source.toLowerCase();
+  return (
+    <>
+      <Panel title="Resultado preliminar" showInfo={false}>
+        <div className="visionResultRows">
+          <ResultRow label="Predicción" value={formatPrediction(result.prediction)} />
+          <ResultRow label="Confianza" value={`${confidencePercentage}%`} />
+          <ResultRow label="Cultivo" value={formatCrop(result.cropType)} />
+          <ResultRow label="Zona Analizada" value={formatZone(result.zoneId)} />
 
-    return (
-        <article className="visionResultCard">
-            <header className="visionResultCard__header">
-                <div>
-                    <p>Clasificación preliminar</p>
-                    <h2>{formatPrediction(result.prediction)}</h2>
-                    <span>{confidencePercentage}% de confianza</span>
-                </div>
+          <div className="visionResultRow">
+            <strong>Estado</strong>
+            <StatusBadge tone={result.prediction === "HEALTHY" ? "SUCCESS" : "WARNING"}>
+              {result.prediction === "HEALTHY" ? "Normal" : "Advertencia"}
+            </StatusBadge>
+          </div>
+        </div>
+      </Panel>
 
-                <strong className={`visionSourceBadge visionSourceBadge--${sourceClassName}`}>
-                {source}
-                </strong>
-            </header>
+      <Panel title="Métricas visuales" showInfo={false}>
+        <div className="visionMetricRows">
+          <MetricRow label="Cobertura verde" value={result.visualMetrics.greenCoveragePercentage} unit="%" />
+          <MetricRow label="Área seca" value={result.visualMetrics.dryAreaPercentage} unit="%" />
+          <BooleanMetricRow label="Clorosis sospechada" value={result.visualMetrics.chlorosisSuspected} />
+          <BooleanMetricRow label="Manchas foliares" value={result.visualMetrics.leafSpotSuspected} />
+          <BooleanMetricRow label="Patrón de estrés" value={result.visualMetrics.stressPatternDetected} emphasized />
+        </div>
+      </Panel>
 
-            {source === "FALLBACK" && (
-                <section className="visionResultCard__fallbackNotice">
-                <strong>Fallback controlado</strong>
-                <p>
-                    {fallbackReason ??
-                    "Backend no disponible. Se muestra respuesta local controlada."}
-                </p>
-                </section>
-            )}
+      <section className="visionPreliminaryNotice">
+        <span className="visionPreliminaryNotice__icon">{/* SVG leaf */}</span>
 
-            <section className="visionResultCard__notice">
-                <strong>Limitación técnica</strong>
-                <p>Análisis visual preliminar</p>
-            </section>
+        <div>
+          <strong>Resultado preliminar</strong>
+          <p>{result.explanation}</p>
+          <small>Análisis visual preliminar. No representa diagnóstico definitivo.</small>
+        </div>
+      </section>
 
-            <section className="visionResultCard__metrics">
-                <MetricBox label="Cobertura verde" value={formatMetric(result.visualMetrics.greenCoveragePercentage,"%" )} />
-
-                <MetricBox label="Área seca" value={formatMetric(result.visualMetrics.dryAreaPercentage,"%")} />
-
-                <MetricBox label="Clorosis" value={formatBoolean(result.visualMetrics.chlorosisSuspected)} />
-
-                <MetricBox label="Mancha foliar" value={formatBoolean(result.visualMetrics.leafSpotSuspected)} />
-            </section>
-
-            <section className="visionResultCard__section">
-                <h3>Señales detectadas</h3>
-                <div className="visionSignalList">
-                    <SignalBadge label="Patrón de estrés" value={formatBoolean(result.visualMetrics.stressPatternDetected)}/>
-
-                    <SignalBadge label="Field" value={result.fieldId} />
-
-                    <SignalBadge label="Zone" value={result.zoneId ?? "N/A"} />
-
-                    <SignalBadge label="Crop" value={result.cropType} />
-                </div>
-            </section>
-
-            <section className="visionResultCard__section">
-                <h3>Explicación</h3>
-                <p>{result.explanation}</p>
-            </section>
-            <section className="visionResultCard__section">
-                <h3>Acción sugerida</h3>
-                <p>{result.recommendedAction}</p>
-            </section>
-
-            <section className="visionResultCard__section">
-                <h3>Evidencia generada</h3>
-                <div className="visionEvidenceList">
-                {result.evidence.map((item) => (
-                    <article
-                    key={`${item.source}-${item.metric}-${String(item.value ?? "none")}`}
-                    className={`visionEvidenceItem visionEvidenceItem--${item.status.toLowerCase()}`}>
-                        <strong>{item.metric}</strong>
-
-                        <span>{String(item.value ?? "N/A")}{item.unit ? ` ${item.unit}` : ""}</span>
-                        <small>{item.explanation}</small>
-                    </article>
-                ))}
-                </div>
-            </section>
-        </article>
-    );
+      {source === "FALLBACK" && (
+        <div className="visionFallbackNotice">
+          <strong>Modo de respaldo</strong>
+          <span>{fallbackReason ?? "Resultado local controlado."}</span>
+        </div>
+      )}
+    </>
+  );
 }
 
-
-interface MetricBoxProps {
-    readonly label: string;
-    readonly value: string;
+function ResultRow({ label, value }: { readonly label: string; readonly value: string }) {
+  return (
+    <div className="visionResultRow">
+      <strong>{label}</strong>
+      <span>{value}</span>
+    </div>
+  );
 }
 
-// Renderiza una métrica visual principal. Se usa para representar porcentajes y señales binarias resumidas.
-function MetricBox({ label, value }: MetricBoxProps) {
-    return (
-        <article className="visionMetricBox">
-            <span>{label}</span>
-            <strong>{value}</strong>
-        </article>
-    )
+function MetricRow({ label, value, unit }: { readonly label: string; readonly value?: number | null; readonly unit: string }) {
+  const percentage = value ?? 0;
+
+  return (
+    <div className="visionMetricRow">
+      <strong>{label}</strong>
+
+      <div className="visionMetricProgress">
+        <i><b style={{ width: `${Math.max(0, Math.min(percentage, 100))}%` }} /></i>
+      </div>
+
+      <span>{value === null || value === undefined ? "N/D" : `${value}${unit}`}</span>
+    </div>
+  );
 }
 
-interface SignalBadgeProps {
-  readonly label: string;
-  readonly value: string;
+function BooleanMetricRow({ label, value, emphasized = false }: { readonly label: string; readonly value?: boolean | null; readonly emphasized?: boolean }) {
+  const percentage = value ? 88 : 12;
+
+  return (
+    <div className="visionMetricRow">
+      <strong>{label}</strong>
+
+      <div className={emphasized ? "visionMetricProgress is-emphasized" : "visionMetricProgress"}>
+        <i><b style={{ width: `${percentage}%` }} /></i>
+      </div>
+
+      <span>{value === null || value === undefined ? "N/D" : value ? "Sí" : "No"}</span>
+    </div>
+  );
 }
 
-
-// Renderiza una señal secundaria. Se usa para las field, zone, crop y patrón de estrés.
-function SignalBadge({ label, value }: SignalBadgeProps) {
-    return (
-        <article className="visionSignalBadge">
-            <span>{label}</span>
-            <strong>{value}</strong>
-        </article>
-    );
+function normalizeConfidence(value: number): number {
+  return Math.round(value <= 1 ? value * 100 : value);
 }
 
-
-// Función auxiliar para formatear el texto de una #predicción" en forma legible, reemplazando guiones bajos por espacios
-function formatPrediction(prediction: string): string {
-    return prediction.replaceAll("_", " ");
+function formatPrediction(value: string): string {
+  return value.replaceAll("_", " ");
 }
 
-// Formatea métricas numéricas, si el valor no existe, retorna N/A para evitar que UI se rompa.
-function formatMetric(value: number | null | undefined, unit: string): string {
-    if (value === null || value === undefined) return "N/A";
-    return `${value} ${unit}`;
+function formatCrop(value: string): string {
+  if (value === "ORANGE") return "Naranjo";
+
+  return value.replaceAll("_", " ");
 }
 
-// Formatea booleanos, si el valor no existe retorna N/A .
-function formatBoolean(value: boolean | null | undefined): string {
-    if (value === null || value === undefined) return "N/A";
-    return value ? "YES" : "NO";
+function formatZone(value?: string | null): string {
+  return value ? value.replace("zone-", "Zona ") : "—";
 }
-

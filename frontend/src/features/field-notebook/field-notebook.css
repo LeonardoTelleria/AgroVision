@@ -1,0 +1,533 @@
+/**
+ * =========================================
+ * Field Notebook — Figma implementation
+ * =========================================
+ */
+
+.fieldNotebookFigma {
+  gap: 10px;
+}
+
+/* =========================================
+   Main workspace
+   ========================================= */
+
+.fieldNotebookFigma__workspace {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 0.9fr);
+  gap: 10px;
+}
+
+.fieldNotebookFigma__sidebar {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+/* =========================================
+   Form
+   ========================================= */
+
+.fieldNotebookForm {
+  display: grid;
+  gap: 9px;
+}
+
+.fieldNotebookForm__three {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.fieldNotebookField {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.fieldNotebookField > span {
+  color: var(--av-text-secondary);
+  font-size: 0.49rem;
+  font-weight: 600;
+}
+
+.fieldNotebookField input,
+.fieldNotebookField select,
+.fieldNotebookField textarea {
+  width: 100%;
+  min-width: 0;
+  color: var(--av-text-secondary);
+  font-size: 0.55rem;
+  border: 1px solid var(--av-border);
+  border-radius: 5px;
+  outline: 0;
+  background: var(--av-neutral-50);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.fieldNotebookField input,
+.fieldNotebookField select {
+  height: 31px;
+  padding: 0 8px;
+}
+
+.fieldNotebookField textarea {
+  min-height: 66px;
+  padding: 8px;
+  resize: vertical;
+}
+
+.fieldNotebookField input:focus,
+.fieldNotebookField select:focus,
+.fieldNotebookField textarea:focus {
+  border-color: var(--av-teal-300);
+  box-shadow: 0 0 0 2px rgba(14, 147, 138, 0.08);
+}
+
+/* =========================================
+   Upload
+   ========================================= */
+
+.fieldNotebookUpload {
+  position: relative;
+  min-height: 63px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 1px dashed var(--av-neutral-500);
+  border-radius: 5px;
+  background: var(--av-neutral-50);
+  cursor: pointer;
+  transition: border-color 130ms ease, background 130ms ease;
+}
+
+.fieldNotebookUpload:hover {
+  border-color: var(--av-teal-300);
+  background: var(--av-lime-50);
+}
+
+.fieldNotebookUpload > span {
+  width: 20px;
+  height: 20px;
+}
+
+.fieldNotebookUpload > div {
+  display: grid;
+}
+
+.fieldNotebookUpload strong {
+  color: var(--av-text-secondary);
+  font-size: 0.51rem;
+}
+
+.fieldNotebookUpload small {
+  color: var(--av-text-muted);
+  font-size: 0.43rem;
+}
+
+.fieldNotebookUpload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.fieldNotebookFeedback {
+  margin: 0;
+  padding: 5px 7px;
+  color: var(--av-success-text);
+  font-size: 0.5rem;
+  border-radius: 4px;
+  background: rgba(48, 183, 106, 0.08);
+}
+
+/* =========================================
+   Form actions
+   ========================================= */
+
+.fieldNotebookForm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.fieldNotebookButton {
+  min-width: 104px;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 0.51rem;
+  font-weight: 700;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.fieldNotebookButton:hover {
+  transform: translateY(-1px);
+}
+
+.fieldNotebookButton--secondary {
+  color: var(--av-text-secondary);
+  border: 1px solid var(--av-border);
+  background: var(--av-neutral-50);
+}
+
+.fieldNotebookButton--primary {
+  color: #ffffff;
+  border: 1px solid var(--av-green-400);
+  background: var(--av-green-400);
+}
+
+.fieldNotebookButton--primary:hover {
+  background: var(--av-green-300);
+}
+
+/* =========================================
+   Day summary
+   ========================================= */
+
+.fieldDaySummary {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
+}
+
+.fieldDaySummaryRow {
+  min-height: 29px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 7px;
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.fieldDaySummaryRow:last-child {
+  border-bottom: 0;
+}
+
+.fieldDaySummaryRow > span {
+  width: 14px;
+  height: 14px;
+}
+
+.fieldDaySummaryRow strong {
+  color: var(--av-text-secondary);
+  font-size: 0.49rem;
+  font-weight: 500;
+}
+
+.fieldDaySummaryRow b {
+  min-width: 25px;
+  padding: 1px 5px;
+  color: var(--av-text-secondary);
+  font-size: 0.47rem;
+  text-align: center;
+  border: 1px solid var(--av-border);
+  border-radius: 999px;
+  background: var(--av-neutral-100);
+}
+
+/* =========================================
+   Shortcuts
+   ========================================= */
+
+.fieldNotebookShortcuts {
+  display: grid;
+}
+
+.fieldNotebookShortcut {
+  min-height: 29px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 10px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  color: var(--av-text-secondary);
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--av-border-soft);
+  background: transparent;
+  cursor: pointer;
+  transition: padding-left 120ms ease, background 120ms ease;
+}
+
+.fieldNotebookShortcut:hover {
+  padding-left: 9px;
+  background: var(--av-lime-50);
+}
+
+.fieldNotebookShortcut > span {
+  width: 14px;
+  height: 14px;
+}
+
+.fieldNotebookShortcut strong {
+  font-size: 0.49rem;
+  font-weight: 500;
+}
+
+.fieldNotebookShortcut b {
+  color: var(--av-text-muted);
+}
+
+/* =========================================
+   History + relations
+   ========================================= */
+
+.fieldNotebookFigma__information {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 0.9fr);
+  gap: 10px;
+}
+
+.fieldNotebookHistoryTools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fieldNotebookHistoryTools button,
+.fieldNotebookHistoryTools select {
+  height: 26px;
+  color: var(--av-text-secondary);
+  font-size: 0.48rem;
+  border: 1px solid var(--av-border);
+  border-radius: 5px;
+  background: var(--av-neutral-50);
+}
+
+.fieldNotebookHistoryTools button {
+  padding: 0 9px;
+}
+
+.fieldNotebookHistoryTools select {
+  min-width: 105px;
+  padding: 0 7px;
+}
+
+.fieldNotebookHistoryTable {
+  min-width: 690px;
+}
+
+.fieldNotebookRelations {
+  display: grid;
+}
+
+.fieldNotebookRelation {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto 70px 10px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px;
+  border-bottom: 1px solid var(--av-border-soft);
+  transition: background 120ms ease;
+}
+
+.fieldNotebookRelation:hover {
+  background: var(--av-lime-50);
+}
+
+.fieldNotebookRelation__icon {
+  width: 15px;
+  height: 15px;
+}
+
+.fieldNotebookRelation__icon--high {
+  background: var(--av-danger);
+}
+
+.fieldNotebookRelation__icon--medium {
+  background: var(--av-warning);
+}
+
+.fieldNotebookRelation__icon--low {
+  background: var(--av-success);
+}
+
+.fieldNotebookRelation > div {
+  min-width: 0;
+  display: grid;
+}
+
+.fieldNotebookRelation strong {
+  color: var(--av-text-secondary);
+  font-size: 0.49rem;
+  font-weight: 500;
+}
+
+.fieldNotebookRelation small,
+.fieldNotebookRelation time {
+  color: var(--av-text-muted);
+  font-size: 0.43rem;
+}
+
+.fieldNotebookCenteredAction {
+  display: block;
+  margin: 7px auto 0;
+}
+
+/* =========================================
+   Evidence files
+   ========================================= */
+
+.fieldEvidenceStrip {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(110px, 1fr)) minmax(100px, 0.82fr);
+  gap: 8px;
+}
+
+.fieldEvidenceFile {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
+  background: var(--av-neutral-50);
+  transition: transform 130ms ease, box-shadow 130ms ease, border-color 130ms ease;
+}
+
+.fieldEvidenceFile:hover {
+  transform: translateY(-2px);
+  border-color: var(--av-neutral-400);
+  box-shadow: var(--av-shadow-card);
+}
+
+.fieldEvidenceFile__preview {
+  height: 73px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.fieldEvidenceFile__preview--image {
+  background:
+    linear-gradient(150deg, rgba(183, 225, 58, 0.23), transparent 50%),
+    linear-gradient(30deg, #375e34, #8b9c48);
+}
+
+.fieldEvidenceFile__preview--image.fieldEvidenceFile__preview--2 {
+  background:
+    linear-gradient(135deg, rgba(206, 238, 104, 0.2), transparent),
+    linear-gradient(30deg, #334c26, #738447);
+}
+
+.fieldEvidenceFile__preview--image.fieldEvidenceFile__preview--3 {
+  background:
+    linear-gradient(90deg, #978259 0 15%, #4f7c36 15% 35%, #8f7049 35% 55%, #4a7737 55% 80%, #9b8354 80%);
+}
+
+.fieldEvidenceFile__preview--pdf {
+  background: var(--av-neutral-100);
+}
+
+.fieldEvidenceFile__preview--pdf strong {
+  color: var(--av-danger);
+  font-family: var(--av-font-heading);
+  font-size: 0.7rem;
+}
+
+.fieldEvidenceFile__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fieldEvidenceFile__copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  padding: 5px 6px 6px;
+}
+
+.fieldEvidenceFile__copy span,
+.fieldEvidenceFile__copy small {
+  color: var(--av-text-muted);
+  font-size: 0.4rem;
+}
+
+.fieldEvidenceFile__copy strong {
+  min-width: 0;
+  color: var(--av-text-secondary);
+  font-size: 0.47rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fieldEvidenceFile--add {
+  position: relative;
+  min-height: 111px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  color: var(--av-text-secondary);
+  border-style: dashed;
+  cursor: pointer;
+}
+
+.fieldEvidenceFile--add > span {
+  font-family: var(--av-font-heading);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.fieldEvidenceFile--add > strong {
+  margin-top: 3px;
+  font-size: 0.52rem;
+}
+
+.fieldEvidenceFile--add > small {
+  font-size: 0.46rem;
+}
+
+.fieldEvidenceFile--add input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* =========================================
+   Responsive
+   ========================================= */
+
+@media (max-width: 1050px) {
+  .fieldEvidenceStrip {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 850px) {
+  .fieldNotebookFigma__workspace,
+  .fieldNotebookFigma__information {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldNotebookFigma__sidebar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .fieldEvidenceStrip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .fieldNotebookForm__three,
+  .fieldNotebookFigma__sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldEvidenceStrip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
