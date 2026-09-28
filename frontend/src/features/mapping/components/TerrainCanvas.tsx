@@ -28,93 +28,135 @@
  * =========================================
  */
 
+/**
+ * =========================================
+ * TerrainCanvas
+ * =========================================
+ *
+ * Vista operacional del terreno adaptada a
+ * la interfaz oficial de Mapping en Figma.
+ *
+ * La información de playback continúa
+ * entrando mediante RenderSimulationData.
+ *
+ * Ya no se presenta como HUD oscuro porque
+ * Mapping ahora funciona como mapa operativo
+ * auxiliar de AgroVision.
+ */
+
 import type { RenderSimulationData } from "../types/mappingRender.types";
-import { MeasurementOverlay } from "../../../../src/features/mapping/components/MeasurementOverlay";
-import { ObstaclePoints } from "../../../../src/features/mapping/components/ObstaclePoint";
-import { OccupancyGrid } from "../../../../src/features/mapping/components/OccupancyGrid";
-import { PathTrail } from "../../../../src/features/mapping/components/PathTrail";
-import { PlantMarkers } from "../../../../src/features/mapping/components/PlantsMarker";
-import { PointCloudLayer } from "../../../../src/features/mapping/components/PointCloudLayer";
-import { RoverMarker } from "../../../../src/features/mapping/components/RoverMarker";
-import { SensorSweep } from "./SensorSweep";
+
+export interface MappingLayerVisibility {
+  readonly boundary: boolean;
+  readonly riskZones: boolean;
+  readonly managementZones: boolean;
+  readonly internalPaths: boolean;
+  readonly samplingPoints: boolean;
+  readonly hydrography: boolean;
+}
 
 interface TerrainCanvasProps {
   readonly data: RenderSimulationData;
+  readonly visibleLayers?: MappingLayerVisibility;
 }
 
-export function TerrainCanvas({ data }: TerrainCanvasProps) {
+const DEFAULT_LAYERS: MappingLayerVisibility = {
+  boundary: true,
+  riskZones: true,
+  managementZones: true,
+  internalPaths: true,
+  samplingPoints: true,
+  hydrography: false,
+};
+
+export function TerrainCanvas({ data, visibleLayers = DEFAULT_LAYERS }: TerrainCanvasProps) {
   return (
-    <div className="terrainCanvasWrapper">
-      <div className="terrainMetaBar">
-        <span>FRAME 0472</span>
-        <strong>Rover Mapping Simulation</strong>
-        <span>XY · LiDAR · Pose</span>
-      </div>
-
-      <svg
-        className="terrainCanvas"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="xMidYMid meet"
-        role="img"
-        aria-label="Simulación técnica 2D del mapeo del rover"
-      >
+    <div className="operationalTerrain">
+      <svg className="operationalTerrain__svg" viewBox="0 0 100 72" preserveAspectRatio="none" role="img" aria-label="Mapa operacional del terreno">
         <defs>
-          <radialGradient id="scanGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(80, 220, 255, 0.22)" />
-            <stop offset="100%" stopColor="rgba(80, 220, 255, 0)" />
-          </radialGradient>
-
-          <linearGradient id="canvasFade" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#07131d" />
-            <stop offset="55%" stopColor="#06101a" />
-            <stop offset="100%" stopColor="#030811" />
+          <linearGradient id="terrainBackground" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#496d37" />
+            <stop offset="35%" stopColor="#718c49" />
+            <stop offset="67%" stopColor="#52723a" />
+            <stop offset="100%" stopColor="#294e30" />
           </linearGradient>
+
+          <pattern id="terrainTexture" width="8" height="8" patternUnits="userSpaceOnUse">
+            <circle cx="2" cy="2" r="0.7" fill="rgba(8,38,30,.28)" />
+            <circle cx="6" cy="5" r="1" fill="rgba(183,225,58,.16)" />
+          </pattern>
         </defs>
 
-        <rect width="100" height="100" className="technicalMapBase" />
+        <rect width="100" height="72" fill="url(#terrainBackground)" />
+        <rect width="100" height="72" fill="url(#terrainTexture)" />
 
-        <OccupancyGrid />
+        {/* Caminos agrícolas decorativos del mapa. */}
+        <path className="operationalTerrain__road" d="M-5 55 C18 50, 24 37, 42 37 S72 51, 108 44" />
+        <path className="operationalTerrain__road operationalTerrain__road--thin" d="M14 -5 C19 18, 40 20, 47 36 S56 60, 72 78" />
+        <path className="operationalTerrain__road operationalTerrain__road--thin" d="M81 -4 C75 16, 71 27, 62 37 S46 52, 35 75" />
 
-        <PointCloudLayer data={data} />
+        {/* Hidrografía opcional. */}
+        {visibleLayers.hydrography && (
+          <>
+            <ellipse className="operationalTerrain__water" cx="26" cy="39" rx="4" ry="2.6" />
+            <ellipse className="operationalTerrain__water" cx="65" cy="53" rx="3.5" ry="2.3" />
+          </>
+        )}
 
-        <SensorSweep rover={data.rover} />
+        {/* Límite del lote. */}
+        {visibleLayers.boundary && (
+          <path className="operationalTerrain__boundary" d="M10 18 L28 8 L63 10 L88 23 L91 49 L76 65 L38 67 L12 55 L6 32 Z" />
+        )}
 
-        <PathTrail
-          points={data.trayectory}
-          plannedPoints={data.plannedPath}
-        />
+        {/* Zonas de manejo. */}
+        {visibleLayers.managementZones && (
+          <>
+            <path className="operationalTerrain__zone operationalTerrain__zone--one" d="M14 21 L35 15 L42 31 L31 42 L13 37 Z" />
+            <path className="operationalTerrain__zone operationalTerrain__zone--two" d="M47 13 L69 15 L77 33 L58 38 L43 29 Z" />
+            <path className="operationalTerrain__zone operationalTerrain__zone--three" d="M13 40 L31 43 L39 62 L18 58 Z" />
 
-        <PlantMarkers plants={data.plants} />
+            <text className="operationalTerrain__zoneLabel" x="23" y="25">ZONA 1</text>
+            <text className="operationalTerrain__zoneSub" x="23" y="28">Bajo riesgo</text>
 
-        <ObstaclePoints obstacles={data.obstacles} />
+            <text className="operationalTerrain__zoneLabel" x="58" y="23">ZONA 2</text>
+            <text className="operationalTerrain__zoneSub" x="58" y="26">Riesgo moderado</text>
 
-        <MeasurementOverlay data={data} />
+            <text className="operationalTerrain__zoneLabel" x="21" y="50">ZONA 3</text>
+            <text className="operationalTerrain__zoneSub" x="21" y="53">Bajo riesgo</text>
+          </>
+        )}
 
-        <RoverMarker rover={data.rover} />
+        {/* Zona crítica. */}
+        {visibleLayers.riskZones && (
+          <>
+            <path className="operationalTerrain__critical" d="M68 30 L82 27 L92 37 L87 53 L69 56 L59 46 Z" />
 
-        <g className="mapHud">
-          <text x="8" y="5.4" className="mapHudTitle">
-            ROVER SCAN / TOP VIEW
-          </text>
+            <text className="operationalTerrain__criticalLabel" x="76" y="40">ZONA CRÍTICA</text>
+            <text className="operationalTerrain__criticalSub" x="76" y="43">Riesgo alto</text>
+          </>
+        )}
 
-          <text x="8" y="8.4" className="mapHudSubtitle">
-            Simulated LiDAR returns · trajectory · detected clusters
-          </text>
+        {/* Ruta operativa. */}
+        {visibleLayers.internalPaths && (
+          <path className="operationalTerrain__route" d="M28 58 C33 52, 31 43, 38 40 C45 36, 38 31, 45 27" />
+        )}
 
-          <text x="74" y="5.4" className="mapHudValue">
-            θ {data.rover.angle}°
-          </text>
+        {/* Puntos de control / muestreo. */}
+        {visibleLayers.samplingPoints && (
+          <>
+            <circle className="operationalTerrain__sample" cx="12" cy="31" r="1.2" />
+            <circle className="operationalTerrain__sample" cx="18" cy="56" r="1.2" />
+            <circle className="operationalTerrain__sample" cx="45" cy="10" r="1.2" />
+            <circle className="operationalTerrain__sample" cx="71" cy="12" r="1.2" />
+            <circle className="operationalTerrain__sample" cx="89" cy="31" r="1.2" />
+            <circle className="operationalTerrain__sample" cx="72" cy="64" r="1.2" />
+          </>
+        )}
 
-          <text x="74" y="8.4" className="mapHudSubtitle">
-            battery {data.rover.battery}%
-          </text>
-        </g>
-
-        <g className="scaleBar" transform="translate(73 95)">
-          <line x1="0" y1="0" x2="16" y2="0" />
-          <line x1="0" y1="-1.2" x2="0" y2="1.2" />
-          <line x1="16" y1="-1.2" x2="16" y2="1.2" />
-          <text x="8" y="-2.2">5 m visual</text>
+        {/* Rover se mantiene vinculado al estado real del playback. */}
+        <g className="operationalTerrain__rover" transform={`translate(${data.rover.position.x} ${data.rover.position.y})`}>
+          <circle r="2.2" />
+          <path d="M-2 0 H2 M0 -2 V2" />
         </g>
       </svg>
     </div>

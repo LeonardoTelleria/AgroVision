@@ -1,240 +1,241 @@
-// Archivo encargado de mostrar la pantalla principal de la app.
-
-/**
-* =========================================
-* DashboardPage
-* =========================================
-*
-* Pantalla principal del dashboard prescriptivo.
-*
-* Finalidad:
-* - mostrar inteligencia agrícola multifuente;
-* - consumir datos desde dashboardService;
-* - mantener flujo Page → Service → Adapter → Mock fallback;
-* - delegar secciones visuales a componentes reutilizables;
-* 
-* Regla:
-* DashboardPage coordina datos y layout general.
-* Los detalles visuales deben vivir en components/.
-*/
-
 import { useEffect, useState } from "react";
-import { CriticalAlertCard } from "../components/CriticalAlertCard";
-import { EvidenceBadge } from "../components/EvidenceBadge";
-import { MainRecommendationCard } from "../components/MainRecommendationCard";
-import { VegetationSummaryCard } from "../components/VegetationSummaryCard";
-import { VisionSummaryCard } from "../components/VisionSummaryCard";
+import { MetricCard } from "../../../shared/components/ui/MetricCard";
+import { Panel } from "../../../shared/components/ui/Panel";
+import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
 import { getDashboardData } from "../services/dashboardService";
 import type { DashboardData } from "../types/dashboard.types";
-import { DemoFlowActions } from "../components/DemoFlowActions";
 import "../dashboard.css";
 
 export function DashboardPage() {
-
-  const DEMO_FIELD_ID = "field-001";
-  const DEMO_ZONE_ID = "zone-03";
-  const DEMO_CROP_TYPE = "ORANGE";
-
-
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-/**
- * Carga inicial del dashboard.
- *
- * Funcionamiento:
- * - llama getDashboardData();
- * - el service decide si usa backend, adapter o mock fallback;
- * - si carga bien, guarda datos en estado;
- * - si falla, guarda mensaje controlado de error;
- * - siempre apaga loading al finalizar.
- */
   useEffect(() => {
     async function loadDashboard() {
       try {
         const data = await getDashboardData();
+
         setDashboardData(data);
         setErrorMessage(null);
       } catch {
-        setErrorMessage("Error al intentar cargar datos en dashboard.");
+        setErrorMessage("No fue posible cargar Dashboard.");
       } finally {
         setIsLoading(false);
       }
     }
 
-    // Se usa void para indicar que no esperamos la promesa en el render.
     void loadDashboard();
   }, []);
 
-/**
- * Estado de carga.
- *
- * Se muestra antes de que exista dashboardData.
- */
   if (isLoading) {
-    return (
-      <section className="dashboardPage">
-        <div className="dashboardState">
-          <p>Cargando dashboard prescriptivo...</p>
-        </div>
-      </section>
-    );
+    return <section className="avState"><strong>Cargando Dashboard</strong><p>Preparando inteligencia agrícola.</p></section>;
   }
 
-/**
- * Estado de error o data inexistente.
- *
- * Corrige el typo anterior:
- * daashboardSate--error → dashboardState--error
-*/
   if (errorMessage || !dashboardData) {
-    return (
-      <section className="dashboardPage">
-        <div className="dashboardState dashboardState--error">
-          <p>{errorMessage ?? "No hay datos disponibles."}</p>
-        </div>
-      </section>
-    );
+    return <section className="avState"><strong>Dashboard no disponible</strong><p>{errorMessage}</p></section>;
   }
 
-  // Data principal ya validada.
   const { summary } = dashboardData;
-
-  // La alerta principal se toma como la primera alerta crítica disponible.
   const mainAlert = summary.alerts.criticalAlerts[0];
-
-  // La recomendación principal viene definida por el contrato del dashboard.
-  const mainRecommendation = summary.recommendations.mainRecommendation;
+  const recommendation = summary.recommendations.mainRecommendation;
+  const zoneId = summary.intelligence.mostAffectedZoneId ?? "zone-03";
 
   return (
-    <section className="dashboardPage" aria-labelledby="dashboard-title">
-      <header className="dashboardHero">
-        <div className="dashboardHero__content">
-          <p className="dashboardHero__eyebrow">Dashboard prescriptivo</p>
+    <section className="avScreen dashboardFigma">
+      <h1 className="avScreenTitle">Resumen del cultivo</h1>
 
-          <h1 id="dashboard-title">Inteligencia agrícola multifuente</h1>
-          <span>
-            AgroVision fusiona evidencia visual, clima, sensores, historial,
-            mapping y capa satelital simulada para explicar riesgos y sugerir
-            acciones concretas.
-          </span>
+      <section className="avMetricGrid">
+        <MetricCard title="Salud general" value={summary.healthScore} valueSuffix="/100" description="Salud moderada" progress={summary.healthScore} actionLabel="↑ +4 vs. semana anterior" />
+
+        <MetricCard title="Alertas activas" value={summary.alerts.active} description={`${summary.alerts.critical} críticas · ${summary.alerts.warning} moderadas`} progress={Math.min(summary.alerts.active * 15, 100)} tone="AMBER" actionLabel="Ver todas las alertas" />
+
+        <MetricCard title="Recomendaciones urgentes" value={summary.recommendations.urgent} description="Requieren atención" progress={Math.min(summary.recommendations.urgent * 24, 100)} tone="TEAL" actionLabel="Ver recomendaciones" />
+      </section>
+
+      <section className="dashboardFigma__main">
+        <div className="dashboardFigma__left">
+          <Panel title="Mapa / Zona crítica" showCardTag>
+            <div className="dashboardMap">
+              <div className="dashboardMap__legend">
+                <strong>Leyenda</strong>
+                <span><i className="legendDot legendDot--low" /> Bajo riesgo</span>
+                <span><i className="legendDot legendDot--medium" /> Riesgo moderado</span>
+                <span><i className="legendDot legendDot--high" /> Riesgo alto</span>
+                <span><i className="legendLine" /> Límite del lote</span>
+              </div>
+
+              <div className="dashboardMap__zone">
+                <strong>ZONA CRÍTICA</strong>
+                <span>(Riesgo alto)</span>
+              </div>
+
+              <div className="dashboardMap__controls">
+                <button type="button">+</button>
+                <button type="button">−</button>
+                <button type="button">{/* SVG center */}</button>
+                <button type="button">{/* SVG layer */}</button>
+              </div>
+
+              <button type="button" className="dashboardMap__flight">{/* SVG drone */} Bajo aéreo</button>
+            </div>
+          </Panel>
+
+          <div className="dashboardFigma__insights">
+            <Panel title="Capa satelital simulada" showCardTag>
+              <div className="satelliteMiniGrid">
+                <SatelliteMetric label="NDVI" value={summary.vegetation.ndvi?.toFixed(2) ?? "—"} status={summary.vegetation.vigorLevel} />
+                <SatelliteMetric label="NDWI" value="—" status="N/A" />
+                <SatelliteMetric label="GNDVI" value="—" status="N/A" />
+                <SatelliteMetric label="SAVI" value="—" status="N/A" />
+              </div>
+
+              <footer className="dashboardPanelFooter">
+                <span>Última actualización: {formatTime(summary.lastUpdatedAt)}</span>
+                <button className="avTextAction" type="button">Ver detalles →</button>
+              </footer>
+            </Panel>
+
+            <Panel title="Zone Insight" showCardTag>
+              <div className="zoneInsightRows">
+                <InfoRow label="Zona" value={zoneId} />
+                <InfoRow label="Score de riesgo" value={formatRisk(summary.intelligence.dominantRisk)} highlight />
+                <InfoRow label="Evidencia principal" value={recommendation.evidence[0]?.source ?? "—"} />
+                <InfoRow label="Acción sugerida" value={recommendation.suggestedAction} />
+              </div>
+
+              <button className="avTextAction zoneInsightAction" type="button">Ver detalle de la zona →</button>
+            </Panel>
+          </div>
         </div>
 
-        <aside className="dashboardHero__status">
-          <span>Riesgo dominante</span>
+        <div className="dashboardFigma__right">
+          <Panel title="Resumen prescriptivo" showCardTag>
+            <div className="prescriptiveRows">
+              <SummaryRow label="Riesgo dominante" value={formatRisk(summary.intelligence.dominantRisk)} badge="DANGER" />
+              <SummaryRow label="Causa probable" value={summary.intelligence.prescriptiveSummary} />
+              <SummaryRow label="Acción recomendada" value={recommendation.suggestedAction} />
+              <SummaryRow label="Impacto esperado" value={recommendation.expectedImpact.description} />
+            </div>
+          </Panel>
 
-          <strong>{formatRiskLabel(summary.intelligence.dominantRisk)}</strong>
-          <small>
-            Zona afectada:{" "}
-            {summary.intelligence.mostAffectedZoneId ?? "Sin zona definida"}
-          </small>
-        </aside>
-      </header>
+          <Panel title="Alertas críticas" showCardTag>
+            <div className="avCompactList">
+              {summary.alerts.criticalAlerts.slice(0, 3).map((alert) => (
+                <div key={alert.id} className="avCompactRow">
+                  <div className="avCompactRow__main">
+                    <span className="alertTriangle">△</span>
 
-      <section className="dashboardDemoContext" aria-label="Caso demo activo">
-        <article>
-          <span>Field</span>
-          <strong>{DEMO_FIELD_ID}</strong>
-        </article>
+                    <div className="avCompactRow__copy">
+                      <strong>{alert.title}</strong>
+                    </div>
+                  </div>
 
-        <article>
-          <span>Zone</span>
-          <strong>
-            {summary.intelligence.mostAffectedZoneId ?? DEMO_ZONE_ID}
-          </strong>
-        </article>
+                  <StatusBadge tone={alert.severity === "CRITICAL" ? "DANGER" : "WARNING"}>{alert.severity === "CRITICAL" ? "Alto" : "Media"}</StatusBadge>
+                </div>
+              ))}
+            </div>
 
-        <article>
-          <span>Crop</span>
-          <strong>{DEMO_CROP_TYPE}</strong>
-        </article>
+            <button type="button" className="avTextAction dashboardCenteredAction">Ver todas las alertas →</button>
+          </Panel>
 
-        <article>
-          <span>Risk</span>
-          <strong>{formatRiskLabel(summary.intelligence.dominantRisk)}</strong>
-        </article>
+          <Panel title="Evidencias" showCardTag>
+            <ul className="dashboardEvidenceBullets">
+              {recommendation.evidence.slice(0, 4).map((evidence) => (
+                <li key={`${evidence.source}-${evidence.metric}`}>{evidence.explanation ?? `${evidence.metric}: ${String(evidence.value ?? "—")}`}</li>
+              ))}
+            </ul>
+
+            <button type="button" className="avTextAction dashboardCenteredAction">Ver todas las evidencias →</button>
+          </Panel>
+        </div>
       </section>
 
-      <section className="dashboardMetricGrid" aria-label="Resumen ejecutivo">
-        <article className="dashboardMetricCard dashboardMetricCard--risk">
-          <span>Salud general</span>
-          <strong>{summary.healthScore}%</strong>
-          <small>{summary.farm.name}</small>
-        </article>
-
-        <article className="dashboardMetricCard">
-          <span>Cultivos críticos</span>
-          <strong>{summary.crops.critical}</strong>
-          <small>
-            {summary.crops.warning} en observación · {summary.crops.total} total
-          </small>
-        </article>
-
-        <article className="dashboardMetricCard">
-          <span>Alertas activas</span>
-          <strong>{summary.alerts.active}</strong>
-          <small>
-            {summary.alerts.critical} críticas · {summary.alerts.warning} warning
-          </small>
-        </article>
-
-        <article className="dashboardMetricCard">
-          <span>Capa satelital</span>
-          <strong>{summary.intelligence.satelliteLayerStatus}</strong>
-          <small>NDVI simulado: {summary.vegetation.ndvi ?? "N/A"}</small>
-        </article>
-      </section>
-
-      <DemoFlowActions
-        fieldId={DEMO_FIELD_ID}
-        zoneId={summary.intelligence.mostAffectedZoneId ?? "zone-03"}
-        cropType={DEMO_CROP_TYPE}
-        riskLevel={formatRiskLabel(summary.intelligence.dominantRisk)}
-      />
-
-      <section className="dashboardMainGrid">
-        <article className="dashboardPanel dashboardPanel--wide">
-          <header>
-            <p>Resumen prescriptivo</p>
-            <h2>Qué está pasando y qué hacer</h2>
-          </header>
-
-          <p className="dashboardPanel__summary">
-            {summary.intelligence.prescriptiveSummary}
-          </p>
-
-          <div className="dashboardEvidenceGrid">
-            {mainRecommendation.evidence.map((evidence) => (
-              <EvidenceBadge
-                key={`${evidence.source}-${evidence.metric}`}
-                evidence={evidence}
-              />
-            ))}
+      <section className="dashboardFigma__bottom">
+        <Panel title="Actividad reciente">
+          <div className="dashboardTimeline">
+            {mainAlert && <TimelineItem time={formatTime(mainAlert.createdAt)} text={`Alerta crítica: ${mainAlert.title}`} status="Máxima" tone="DANGER" />}
+            <TimelineItem time="Hoy" text="Nueva evidencia registrada" status="Sistema" tone="LIME" />
+            <TimelineItem time="Ayer" text={`Recomendación generada: ${recommendation.suggestedAction}`} status="AgroVision AI" tone="INFO" />
+            <TimelineItem time="Ayer" text="Registro de campo actualizado" status="Productor" tone="SUCCESS" />
           </div>
-        </article>
 
-        <MainRecommendationCard recommendation={mainRecommendation} />
+          <button type="button" className="avTextAction dashboardCenteredAction">Ver toda la actividad →</button>
+        </Panel>
 
-        <VegetationSummaryCard vegetation={summary.vegetation} />
+        <Panel title="Próximas acciones">
+          <div className="nextActionList">
+            <NextAction text={recommendation.suggestedAction} date="Hoy" priority="Alta" />
+            <NextAction text={`Monitorear ${zoneId} en 48 h`} date="48 h" priority="Alta" />
+            <NextAction text="Revisar trampas y muestreo de plagas" date="Próximo control" priority="Media" />
+            <NextAction text="Registrar observaciones de campo" date="Pendiente" priority="Baja" />
+          </div>
 
-        <VisionSummaryCard vision={summary.vision} />
-
-        {mainAlert && <CriticalAlertCard alert={mainAlert} />}
+          <button type="button" className="avTextAction dashboardCenteredAction">Ver todas las acciones →</button>
+        </Panel>
       </section>
     </section>
   );
 }
 
-/**
- * Convierte un valor técnico en texto legible.
- *
- * Ejemplo:
- * WATER_STRESS → WATER STRESS
- *
- * No modifica el dato original; solo transforma la vista.
-*/
+function SatelliteMetric({ label, value, status }: { readonly label: string; readonly value: string; readonly status: string }) {
+  return (
+    <article className="satelliteMetric">
+      <strong>{label}</strong>
+      <b>{value}</b>
+      <span>{status}</span>
+      <div className="satelliteSparkline" />
+      <small>Chart</small>
+    </article>
+  );
+}
 
-function formatRiskLabel(risk: string): string {
-  return risk.replaceAll("_", " ");
+function InfoRow({ label, value, highlight = false }: { readonly label: string; readonly value: string; readonly highlight?: boolean }) {
+  return (
+    <div className="figmaInfoRow">
+      <span>{label}</span>
+      <strong className={highlight ? "is-highlighted" : ""}>{value}</strong>
+    </div>
+  );
+}
+
+function SummaryRow({ label, value, badge }: { readonly label: string; readonly value: string; readonly badge?: "DANGER" }) {
+  return (
+    <div className="prescriptiveRow">
+      <span>{/* SVG */}</span>
+      <strong>{label}</strong>
+      {badge && <StatusBadge tone="DANGER">Alto</StatusBadge>}
+      <p>{value}</p>
+    </div>
+  );
+}
+
+function TimelineItem({ time, text, status, tone }: { readonly time: string; readonly text: string; readonly status: string; readonly tone: "DANGER" | "LIME" | "INFO" | "SUCCESS" }) {
+  return (
+    <div className="dashboardTimeline__item">
+      <span className="dashboardTimeline__point" />
+      <time>{time}</time>
+      <p>{text}</p>
+      <StatusBadge tone={tone}>{status}</StatusBadge>
+    </div>
+  );
+}
+
+function NextAction({ text, date, priority }: { readonly text: string; readonly date: string; readonly priority: "Alta" | "Media" | "Baja" }) {
+  return (
+    <div className="nextAction">
+      <input type="checkbox" aria-label={text} />
+      <p>{text}</p>
+      <span>{date}</span>
+      <StatusBadge tone={priority === "Alta" ? "DANGER" : priority === "Media" ? "WARNING" : "SUCCESS"}>{priority}</StatusBadge>
+    </div>
+  );
+}
+
+function formatRisk(value: string): string {
+  return value.replaceAll("_", " ");
+}
+
+function formatTime(value: string): string {
+  return new Intl.DateTimeFormat("es-NI", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 }

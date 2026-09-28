@@ -1,27 +1,22 @@
+/**
+ * =========================================
+ * AgroVision — Global Layout
+ * =========================================
+ *
+ * Basado en la maqueta oficial:
+ *
+ * - Sidebar fija oscura.
+ * - Topbar compacta.
+ * - contenido claro.
+ * - baja altura visual.
+ * - bordes pequeños.
+ * - sombras mínimas.
+ * - alta densidad de información.
+ */
 
-/* EStilos generales del laypout, como:
- * - Sidebar
- * - Topbar
- * - Min layout
- * - PlaceHolders de rutas
-*/ 
-:root {
-  --layout-bg: #050806;
-  --layout-panel: rgba(14, 20, 16, 0.88);
-  --layout-panel-soft: rgba(255, 255, 255, 0.055);
-  --layout-border: rgba(255, 255, 255, 0.1);
-
-  --layout-text: #f4f7ef;
-  --layout-text-soft: #c9d2c6;
-  --layout-muted: #8d988d;
-
-  --layout-green: #9dd426;
-  --layout-green-soft: rgba(183, 255, 23, 0.12);
-  --layout-green-glow: rgba(183, 255, 23, 0.34);
-
-  --sidebar-width: 292px;
-  --topbar-height: 150px;
-}
+/* =========================================
+   Reset
+   ========================================= */
 
 * {
   box-sizing: border-box;
@@ -30,437 +25,1180 @@
 html,
 body,
 #root {
+  width: 100%;
   min-width: 0;
   min-height: 100%;
+}
+
+html {
+  background: var(--av-page);
 }
 
 body {
   margin: 0;
   overflow-x: hidden;
-  background: var(--layout-bg);
+  color: var(--av-text);
+  font-family: var(--av-font-body);
+  font-size: 16px;
+  background: var(--av-page);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--av-font-body);
 }
 
 button {
-  font: inherit;
+  color: inherit;
 }
 
-/* =========================
-   App frame
-   ========================= */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--av-font-heading);
+}
+
+/* =========================================
+   App
+   ========================================= */
 
 .agrovisionApp {
+  --sidebar-width: var(--av-sidebar-expanded);
+
+  width: 100%;
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  min-height: 100dvh;
+  background: var(--av-page);
+}
 
-  color: var(--layout-text);
-  font-family:
-    Inter,
-    "Space Grotesk",
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
-
-  background:
-    radial-gradient(circle at 84% 8%, rgba(183, 255, 23, 0.14), transparent 30%),
-    radial-gradient(circle at 18% 28%, rgba(88, 255, 190, 0.07), transparent 28%),
-    linear-gradient(135deg, #050806 0%, #09100b 46%, #101711 100%);
+.agrovisionApp.is-sidebar-collapsed {
+  --sidebar-width: var(--av-sidebar-collapsed);
 }
 
 .agrovisionMain {
   min-width: 0;
-  display: grid;
-  grid-template-rows: var(--topbar-height) minmax(0, 1fr);
+  min-height: 100vh;
+
+  margin-left: var(--sidebar-width);
+
+  transition: margin-left 190ms ease;
 }
 
 .agrovisionContent {
+  width: 100%;
   min-width: 0;
-  width: min(1440px, 100%);
-  margin: 0 auto;
-  padding: 28px;
+
+  padding: 10px 12px 18px;
 }
 
-/* =========================
+/* =========================================
    Sidebar
-   ========================= */
+   ========================================= */
 
 .sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  min-width: 0;
-
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 80;
+  width: var(--sidebar-width);
+  height: 100vh; /* ocupa todo el alto de la pantalla */
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 28px;
+  grid-template-rows: auto auto 1fr auto;
+  align-content: start;
+  gap: 20px;
+  padding: 13px 9px 16px;
+  overflow: visible;
+  border-right: 1px solid var(--av-teal-700);
+  background: linear-gradient(180deg, #051c14 0%, #041e16 65%, #08241b 100%);
 
-  padding: 24px 18px;
-
-  border-right: 1px solid var(--layout-border);
-  background: rgba(5, 8, 6, 0.82);
-  backdrop-filter: blur(24px);
+  transition: width 190ms ease;
 }
 
-.agroSidebar__nav {
-    min-width: 0;
-    display: grid;
-    gap: 16px;
-    width: 100%;
-    padding: 60px 32px;
+/* =========================================
+   Sidebar brand
+   ========================================= */
 
-}
+.sidebar__brand {
+  min-height: 43px;
 
-.agroSidebar__brand {
-  margin-top: 1rem;
-  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 12px;
+  padding: 0 8px 9px;
 
-  padding: 0 6px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
-.sidebar__logo {
-  flex: 0 0 auto;
+.sidebar__brand img {
+  width: 112px;
+  height: auto;
+  max-width: none;
+
+  display: block;
+
+  object-fit: contain;
+  object-position: left center;
+}
+
+.is-sidebar-collapsed .sidebar__brand {
+  align-items: center;
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.is-sidebar-collapsed .sidebar__brand img {
+  width: 38px;
+  height: 38px;
+
+  object-fit: cover;
+  object-position: left;
+}
+
+/* =========================================
+   Collapse control
+   ========================================= */
+
+.sidebar__toggle {
+  position: absolute;
+  top: 62px;
+  right: -11px;
+  z-index: 3;
+  width: 26px;
+  height: 26px;
   display: grid;
   place-items: center;
+  padding: 0;
+  color: var(--av-lime-900);
+  font-family: var(--av-font-heading);
+  font-size: 1rem;
+  font-weight: 800;
 
-  width: 44px;
-  height: 44px;
+  border: 1px solid var(--av-lime-500);
+  border-radius: 999px;
 
-  color: #071006;
-  font-size: 0.9rem;
-  font-weight: 950;
-  letter-spacing: -0.05em;
+  background: var(--av-lime-400);
 
-  border-radius: 16px;
-  background: var(--layout-green);
-  box-shadow: 0 0 26px var(--layout-green-glow);
+  box-shadow: var(--av-shadow-sm);
+
+  cursor: pointer;
+
+  transition:
+    transform 140ms ease,
+    background 140ms ease;
 }
 
-.sidebar__brand div {
-  min-width: 0;
+.sidebar__toggle:hover {
+  transform: scale(1.08);
+
+  background: var(--av-lime-300);
 }
 
-.sidebar__brand strong {
-  display: block;
-  color: var(--layout-text);
-  font-size: 1.18rem;
-  line-height: 1;
-  font-weight: 950;
-  letter-spacing: -0.045em;
-  white-space: nowrap;
-}
-
-.sidebar__brand span {
-  display: block;
-  margin-top: 4px;
-  color: var(--layout-green);
-  font-size: 1.1rem;
-  font-weight: 850;
-  line-height: 1;
-}
+/* =========================================
+   Sidebar nav - Lista de navegacion
+   ========================================= */
 
 .sidebar__nav {
   min-width: 0;
   display: grid;
   align-content: start;
-  gap: 10px;
-}
-
-.sidebar__link {
-  width: 100%;
-  min-width: 0;
-  min-height: 50px;
-
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-
-  padding: 0 14px;
-
-  color: var(--layout-text-soft);
-  font-size: 0.93rem;
-  font-weight: 850;
-  text-align: left;
-
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: transparent;
-
-  cursor: pointer;
-  transition:
-    transform 180ms ease,
-    background 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease;
-}
-
-.sidebar__link:hover {
-  transform: translateX(2px);
-  color: var(--layout-text);
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.sidebar__link.is-active {
-  color: #071006;
-  border-color: transparent;
-  background: var(--layout-green);
-  box-shadow: 0 0 28px var(--layout-green-glow);
+  gap: 12px;
+  padding-top: 2px;
 }
 
 .sidebar__icon {
-  display: grid;
-  place-items: center;
-  font-size: 1.1rem;
-  line-height: 1;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
 }
 
-.sidebar__link span:last-child {
+.sidebar__link,
+.sidebar__secondaryLink {
+  position: relative;
+
+  width: 100%;
   min-width: 0;
+  min-height: 36px;
+
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+
+  padding: 10px 16px;
+
+  color: var(--av-neutral-200);
+
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  transition:
+    color 130ms ease,
+    background 130ms ease,
+    transform 130ms ease;
+}
+
+aside.sidebar nav.sidebar__nav button.sidebar__link.is-active {
+  color: #051c14 !important; /* Texto oscuro idéntico a tu nuevo fondo para que sea legible */
+  background: #a3e635 !important;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+/* Evitamos que el botón activo parpadee o cambie si se le pasa el mouse por encima */
+aside.sidebar nav.sidebar__nav button.sidebar__link.is-active:hover {
+  color: #051c14 !important;
+  background: #a3e635 !important;
+  opacity: 0.9;
+}
+
+.is-sidebar-collapsed
+  aside.sidebar
+  nav.sidebar__nav
+  button.sidebar__link.is-active {
+  background: transparent !important;
+  color: #ffffff !important; /* Mantiene el icono brillante/blanco para saber cuál está seleccionado */
+}
+
+/* Cuando el botón esté activo, aplicamos un filtro al icono de su interior */
+aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
+  /* Este filtro transforma cualquier icono blanco/gris claro en el verde oscuro #051c14 */
+  filter: invert(100%) sepia(35%) saturate(1200%) hue-rotate(110deg)
+    brightness(95%) contrast(100%);
+}
+
+.sidebar__link:hover,
+.sidebar__secondaryLink:hover {
+  color: var(--av-neutral-50);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.sidebar__link.is-active {
+  color: var(--av-neutral-50);
+
+  background: var(--av-sidebar-active);
+}
+
+.sidebar__iconSlot {
+  width: 20px;
+  height: 20px;
+
+  display: inline-flex;
+  align-items: center;
+
+  flex: 0 0 auto;
+}
+
+.sidebar__linkLabel,
+.sidebar__secondaryLink > span:last-child {
+  min-width: 0;
+
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.sidebar__footer {
-  min-width: 0;
-  display: grid;
-  gap: 6px;
-  margin: 0 26px;
+/* =========================================
+   Collapsed nav
+   ========================================= */
 
-  padding: 16px;
-  border: 1px solid var(--layout-border);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.045);
+.is-sidebar-collapsed .sidebar__brand,
+.is-sidebar-collapsed .sidebar__link,
+.is-sidebar-collapsed .sidebar__secondaryLink {
+  grid-template-columns: 1fr;
+
+  justify-items: center;
+
+  padding: 0;
 }
 
-.sidebar__footer small {
-  color: var(--layout-muted);
-  font-size: 0.76rem;
+.is-sidebar-collapsed .sidebar__iconSlot,
+.is-sidebar-collapsed .sidebar__linkLabel,
+.is-sidebar-collapsed .sidebar__secondaryLink > span:last-child {
+  display: none;
 }
 
-.sidebar__footer strong {
-  color: var(--layout-text);
-  font-size: 0.95rem;
+/* Tooltip estilo glass. */
+
+.is-sidebar-collapsed .sidebar__link:hover::after {
+  content: attr(data-label);
+
+  position: absolute;
+  left: calc(100% + 11px);
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  z-index: 100;
+
+  width: max-content;
+
+  padding: 5px 8px;
+
+  color: var(--av-text);
+
+  font-size: 0.65rem;
+
+  border: 1px solid rgba(212, 222, 216, 0.75);
+  border-radius: 5px;
+
+  background: rgba(248, 250, 248, 0.92);
+
+  backdrop-filter: blur(12px);
+
+  box-shadow: var(--av-shadow-float);
+
+  pointer-events: none;
 }
 
-/* =========================
+/* =========================================
+   Secondary nav
+   ========================================= */
+
+.sidebar__secondary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(228, 236, 231, 0.12);
+}
+
+.is-sidebar-collapsed .sidebar__secondary {
+  border-top: none;
+}
+
+/* =========================================
+   Sidebar weather
+   ========================================= */
+.sidebar__weather {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(12, 53, 41, 0.65);
+  border: 1px solid rgba(228, 236, 231, 0.15);
+  border-radius: 12px;
+  color: var(--av-neutral-100, #f8faf8);
+  font-size: 0.8rem;
+  transition: all 190ms ease;
+}
+
+.sidebar__weatherMain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar__weatherIcon {
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar__weatherIcon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.sidebar__weatherTemp {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__weatherTemp strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.sidebar__weatherTemp small {
+  color: var(--av-neutral-300, #d4ded8);
+  font-size: 0.75rem;
+}
+
+.sidebar__weatherStats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.7rem;
+  color: var(--av-neutral-300, #b2c4ba);
+  padding: 2px 0;
+}
+
+.sidebar__weatherDivider {
+  opacity: 0.4;
+}
+
+.sidebar__weatherBtn {
+  width: 100%;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 130ms ease;
+}
+
+.sidebar__weatherBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* =========================================
+   Manejo del Estado Colapsado (Sidebar Compacto)
+   ========================================= */
+
+.is-sidebar-collapsed .sidebar__weather {
+  padding: 8px 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.is-sidebar-collapsed .sidebar__weatherTemp,
+.is-sidebar-collapsed .sidebar__weatherStats,
+.is-sidebar-collapsed .sidebar__weatherBtn {
+  display: none; /* Oculta los textos largos en modo compacto */
+}
+
+/* Reutiliza el tooltip glass que ya tienes configurado en los links */
+.is-sidebar-collapsed .sidebar__weather:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(100% + 11px);
+  z-index: 100;
+  width: max-content;
+  padding: 5px 8px;
+  color: var(--av-text);
+  font-size: 0.65rem;
+  border: 1px solid rgba(212, 222, 216, 0.75);
+  border-radius: 5px;
+  background: rgba(248, 250, 248, 0.92);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+
+/* =========================================
    Topbar
-   ========================= */
+   ========================================= */
 
-.topbar {
+/* .topbar {
   position: sticky;
   top: 0;
-  z-index: 30;
+
+  z-index: 60;
+
+  width: 100%;
   min-width: 0;
-  min-height: var(--topbar-height);
-  border-radius: 0 0 20px 20px;
+  height: var(--av-topbar-height);
+
+  display: grid;
+  grid-template-columns:
+    minmax(100px, auto)
+    minmax(220px, 1fr)
+    auto;
+
+  align-items: center;
+  gap: 14px;
+
+  padding: 7px 12px;
+
+  border-bottom: 1px solid var(--av-border-soft);
+
+  background: rgba(248, 250, 248, 0.97);
+
+  backdrop-filter: blur(12px);
+} */
+
+.topbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
-
-  padding: 0 28px;
-
-  /* border-bottom: 1px solid var(--layout-border); */
-  background: rgba(5, 8, 6, 0.78);
-  backdrop-filter: blur(24px);
-}
-
-.topbar > div:first-child {
-  min-width: 0;
-}
-
-.topbar__eyebrow {
-  margin: 0 0 6px;
-
-  color: var(--layout-green);
-  font-size: 0.72rem;
-  font-weight: 950;
-  line-height: 1;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  padding: 12px 24px;
+  background: var(--av-page);
+  border-bottom: 1px solid var(--av-card);
+  height: 64px;
+  box-sizing: border-box;
+  margin-top: 5px;
 }
 
 .topbar h1 {
   margin: 0;
 
-  color: var(--layout-text);
-  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 1.05rem;
+  font-weight: 800;
   line-height: 1;
-  font-weight: 950;
-  letter-spacing: -0.045em;
+
+  letter-spacing: -0.035em;
 }
 
-.topbar span {
-  display: block;
-  margin-top: 6px;
+/* =========================================
+   Search
+   ========================================= */
 
-  color: var(--layout-muted);
-  font-size: 0.82rem;
-  line-height: 1.35;
-}
-
-.topbar__profile {
-  flex: 0 0 auto;
+/* .topbar__search {
+  width: min(100%, 390px);
+  height: 34px;
 
   display: flex;
   align-items: center;
+  gap: 7px;
+
+  justify-self: start;
+
+  padding: 0 9px;
+
+  color: var(--av-text-muted);
+
+  border: 1px solid var(--av-border);
+  border-radius: 6px;
+
+  background: var(--av-neutral-50);
+
+  transition:
+    border-color 130ms ease,
+    box-shadow 130ms ease;
+} */
+.topbar__search {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--av-neutral-400);
+  border-radius: 12px;
+  padding: 0 14px;
+  width: 520px;
+  height: 50px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s;
+}
+
+.topbar__search:focus-within {
+  background: var(--av-neutral-50);
+  border-color: var(--av-neutral-400);
+  box-shadow: 0 0 0 2px rgba(21, 183, 169, 0.08);
+}
+
+.topbar__searchIcon {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  opacity: 0.4;
+}
+
+.topbar__search input {
+  width: 100%;
+  color: var(--av-text);
+  font-size: 1.1rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.topbar__search input::placeholder {
+  color: var(--av-neutral-500);
+}
+
+/* Cabeceras internas de los dropdowns */
+.topbar__popoverHeader {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888888;
+  padding: 4px 8px 8px 8px;
+  font-weight: 600;
+}
+
+/* =========================================
+   Topbar actions
+   ========================================= */
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar__popoverAnchor {
+  position: relative;
+}
+
+.topbar__selectButton,
+.topbar__iconButton,
+.topbar__profileButton {
+  height: 34px;
+
+  cursor: pointer;
+
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    transform 130ms ease,
+    box-shadow 130ms ease;
+}
+
+.topbar__iconButton:hover,
+.topbar__profileButton:hover {
+  transform: translateY(-1px);
+  border-color: var(--av-neutral-400);
+  box-shadow: var(--av-shadow-xs);
+  background: #f8fafc
+}
+
+/* Campo / fecha */
+
+.topbar__selectButton {
+  display: flex;
+  align-items: center;
   gap: 10px;
+  padding: 0 16px;
+  background: #ffffff;
+  border: 1px solid var(--av-border);
+  border-radius: 12px;
+  color: var(--av-green-1000);
+  height: 50px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
 
-  max-width: 260px;
-  padding: 8px 10px;
+.topbar__selectButton:hover {
+  background: var(--av-neutral-100);
+  border-color: #cbd5e1;
+}
 
-  border: 1px solid var(--layout-border);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.045);
+.topbar__selectButton strong {
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.59rem;
+  font-weight: 700;
+}
+
+.topbar__selectButton small {
+  margin-left: 2px;
+
+  color: var(--av-text-muted);
+}
+
+.topbar__buttonIcon,
+.topbar__inlineIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Notification */
+
+.topbar__iconButton {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--av-border);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  place-items: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+  gap: 2px;
+}
+
+.topbar__iconButton:hover {
+  background: #f8fafc;
+}
+
+.topbar__iconSlot {
+  width: 32px;
+  height: 32px;
+  
+}
+
+/*Globo verde de notificaciones*/
+.topbar__notificationBadge {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  background: #65a30d;       /* Verde lima exacto */
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff; /* Efecto flotante sobre la campana */
+}
+
+/* Profile */
+
+.topbar__profileButton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  padding: 0px 22px 0 18px;   /* Reducido a la izquierda para empotrar el avatar */
+  border: 1px solid var(--av-border);
+  border-radius: 12px;
+  height: 50px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
 }
 
 .topbar__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--av-neutral-200);
+}
+
+.topbar__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.topbar__profileData {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.5;
+}
+
+.topbar__profileButton strong {
+  color: var(--av-text);
+  font-family: var(--av-font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.topbar__profileButton small {
+  color: var(--av-text-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+/* =========================================
+   Glass popovers
+   ========================================= */
+
+.topbar__dismiss {
+  position: fixed;
+  inset: 0;
+
+  z-index: 61;
+
+  padding: 0;
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: default;
+}
+
+.topbar__popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 7px);
+
+  z-index: 62;
+
+  width: 225px;
+
+  display: grid;
+  gap: 5px;
+
+  padding: 9px;
+
+  border: 1px solid rgba(212, 222, 216, 0.76);
+  border-radius: 8px;
+
+  background: rgba(248, 250, 248, 0.94);
+
+  backdrop-filter: blur(18px);
+
+  box-shadow: var(--av-shadow-float);
+
+  animation: topbarPopoverEnter 130ms ease;
+}
+
+.topbar__popover > strong {
+  padding: 2px 3px 6px;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.66rem;
+  font-weight: 700;
+
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.topbar__popover button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+  color: #333333;
+  transition: background 0.15s ease;
+}
+
+.topbar__popover button:hover {
+  background: #f5f5f5;
+  color: #000000;
+}
+
+.topbar__popover button span {
+  /* font-size: 0.75rem; */
+  font-weight: 500;
+  /* color: var(--av-neutral-500); */
+}
+
+.topbar__popover button small {
+  color: var(--av-neutral-500);
+  font-size: 0.75rem;
+}
+
+/* =========================================
+   Chevron (Flecha desplegable minimalista por CSS)
+   ========================================= */
+.topbar__chevron {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid #64748b;
+  border-bottom: 1.5px solid #64748b;
+  transform: rotate(45deg);  /* Forma de V perfecta */
+  margin-left: 6px;
+  transition: transform 0.2s ease;
+}
+
+/* Animación del Chevron cuando el select está abierto */
+.topbar__selectButton.is-open .topbar__chevron {
+  transform: translateY(1px) rotate(-135deg); /* Gira la flecha hacia arriba de manera preciosa */
+}
+
+.topbar__profileButton.is-open .topbar__chevron {
+  transform: translateY(1px) rotate(-135deg);
+}
+/* Detalles del menú de perfil */
+.topbar__profileMenuHeader {
+  padding: 4px 8px 8px 8px;
+  display: flex;
+  flex-direction: column;
+}
+.topbar__profileMenuHeader strong {
+  font-size: 0.9rem;
+  color: #111111;
+}
+.topbar__profileMenuHeader span {
+  font-size: 0.75rem;
+  color: #777777;
+}
+
+.topbar__popoverDivider {
+  border: 0;
+  border-top: 1px solid #eeeeee;
+  margin: 6px 0;
+}
+.topbar__logoutBtn {
+  color: var(--av-danger) !important;
+}
+.topbar__logoutBtn:hover {
+  background: #fef2f2 !important;
+}
+
+/* Date */
+
+.topbar__dateRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+
+  padding: 6px;
+
+  border-radius: 5px;
+
+  background: var(--av-neutral-100);
+}
+
+.topbar__dateRow span {
+  color: var(--av-text-muted);
+
+  font-size: 0.59rem;
+}
+
+.topbar__dateRow b {
+  color: var(--av-text-secondary);
+
+  font-size: 0.59rem;
+}
+
+/* Notifications */
+
+.topbar__popover--notifications article {
+  display: flex;
+  gap: 7px;
+
+  padding: 6px;
+
+  border-radius: 5px;
+
+  background: var(--av-neutral-100);
+}
+
+.topbar__notificationDot {
+  width: 6px;
+  height: 6px;
+
   flex: 0 0 auto;
 
-  display: grid;
-  place-items: center;
-
-  width: 38px;
-  height: 38px;
-
-  color: #071006;
-  font-size: 0.84rem;
-  font-weight: 950;
+  margin-top: 4px;
 
   border-radius: 999px;
-  background: var(--layout-green);
+
+  background: var(--av-warning);
 }
 
-.topbar__profile div:last-child {
+.topbar__popover--notifications article div {
   min-width: 0;
+
+  display: grid;
+  gap: 2px;
 }
 
-.topbar__profile strong {
-  display: block;
-  color: var(--layout-text);
-  font-size: 0.82rem;
-  line-height: 1.1;
-  white-space: nowrap;
+.topbar__popover--notifications article b {
+  color: var(--av-text);
+
+  font-size: 0.61rem;
 }
 
-.topbar__profile span {
-  margin: 3px 0 0;
-  color: var(--layout-muted);
-  font-size: 0.72rem;
-  white-space: nowrap;
+.topbar__popover--notifications article small {
+  color: var(--av-text-muted);
+
+  font-size: 0.55rem;
 }
 
-/* =========================
+/* Profile */
+
+.topbar__popover--profile {
+  width: 180px;
+}
+
+.topbar__popover--profile > span {
+  color: var(--av-text-muted);
+
+  font-size: 0.59rem;
+}
+
+/* Animation */
+
+@keyframes topbarPopoverEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
    Route placeholder
-   ========================= */
+   ========================================= */
 
 .routePlaceholder {
-  position: relative;
+  min-height: 320px;
 
-  min-height: calc(100vh - var(--topbar-height) - 56px);
   display: grid;
-  align-content: center;
-  gap: 14px;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
 
-  padding: clamp(28px, 5vw, 64px);
-  overflow: hidden;
+  padding: 20px;
 
-  border: 1px solid var(--layout-border);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at 76% 24%, rgba(183, 255, 23, 0.18), transparent 34%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
-    var(--layout-panel);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.44);
-}
+  text-align: center;
 
-.routePlaceholder::after {
-  content: "";
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-lg);
 
-  position: absolute;
-  right: 8%;
-  top: 18%;
-
-  width: min(360px, 38vw);
-  height: min(220px, 24vw);
-
-  border-radius: 42px;
-  border: 1px solid rgba(183, 255, 23, 0.22);
-  background:
-    repeating-linear-gradient(
-      135deg,
-      rgba(183, 255, 23, 0.18) 0 1px,
-      transparent 1px 18px
-    ),
-    rgba(183, 255, 23, 0.04);
-
-  transform: rotate(-12deg);
-  opacity: 0.7;
-}
-
-.routePlaceholder__eyebrow,
-.routePlaceholder h1,
-.routePlaceholder span {
-  position: relative;
-  z-index: 1;
+  background: var(--av-panel);
 }
 
 .routePlaceholder__eyebrow {
-  width: max-content;
   margin: 0;
-  padding: 8px 12px;
 
-  color: var(--layout-green);
-  font-size: 0.72rem;
-  font-weight: 950;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  padding: 4px 7px;
 
-  border: 1px solid rgba(183, 255, 23, 0.24);
-  border-radius: 999px;
-  background: rgba(183, 255, 23, 0.08);
+  color: var(--av-lime-900);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.58rem;
+  font-weight: 800;
+
+  border-radius: 5px;
+
+  background: var(--av-lime-400);
 }
 
 .routePlaceholder h1 {
-  max-width: 780px;
   margin: 0;
 
-  color: var(--layout-text);
-  font-size: clamp(3rem, 7vw, 6.5rem);
-  line-height: 0.88;
-  font-weight: 950;
-  letter-spacing: -0.08em;
-  text-transform: uppercase;
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 1.25rem;
 }
 
 .routePlaceholder span {
-  max-width: 650px;
-  color: var(--layout-text-soft);
-  font-size: 1rem;
-  line-height: 1.65;
+  max-width: 500px;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.7rem;
 }
 
-/* =========================
-   Responsive
-   ========================= */
+/* =========================================
+   Global panel conventions
+   ========================================= */
 
-@media (max-width: 980px) {
-  :root {
-    --sidebar-width: 88px;
+.avPanel {
+  min-width: 0;
+
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-md);
+
+  background: var(--av-panel);
+
+  box-shadow: var(--av-shadow-xs);
+}
+
+.avSectionTitle {
+  margin: 0;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* =========================================
+   Standard tables
+   ========================================= */
+
+.avTable {
+  width: 100%;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  font-size: 0.58rem;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
+
+  overflow: hidden;
+}
+
+.avTable thead {
+  background: var(--av-neutral-100);
+}
+
+.avTable th {
+  padding: 5px 6px;
+
+  color: var(--av-text-muted);
+
+  font-family: var(--av-font-heading);
+  font-weight: 700;
+
+  text-align: left;
+}
+
+.avTable td {
+  padding: 5px 6px;
+
+  color: var(--av-text-secondary);
+
+  border-top: 1px solid var(--av-border-soft);
+}
+
+.avTable tbody tr {
+  background: var(--av-neutral-50);
+
+  transition: background 120ms ease;
+}
+
+.avTable tbody tr:nth-child(even) {
+  background: var(--av-neutral-100);
+}
+
+.avTable tbody tr:hover {
+  background: var(--av-lime-50);
+}
+
+/* =========================================
+   Responsive
+   ========================================= */
+
+@media (max-width: 1100px) {
+  .topbar {
+    grid-template-columns:
+      minmax(90px, auto)
+      minmax(180px, 1fr)
+      auto;
   }
 
-  .sidebar {
-    padding: 18px 12px;
+  .topbar__selectButton:first-child {
+    max-width: 115px;
+  }
+}
+
+@media (max-width: 900px) {
+  .agrovisionApp {
+    --sidebar-width: var(--av-sidebar-collapsed);
   }
 
   .sidebar__brand {
@@ -468,73 +1206,98 @@ button {
     padding-inline: 0;
   }
 
-  .sidebar__brand div,
-  .sidebar__link span:last-child,
-  .sidebar__footer {
+  .sidebar__brand img {
+    width: 38px;
+    height: 38px;
+
+    object-fit: cover;
+    object-position: left;
+  }
+
+  .sidebar__link,
+  .sidebar__secondaryLink {
+    grid-template-columns: 1fr;
+    justify-items: center;
+
+    padding: 0;
+  }
+
+  .sidebar__linkLabel,
+  .sidebar__secondaryLink > span:last-child,
+  .sidebar__profileCopy,
+  .sidebar__profileChevron {
     display: none;
   }
 
-  .sidebar__link {
+  .sidebar__profile {
     grid-template-columns: 1fr;
+
     justify-items: center;
-    padding: 0;
-  }
-}
 
-@media (max-width: 720px) {
-  .agrovisionApp {
-    display: block;
-  }
-
-  .sidebar {
-    position: static;
-    height: auto;
-    display: grid;
-    gap: 16px;
-    padding: 14px;
-    border-right: 0;
-    border-bottom: 1px solid var(--layout-border);
-  }
-
-  .sidebar__brand {
-    justify-content: flex-start;
-    padding-bottom: 12px;
-  }
-
-  .sidebar__brand div {
-    display: block;
-  }
-
-  .sidebar__nav {
-    display: flex;
-    overflow-x: auto;
-    gap: 8px;
-  }
-
-  .sidebar__link {
-    width: auto;
-    grid-template-columns: 28px auto;
-    padding: 0 14px;
-  }
-
-  .sidebar__link span:last-child {
-    display: inline;
+    padding-inline: 0;
   }
 
   .topbar {
-    position: static;
-    min-height: auto;
-    align-items: flex-start;
-    flex-direction: column;
-    padding: 16px;
+    grid-template-columns:
+      auto
+      minmax(170px, 1fr)
+      auto;
   }
 
-  .topbar__profile {
-    width: 100%;
-    max-width: none;
+  .topbar__selectButton {
+    display: none;
+  }
+}
+
+@media (max-width: 680px) {
+  .agrovisionApp {
+    --sidebar-width: 58px;
+  }
+
+  .sidebar {
+    padding-inline: 6px;
+  }
+
+  .topbar {
+    height: 52px;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+
+    padding: 6px 9px;
+  }
+
+  .topbar__search {
+    display: none;
+  }
+
+  .topbar__profileButton strong {
+    display: none;
   }
 
   .agrovisionContent {
-    padding: 16px;
+    padding: 8px;
+  }
+}
+
+/* =========================================
+   Reduced motion
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .agrovisionMain,
+  .sidebar,
+  .sidebar__toggle,
+  .sidebar__link,
+  .sidebar__secondaryLink,
+  .topbar__selectButton,
+  .topbar__iconButton,
+  .topbar__profileButton {
+    transition: none;
+  }
+
+  .topbar__popover {
+    animation: none;
   }
 }

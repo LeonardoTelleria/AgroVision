@@ -1,0 +1,705 @@
+/**
+ * =========================================
+ * AgroVision Figma UI
+ * =========================================
+ *
+ * Componentes visuales compartidos por todas
+ * las pantallas reconstruidas desde Figma.
+ */
+
+/* =========================================
+   Screen
+   ========================================= */
+
+.avScreen {
+  width: 100%;  
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  color: var(--av-text);
+  font-family: var(--av-font-body);
+}
+
+.avScreen * {
+  box-sizing: border-box;
+}
+
+.avScreen button,
+.avScreen input,
+.avScreen textarea,
+.avScreen select {
+  font-family: var(--av-font-body);
+}
+
+/* =========================================
+   Simple screen title
+   ========================================= */
+
+.avScreenTitle {
+  margin: 0;
+  color: var(--av-text);
+  font-family: var(--av-font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+/* =========================================
+   KPI grid
+   ========================================= */
+
+.avMetricGrid {
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+/* =========================================
+   KPI card
+   ========================================= */
+
+.avMetricCard {
+  position: relative;
+  min-width: 0;
+  height: 144px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 5px;
+  padding: 12px 14px 10px;
+  overflow: hidden;
+  color: var(--av-neutral-50);
+  border: 1px solid var(--av-green-700);
+  border-radius: var(--av-radius-card);
+  background: #001E16;
+  box-shadow: var(--av-shadow-card);
+
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease,
+    border-color 150ms ease;
+}
+
+.avMetricCard::after {
+  content: "";
+
+  position: absolute;
+  right: -25px;
+  bottom: -45px;
+
+  width: 140px;
+  height: 140px;
+
+  border: 1px solid rgba(128, 213, 175, 0.1);
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(128, 213, 175, 0.08),
+      transparent 65%
+    );
+
+  pointer-events: none;
+}
+
+.avMetricCard:hover {
+  transform: translateY(-2px);
+
+  border-color: var(--av-lime-400);
+
+  box-shadow:
+    0 6px 14px rgba(21, 42, 39, 0.15);
+}
+
+.avMetricCard__header {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.avMetricCard__header > span {
+  color: #f8faf8;
+
+  font-family: var(--av-font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.avMetricCard__header small {
+  padding: 2px 5px;
+
+  color: var(--av-neutral-300);
+
+  font-size: 0.48rem;
+
+  border: 1px solid rgba(228, 236, 231, 0.34);
+  border-radius: 4px;
+}
+
+.avMetricCard__body {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+}
+
+/* =========================================
+   Ring
+   ========================================= */
+
+.avMetricRing {
+  --av-ring-color: var(--av-lime-400);
+
+  position: relative;
+
+  flex: 0 0 auto;
+
+  width: 66px;
+  height: 66px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      var(--av-ring-color) 0deg,
+      var(--av-ring-color) var(--av-ring-progress),
+      rgba(135, 147, 143, 0.42) var(--av-ring-progress),
+      rgba(135, 147, 143, 0.42) 360deg
+    );
+}
+
+.avMetricCard--amber .avMetricRing {
+  --av-ring-color: var(--av-amber-400);
+}
+
+.avMetricCard--teal .avMetricRing {
+  --av-ring-color: var(--av-teal-100);
+}
+
+.avMetricRing::after {
+  content: "";
+
+  position: absolute;
+
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+
+  background: var(--av-green-700);
+}
+
+.avMetricRing__center {
+  position: relative;
+  z-index: 1;
+
+  width: 30px;
+  height: 30px;
+
+  display: grid;
+  place-items: center;
+}
+
+/* =========================================
+   Metric value
+   ========================================= */
+
+.avMetricCard__copy {
+  min-width: 0;
+}
+
+.avMetricCard__value {
+  display: flex;
+  align-items: baseline;
+
+  gap: 4px;
+}
+
+.avMetricCard__value strong {
+  color: #f8faf8;
+
+  font-family: var(--av-font-heading);
+  font-size: 2rem;
+  font-weight: 800;
+
+  line-height: 1;
+
+  letter-spacing: -0.045em;
+}
+
+.avMetricCard__value span {
+  color: var(--av-neutral-300);
+
+  font-size: 0.62rem;
+}
+
+.avMetricCard__copy p {
+  margin: 4px 0 0;
+
+  color: var(--av-neutral-200);
+
+  font-size: 0.64rem;
+  line-height: 1.25;
+}
+
+.avMetricCard__action {
+  position: relative;
+  z-index: 1;
+
+  width: max-content;
+
+  padding: 0;
+
+  color: var(--av-lime-400);
+
+  font-size: 0.6rem;
+  font-weight: 700;
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.avMetricCard--amber .avMetricCard__action {
+  color: var(--av-amber-400);
+}
+
+.avMetricCard__action span {
+  display: inline-block;
+
+  margin-left: 4px;
+
+  transition: transform 120ms ease;
+}
+
+.avMetricCard__action:hover span {
+  transform: translateX(3px);
+}
+
+/* =========================================
+   Panel
+   ========================================= */
+
+.avPanel {
+  min-width: 0;
+
+  padding: 11px;
+
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-card);
+
+  background: var(--av-neutral-50);
+
+  box-shadow: var(--av-shadow-card);
+}
+
+.avPanel__header {
+  min-height: 20px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 8px;
+}
+
+.avPanel__title {
+  display: flex;
+  align-items: center;
+
+  gap: 5px;
+}
+
+.avPanel__title h2 {
+  margin: 0;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.avInfoDot {
+  width: 12px;
+  height: 12px;
+
+  display: inline-grid;
+  place-items: center;
+
+  color: var(--av-neutral-600);
+
+  font-family: serif;
+  font-size: 0.5rem;
+
+  border: 1px solid var(--av-neutral-500);
+  border-radius: 50%;
+}
+
+.avCardTag {
+  padding: 2px 5px;
+
+  color: var(--av-neutral-600);
+
+  font-size: 0.45rem;
+
+  border: 1px solid var(--av-border);
+  border-radius: 3px;
+
+  background: var(--av-neutral-100);
+}
+
+/* =========================================
+   Table
+   ========================================= */
+
+.avTableWrap {
+  width: 100%;
+  min-width: 0;
+
+  overflow-x: auto;
+}
+
+.avTable {
+  width: 100%;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  font-size: 0.56rem;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
+
+  overflow: hidden;
+}
+
+.avTable th {
+  padding: 5px 7px;
+
+  color: var(--av-text-secondary);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.51rem;
+  font-weight: 700;
+
+  text-align: left;
+
+  background: var(--av-neutral-100);
+
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.avTable td {
+  padding: 5px 7px;
+
+  color: var(--av-text-secondary);
+
+  border-bottom: 1px solid var(--av-border-soft);
+
+  background: var(--av-neutral-50);
+}
+
+.avTable tr:last-child td {
+  border-bottom: 0;
+}
+
+.avTable tbody tr {
+  transition: background 120ms ease;
+}
+
+.avTable tbody tr:hover td {
+  background: var(--av-lime-50);
+}
+
+/* =========================================
+   Status badges
+   ========================================= */
+
+.avStatusBadge {
+  width: max-content;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 2px 7px;
+
+  font-size: 0.5rem;
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  border-radius: 4px;
+}
+
+.avStatusBadge--success {
+  color: var(--av-success-text);
+  background: rgba(48, 183, 106, 0.1);
+}
+
+.avStatusBadge--warning {
+  color: var(--av-warning-text);
+  background: rgba(224, 102, 26, 0.1);
+}
+
+.avStatusBadge--danger {
+  color: var(--av-danger-text);
+  background: rgba(227, 26, 22, 0.1);
+}
+
+.avStatusBadge--info {
+  color: var(--av-info-text);
+  background: rgba(14, 106, 150, 0.1);
+}
+
+.avStatusBadge--lime {
+  color: var(--av-lime-800);
+  background: var(--av-lime-100);
+}
+
+.avStatusBadge--neutral {
+  color: var(--av-neutral-700);
+  background: var(--av-neutral-200);
+}
+
+/* =========================================
+   Compact list
+   ========================================= */
+
+.avCompactList {
+  display: grid;
+}
+
+.avCompactRow {
+  min-width: 0;
+  min-height: 32px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 5px 6px;
+
+  border-bottom: 1px solid var(--av-border-soft);
+
+  transition: background 120ms ease;
+}
+
+.avCompactRow:last-child {
+  border-bottom: 0;
+}
+
+.avCompactRow:hover {
+  background: var(--av-lime-50);
+}
+
+.avCompactRow__main {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+.avCompactRow__icon {
+  width: 18px;
+  height: 18px;
+
+  flex: 0 0 auto;
+
+  display: grid;
+  place-items: center;
+}
+
+.avCompactRow__copy {
+  min-width: 0;
+
+  display: grid;
+}
+
+.avCompactRow__copy strong {
+  color: var(--av-text);
+
+  font-size: 0.59rem;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.avCompactRow__copy small {
+  color: var(--av-text-muted);
+
+  font-size: 0.49rem;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================================
+   Filter bar
+   ========================================= */
+
+.avFilterBar {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 7px 10px;
+
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-card);
+
+  background: var(--av-neutral-50);
+
+  box-shadow: var(--av-shadow-card);
+}
+
+.avFilterGroup {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  flex: 1;
+}
+
+.avFilterGroup label {
+  color: var(--av-text-secondary);
+
+  font-size: 0.54rem;
+  font-weight: 600;
+}
+
+.avFilterGroup select {
+  min-width: 90px;
+  height: 28px;
+
+  padding: 0 7px;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.55rem;
+
+  border: 1px solid var(--av-border);
+  border-radius: 5px;
+
+  background: var(--av-neutral-50);
+}
+
+/* =========================================
+   Text action
+   ========================================= */
+
+.avTextAction {
+  width: max-content;
+
+  padding: 0;
+
+  color: var(--av-teal-400);
+
+  font-size: 0.56rem;
+  font-weight: 700;
+
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+
+  transition:
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.avTextAction:hover {
+  color: var(--av-teal-300);
+
+  transform: translateX(2px);
+}
+
+/* =========================================
+   Empty / loading
+   ========================================= */
+
+.avState {
+  min-height: 220px;
+
+  display: grid;
+  place-content: center;
+  justify-items: center;
+
+  gap: 4px;
+
+  color: var(--av-text-muted);
+
+  text-align: center;
+
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-card);
+
+  background: var(--av-neutral-50);
+}
+
+.avState strong {
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.8rem;
+}
+
+.avState p {
+  margin: 0;
+
+  font-size: 0.65rem;
+}
+
+/* =========================================
+   Responsive
+   ========================================= */
+
+@media (max-width: 850px) {
+  .avMetricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .avMetricCard {
+    height: 124px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avMetricCard,
+  .avMetricCard__action span,
+  .avCompactRow,
+  .avTextAction {
+    transition: none;
+  }
+}

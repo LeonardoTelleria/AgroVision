@@ -1,375 +1,245 @@
-/* =========================================
-   Reports Page
-   ========================================= */
-
-.reportsPage {
-  display: grid;
-  gap: 24px;
-}
-
-.reportsHero {
-  min-height: 320px;
-  display: grid;
-  align-content: end;
-
-  padding: clamp(28px, 5vw, 56px);
-  overflow: hidden;
-
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at 78% 18%, rgba(145, 231, 255, 0.15), transparent 34%),
-    radial-gradient(circle at 22% 24%, rgba(183, 255, 23, 0.12), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
-    rgba(18, 24, 20, 0.86);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
-}
-
-.reportsHero__eyebrow {
-  width: max-content;
-  margin: 0 0 14px;
-  padding: 8px 12px;
-
-  color: #b7ff17;
-  font-size: 0.72rem;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-
-  border: 1px solid rgba(183, 255, 23, 0.28);
-  border-radius: 999px;
-  background: rgba(183, 255, 23, 0.08);
-}
-
-.reportsHero h1 {
-  max-width: 980px;
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: clamp(3rem, 7vw, 7rem);
-  line-height: 0.86;
-  font-weight: 950;
-  letter-spacing: -0.085em;
-  text-transform: uppercase;
-}
-
-.reportsHero span {
-  display: block;
-  max-width: 740px;
-  margin-top: 18px;
-
-  color: #c8d0c4;
-  line-height: 1.65;
-}
-
-/* =========================================
-   Risk summary
-   ========================================= */
-
-.reportRiskSummary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.reportRiskBox,
-.reportRiskSummary__cause {
-  display: grid;
-  gap: 10px;
-
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 24px;
-  background: rgba(18, 24, 20, 0.82);
-}
-
-.reportRiskBox span,
-.reportRiskSummary__cause span {
-  color: #8d988d;
-  font-size: 0.82rem;
-  font-weight: 850;
-}
-
-.reportRiskBox strong {
-  color: #f4f7ef;
-  font-size: clamp(1.6rem, 3vw, 2.4rem);
-  font-weight: 950;
-  letter-spacing: -0.06em;
-}
-
-.reportRiskBox--high,
-.reportRiskBox--critical {
-  border-color: rgba(255, 95, 95, 0.34);
-}
-
-.reportRiskSummary__cause {
-  grid-column: 1 / -1;
-}
-
-.reportRiskSummary__cause p {
-  margin: 0;
-
-  color: #c8d0c4;
-  line-height: 1.55;
-}
-
-/* =========================================
-   Main cards
-   ========================================= */
-
-.prescriptiveReportCard,
-.reportPanel {
-  display: grid;
-  gap: 18px;
-
-  padding: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
-    rgba(18, 24, 20, 0.82);
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.26);
-}
-
-.prescriptiveReportCard__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.prescriptiveReportCard__header p,
-.reportPanel header p {
-  width: max-content;
-  margin: 0 0 8px;
-  padding: 6px 10px;
-
-  color: #081006;
-  font-size: 0.68rem;
-  font-weight: 950;
-  letter-spacing: 0.075em;
-  text-transform: uppercase;
-
-  border-radius: 999px;
-  background: #b7ff17;
-}
-
-.prescriptiveReportCard__header h2,
-.reportPanel header h2 {
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: clamp(1.55rem, 2vw, 2.2rem);
-  line-height: 0.95;
-  font-weight: 950;
-  letter-spacing: -0.06em;
-}
-
-.prescriptiveReportCard__header span {
-  display: block;
-  max-width: 820px;
-  margin-top: 10px;
-
-  color: #c8d0c4;
-  line-height: 1.55;
-}
-
-.prescriptiveReportCard__header strong {
-  height: max-content;
-
-  padding: 8px 12px;
-  color: #081006;
-  font-size: 0.76rem;
-  font-weight: 950;
-
-  border-radius: 999px;
-  background: #ffb84d;
-}
-
-.reportSplitGrid,
-.reportActionsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.reportCompactList,
-.reportActionsList {
-  display: grid;
+.reportsFigma {
   gap: 10px;
 }
 
-.reportCompactItem,
-.reportActionItem {
+.reportsFigma__top {
+  min-width: 0;
+
   display: grid;
-  gap: 8px;
+  grid-template-columns: 1.25fr 0.9fr;
 
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.045);
-}
-
-.reportCompactItem--high,
-.reportCompactItem--critical {
-  border-color: rgba(255, 95, 95, 0.32);
-}
-
-.reportCompactItem strong,
-.reportActionItem strong {
-  color: #f4f7ef;
-  font-weight: 950;
-}
-
-.reportCompactItem span,
-.reportActionItem p {
-  margin: 0;
-
-  color: #c8d0c4;
-  line-height: 1.5;
-}
-
-.reportCompactItem small,
-.reportActionItem small {
-  color: #8d988d;
-  line-height: 1.45;
-}
-
-/* =========================================
-   Evidence timeline
-   ========================================= */
-
-.reportEvidenceTimeline {
-  display: grid;
   gap: 10px;
 }
 
-.reportEvidenceItem {
+.reportsFigma__side {
   display: grid;
-  gap: 8px;
+  align-content: start;
 
-  padding: 16px;
-  border-left: 3px solid rgba(183, 255, 23, 0.55);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.045);
+  gap: 10px;
 }
 
-.reportEvidenceItem--warning {
-  border-left-color: #ffb84d;
+.reportModuleList {
+  display: grid;
 }
 
-.reportEvidenceItem--critical {
-  border-left-color: #ff5f5f;
+.reportModule {
+  min-height: 29px;
+
+  display: grid;
+  grid-template-columns: 28px 150px minmax(0, 1fr);
+  align-items: center;
+
+  gap: 7px;
+
+  border-bottom: 1px solid var(--av-border-soft);
 }
 
-.reportEvidenceItem div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
+.reportModule:last-child {
+  border-bottom: 0;
 }
 
-.reportEvidenceItem strong {
-  color: #b7ff17;
-  font-size: 0.78rem;
-  font-weight: 950;
-}
+.reportModule > span {
+  width: 22px;
+  height: 22px;
 
-.reportEvidenceItem span {
-  color: #8d988d;
-  font-size: 0.78rem;
-}
-
-.reportEvidenceItem h3 {
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: 1rem;
-}
-
-.reportEvidenceItem p {
-  margin: 0;
-
-  color: #c8d0c4;
-  line-height: 1.5;
-}
-
-/* =========================================
-   Actions
-   ========================================= */
-
-.reportActionItem div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.reportActionItem span {
-  width: max-content;
-  height: max-content;
-
-  padding: 6px 10px;
-  color: #b7ff17;
-  font-size: 0.72rem;
-  font-weight: 950;
-
-  border: 1px solid rgba(183, 255, 23, 0.22);
-  border-radius: 999px;
-  background: rgba(183, 255, 23, 0.07);
-}
-
-.reportActionItem--pending span {
-  color: #ffb84d;
-  border-color: rgba(255, 184, 77, 0.28);
-  background: rgba(255, 184, 77, 0.07);
-}
-
-.reportActionsEmpty {
-  margin: 0;
-  color: #8d988d;
-}
-
-/* =========================================
-   States
-   ========================================= */
-
-.reportsState {
   display: grid;
   place-items: center;
-  min-height: 220px;
 
-  color: #c8d0c4;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 28px;
-  background: rgba(18, 24, 20, 0.82);
+  border-radius: 3px;
+
+  background: var(--av-green-500);
 }
 
-.reportsState--error {
-  color: #ffb84d;
-  border-color: rgba(255, 184, 77, 0.32);
+.reportModule strong {
+  color: var(--av-text-secondary);
+
+  font-size: 0.52rem;
 }
 
-@media (max-width: 1040px) {
-  .reportRiskSummary,
-  .reportSplitGrid,
-  .reportActionsGrid {
+.reportModule p {
+  margin: 0;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.49rem;
+}
+
+.reportExportButtons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 8px;
+}
+
+.reportExportButtons button {
+  min-height: 42px;
+
+  color: var(--av-green-500);
+
+  font-size: 0.54rem;
+  font-weight: 600;
+
+  border: 1px solid var(--av-border);
+  border-radius: 5px;
+
+  background: var(--av-neutral-50);
+
+  cursor: pointer;
+
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+}
+
+.reportExportButtons button:hover {
+  transform: translateY(-1px);
+
+  border-color: var(--av-teal-300);
+
+  background: var(--av-lime-50);
+}
+
+.reportSummaryRows {
+  display: grid;
+}
+
+.reportSummaryRow {
+  min-height: 29px;
+
+  display: grid;
+  grid-template-columns: 13px 85px minmax(0, 1fr);
+  align-items: center;
+
+  gap: 6px;
+
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.reportSummaryDot {
+  width: 9px;
+  height: 9px;
+
+  border-radius: 50%;
+}
+
+.reportSummaryDot--success {
+  background: var(--av-success);
+}
+
+.reportSummaryDot--warning {
+  background: var(--av-warning);
+}
+
+.reportSummaryDot--info {
+  background: var(--av-info);
+}
+
+.reportSummaryDot--neutral {
+  background: var(--av-neutral-500);
+}
+
+.reportSummaryRow strong,
+.reportSummaryRow span {
+  font-size: 0.49rem;
+}
+
+.reportSummaryRow span {
+  color: var(--av-text-secondary);
+}
+
+.reportsCenteredAction {
+  display: block;
+
+  margin: 8px auto 0;
+}
+
+.reportIconButton {
+  border: 0;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+/* Timeline */
+
+.reportTimeline {
+  position: relative;
+
+  min-height: 85px;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: start;
+
+  padding-top: 10px;
+}
+
+.reportTimeline::before {
+  content: "";
+
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 23px;
+
+  height: 1px;
+
+  background: var(--av-green-300);
+}
+
+.reportTimelineNode {
+  position: relative;
+  z-index: 1;
+
+  display: grid;
+  justify-items: center;
+
+  gap: 3px;
+
+  text-align: center;
+}
+
+.reportTimelineNode > span {
+  width: 20px;
+  height: 20px;
+
+  border: 3px solid var(--av-neutral-50);
+  border-radius: 50%;
+
+  box-shadow: 0 0 0 1px var(--av-green-300);
+}
+
+.reportTimelineNode--success > span {
+  background: var(--av-lime-500);
+}
+
+.reportTimelineNode--warning > span {
+  background: var(--av-amber-400);
+}
+
+.reportTimelineNode--info > span {
+  background: var(--av-teal-300);
+}
+
+.reportTimelineNode strong {
+  color: var(--av-text-secondary);
+
+  font-size: 0.48rem;
+}
+
+.reportTimelineNode p {
+  margin: 0;
+
+  color: var(--av-text);
+
+  font-size: 0.5rem;
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .reportsFigma__top {
     grid-template-columns: 1fr;
-  }
-
-  .prescriptiveReportCard__header {
-    flex-direction: column;
-  }
-}
-
-@media (max-width: 720px) {
-  .reportsHero {
-    border-radius: 26px;
-  }
-
-  .reportEvidenceItem div,
-  .reportActionItem div {
-    flex-direction: column;
-  }
-
-  .prescriptiveReportCard, .reportPanel {
-    padding: 18px;
   }
 }

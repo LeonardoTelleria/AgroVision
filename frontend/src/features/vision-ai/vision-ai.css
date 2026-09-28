@@ -1,475 +1,515 @@
-/* =========================================
-   Vision AI Page
-   ========================================= */
+/**
+ * =========================================
+ * Vision AI — Figma implementation
+ * =========================================
+ */
 
-.visionAiPage {
-  display: grid;
-  gap: 24px;
+.visionFigma {
+  gap: 10px;
 }
 
-.visionAiHero {
-  min-height: 320px;
-  display: grid;
-  align-content: end;
-
-  padding: clamp(28px, 5vw, 56px);
-  overflow: hidden;
-
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 34px;
-  background:
-    radial-gradient(circle at 78% 18%, rgba(145, 231, 255, 0.16), transparent 34%),
-    radial-gradient(circle at 22% 24%, rgba(183, 255, 23, 0.12), transparent 32%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.025)),
-    rgba(18, 24, 20, 0.86);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
-}
-
-.visionAiHero__eyebrow {
-  width: max-content;
-  margin: 0 0 14px;
-  padding: 8px 12px;
-
-  color: #b7ff17;
-  font-size: 0.72rem;
-  font-weight: 950;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-
-  border: 1px solid rgba(183, 255, 23, 0.28);
-  border-radius: 999px;
-  background: rgba(183, 255, 23, 0.08);
-}
-
-.visionAiHero h1 {
-  max-width: 900px;
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: clamp(3rem, 7vw, 7rem);
-  line-height: 0.86;
-  font-weight: 950;
-  letter-spacing: -0.085em;
-  text-transform: uppercase;
-}
-
-.visionAiHero span {
-  display: block;
-  max-width: 720px;
-  margin-top: 18px;
-
-  color: #c8d0c4;
-  line-height: 1.65;
-}
-
-.visionAiGrid {
-  display: grid;
-  grid-template-columns: minmax(320px, 0.8fr) minmax(0, 1.2fr);
-  gap: 16px;
-  align-items: stretch;
-}
-
-.visionAiPanel,
-.visionResultCard,
-.visionAiEmptyState {
+.visionFigma__workspace {
   min-width: 0;
-
-  padding: 22px;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 28px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.03)),
-    rgba(18, 24, 20, 0.82);
-  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.26);
+  display: grid;
+  grid-template-columns: minmax(0, 1.72fr) minmax(300px, 0.92fr);
+  gap: 10px;
 }
 
-.visionAiPanel {
+.visionFigma__left,
+.visionFigma__right {
+  min-width: 0;
   display: grid;
   align-content: start;
-  gap: 18px;
+  gap: 10px;
 }
 
-.visionAiPanel header,
-.visionResultCard__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
+/* =========================================
+   Controls
+   ========================================= */
 
-.visionAiPanel header p,
-.visionResultCard__header p {
-  width: max-content;
-  margin: 0 0 8px;
-  padding: 6px 10px;
-
-  color: #081006;
-  font-size: 0.68rem;
-  font-weight: 950;
-  letter-spacing: 0.075em;
-  text-transform: uppercase;
-
-  border-radius: 999px;
-  background: #b7ff17;
-}
-
-.visionAiPanel h2,
-.visionResultCard h2 {
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: clamp(1.65rem, 3vw, 2.4rem);
-  line-height: 0.95;
-  font-weight: 950;
-  letter-spacing: -0.06em;
-}
-
-.visionAiField {
+.visionFigma__controls {
   display: grid;
-  gap: 8px;
+  grid-template-columns: 0.8fr 0.95fr 0.72fr;
+  gap: 9px;
+  margin-bottom: 8px;
 }
 
-.visionAiField span {
-  color: #c8d0c4;
-  font-size: 0.84rem;
-  font-weight: 850;
+.visionFigma__controls > label:not(.visionUploadButton) {
+  display: grid;
+  gap: 3px;
 }
 
-.visionAiField select,
-.visionAiField input {
+.visionFigma__controls label > span {
+  color: var(--av-text-secondary);
+  font-size: 0.5rem;
+}
+
+.visionFigma__controls select {
   width: 100%;
-  min-height: 46px;
-
-  color: #f4f7ef;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.055);
-  padding: 0 14px;
+  height: 30px;
+  padding: 0 8px;
+  color: var(--av-text-secondary);
+  font-size: 0.55rem;
+  border: 1px solid var(--av-border);
+  border-radius: 5px;
+  outline: 0;
+  background: var(--av-neutral-50);
 }
 
-.visionAiMockPreview {
+.visionFigma__controls select:focus {
+  border-color: var(--av-teal-300);
+}
+
+.visionUploadButton {
+  min-height: 49px;
+  align-self: end;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: var(--av-green-400);
+  border: 1px dashed var(--av-neutral-500);
+  border-radius: 6px;
+  background: var(--av-neutral-50);
+  cursor: pointer;
+  transition: border-color 130ms ease, background 130ms ease, transform 130ms ease;
+}
+
+.visionUploadButton:hover {
+  transform: translateY(-1px);
+  border-color: var(--av-teal-300);
+  background: var(--av-lime-50);
+}
+
+.visionUploadButton strong {
+  font-size: 0.55rem;
+  font-weight: 700;
+}
+
+.visionUploadButton__icon {
+  width: 18px;
+  height: 18px;
+}
+
+.visionUploadButton input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+/* =========================================
+   Image
+   ========================================= */
+
+.visionImagePreview {
+  position: relative;
+  height: 225px;
+  overflow: hidden;
+  border: 1px solid var(--av-border);
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 30% 52%, rgba(183, 225, 58, 0.23), transparent 22%),
+    linear-gradient(135deg, #557746 0%, #294f31 48%, #183b2c 100%);
+}
+
+.visionImagePreview.has-image {
+  background: #284d31;
+}
+
+.visionImagePreview > img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.visionImagePreview__empty {
+  position: absolute;
+  inset: 0;
   display: grid;
-  gap: 6px;
-
-  padding: 16px;
-  border: 1px solid rgba(183, 255, 23, 0.18);
-  border-radius: 18px;
-  background: rgba(183, 255, 23, 0.055);
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  color: #f8faf8;
 }
 
-.visionAiMockPreview span,
-.visionAiMockPreview small {
-  color: #8d988d;
+.visionImagePreview__empty strong {
+  font-family: var(--av-font-heading);
+  font-size: 0.72rem;
 }
 
-.visionAiMockPreview strong {
-  color: #f4f7ef;
+.visionImagePreview__empty small {
+  color: var(--av-neutral-300);
+  font-size: 0.5rem;
 }
 
-.visionAiButton {
-  min-height: 48px;
+.visionImagePreview__mapControls {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 5;
+  display: grid;
+  overflow: hidden;
+  border-radius: 5px;
+  box-shadow: var(--av-shadow-card);
+}
 
-  color: #081006;
-  font-weight: 950;
-
+.visionImagePreview__mapControls button {
+  width: 27px;
+  height: 27px;
+  padding: 0;
+  color: var(--av-text);
   border: 0;
-  border-radius: 999px;
-  background: #b7ff17;
+  border-bottom: 1px solid var(--av-border);
+  background: rgba(248, 250, 248, 0.95);
   cursor: pointer;
 }
 
-.visionAiButton:disabled {
-  opacity: 0.65;
-  cursor: wait;
-}
-
-.visionResultCard {
-  display: grid;
-  gap: 20px;
-}
-
-.visionResultCard__header strong {
-  width: max-content;
-  height: max-content;
-
-  padding: 8px 12px;
-  color: #b7ff17;
-
-  border: 1px solid rgba(183, 255, 23, 0.22);
-  border-radius: 999px;
-  background: rgba(183, 255, 23, 0.07);
-}
-
-.visionResultCard__header span {
-  color: #8d988d;
-}
-
-.visionResultCard__metrics {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.visionMetricBox {
-  display: grid;
-  gap: 8px;
-
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.045);
-}
-
-.visionMetricBox span {
-  color: #8d988d;
-  font-size: 0.76rem;
-}
-
-.visionMetricBox strong {
-  color: #f4f7ef;
-  font-size: 1.35rem;
-  font-weight: 950;
-}
-
-.visionResultCard__section {
-  display: grid;
-  gap: 8px;
-}
-
-.visionResultCard__section h3 {
-  margin: 0;
-
-  color: #b7ff17;
-  font-size: 0.82rem;
-  font-weight: 950;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.visionResultCard__section p {
-  margin: 0;
-
-  color: #c8d0c4;
-  line-height: 1.55;
-}
-
-.visionEvidenceList {
-  display: grid;
-  gap: 10px;
-}
-
-.visionEvidenceItem {
-  display: grid;
-  gap: 6px;
-
-  padding: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.045);
-}
-
-.visionEvidenceItem strong {
-  color: #f4f7ef;
-}
-
-.visionEvidenceItem span {
-  color: #b7ff17;
-  font-weight: 900;
-}
-
-.visionEvidenceItem small {
-  color: #8d988d;
-  line-height: 1.45;
-}
-
-.visionEvidenceItem--warning {
-  border-color: rgba(255, 184, 77, 0.28);
-}
-
-.visionEvidenceItem--critical {
-  border-color: rgba(255, 95, 95, 0.3);
-}
-
-.visionAiEmptyState {
+.visionImagePreview__marker {
+  position: absolute;
+  z-index: 4;
+  width: 20px;
+  height: 20px;
   display: grid;
   place-items: center;
-  align-content: center;
+  color: #ffffff;
+  font-size: 0.5rem;
+  font-weight: 700;
+  border-radius: 50%;
+  background: var(--av-green-700);
+}
+
+.visionImagePreview__marker--one {
+  left: 38%;
+  top: 8%;
+}
+
+.visionImagePreview__marker--two {
+  left: 64%;
+  top: 28%;
+}
+
+.visionImagePreview__marker--three {
+  left: 49%;
+  top: 67%;
+}
+
+.visionImagePreview__area {
+  position: absolute;
+  z-index: 3;
+  border: 1px dashed #ffffff;
+}
+
+.visionImagePreview__area--one {
+  left: 38%;
+  top: 13%;
+  width: 18%;
+  height: 41%;
+}
+
+.visionImagePreview__area--two {
+  left: 61%;
+  top: 31%;
+  width: 20%;
+  height: 37%;
+}
+
+.visionImagePreview__area--three {
+  left: 48%;
+  top: 67%;
+  width: 13%;
+  height: 28%;
+}
+
+.visionImagePreview__file {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 6px;
+  color: #ffffff;
+  font-size: 0.46rem;
+  border-radius: 4px;
+  background: rgba(3, 35, 35, 0.83);
+}
+
+/* =========================================
+   Evidence
+   ========================================= */
+
+.visionEvidenceTable {
+  overflow: hidden;
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
+}
+
+.visionEvidenceTable__header,
+.visionEvidenceTable__row {
+  min-width: 690px;
+  display: grid;
+  grid-template-columns: 42px 23px 105px minmax(180px, 1fr) 90px 90px 12px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 7px;
+}
+
+.visionEvidenceTable__header {
+  min-height: 25px;
+  color: var(--av-text-muted);
+  font-family: var(--av-font-heading);
+  font-size: 0.45rem;
+  font-weight: 700;
+  background: var(--av-neutral-100);
+}
+
+.visionEvidenceTable__row {
+  min-height: 31px;
+  color: var(--av-text-secondary);
+  font-size: 0.47rem;
+  border-top: 1px solid var(--av-border-soft);
+}
+
+.visionEvidenceTable__row:hover {
+  background: var(--av-lime-50);
+}
+
+.visionEvidenceTable__row b {
+  width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 0.43rem;
+  border-radius: 50%;
+  background: var(--av-green-300);
+}
+
+.visionEvidenceTable__row p {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* =========================================
+   Result
+   ========================================= */
+
+.visionResultRows {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--av-border-soft);
+  border-radius: 5px;
+}
+
+.visionResultRow,
+.visionResultRows--placeholder > div {
+  min-height: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
   gap: 8px;
-  min-height: 420px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.visionResultRow:last-child,
+.visionResultRows--placeholder > div:last-child {
+  border-bottom: 0;
+}
+
+.visionResultRow strong,
+.visionResultRows--placeholder strong {
+  color: var(--av-text-secondary);
+  font-size: 0.51rem;
+}
+
+.visionResultRow span,
+.visionResultRows--placeholder span {
+  color: var(--av-text-secondary);
+  font-size: 0.5rem;
+}
+
+/* =========================================
+   Metrics
+   ========================================= */
+
+.visionMetricRows {
+  display: grid;
+}
+
+.visionMetricRow {
+  min-height: 29px;
+  display: grid;
+  grid-template-columns: 110px minmax(80px, 1fr) 36px;
+  align-items: center;
+  gap: 8px;
+}
+
+.visionMetricRow strong {
+  color: var(--av-text-secondary);
+  font-size: 0.5rem;
+  font-weight: 600;
+}
+
+.visionMetricRow > span {
+  color: var(--av-text-secondary);
+  font-size: 0.48rem;
+}
+
+.visionMetricProgress i {
+  width: 100%;
+  height: 5px;
+  display: block;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--av-neutral-200);
+}
+
+.visionMetricProgress b {
+  height: 100%;
+  display: block;
+  border-radius: inherit;
+  background: var(--av-green-400);
+}
+
+.visionMetricProgress.is-emphasized b {
+  background: var(--av-lime-500);
+}
+
+/* =========================================
+   Preliminary notice
+   ========================================= */
+
+.visionPreliminaryNotice {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border: 1px solid rgba(48, 183, 106, 0.34);
+  border-radius: 7px;
+  background: rgba(241, 251, 204, 0.38);
+}
+
+.visionPreliminaryNotice__icon,
+.visionPreliminaryNotice > span {
+  width: 35px;
+  height: 35px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--av-green-500);
+}
+
+.visionPreliminaryNotice strong {
+  color: var(--av-text);
+  font-family: var(--av-font-heading);
+  font-size: 0.54rem;
+}
+
+.visionPreliminaryNotice p {
+  margin: 2px 0 0;
+  color: var(--av-text-secondary);
+  font-size: 0.47rem;
+  line-height: 1.3;
+}
+
+.visionPreliminaryNotice small {
+  color: var(--av-text-muted);
+  font-size: 0.43rem;
+}
+
+.visionFallbackNotice {
+  display: grid;
+  gap: 2px;
+  padding: 7px 9px;
+  border: 1px solid rgba(224, 102, 26, 0.22);
+  border-radius: 5px;
+  background: var(--av-amber-50);
+}
+
+.visionFallbackNotice strong {
+  color: var(--av-warning-text);
+  font-size: 0.5rem;
+}
+
+.visionFallbackNotice span {
+  color: var(--av-text-muted);
+  font-size: 0.46rem;
+}
+
+.visionMetricsPlaceholder,
+.visionCompactEmpty {
+  min-height: 65px;
+  display: grid;
+  place-content: center;
+  color: var(--av-text-muted);
+  font-size: 0.5rem;
   text-align: center;
 }
 
-.visionAiEmptyState p {
-  margin: 0;
-
-  color: #f4f7ef;
-  font-size: 1.4rem;
-  font-weight: 950;
-}
-
-.visionAiEmptyState span {
-  max-width: 420px;
-  color: #8d988d;
-  line-height: 1.55;
+.visionCenteredAction {
+  display: block;
+  margin: 7px auto 0;
 }
 
 /* =========================================
-   Vision AI Status Banner
+   History
    ========================================= */
 
-.visionAiStatusBanner {
-  padding: 14px 18px;
-
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 18px;
-  background: rgba(18, 24, 20, 0.82);
-}
-
-.visionAiStatusBanner p {
-  margin: 0;
-
-  color: #c8d0c4;
-  font-size: 0.92rem;
-  line-height: 1.5;
-}
-
-.visionAiStatusBanner--fallback {
-  border-color: rgba(255, 184, 77, 0.32);
-  background: rgba(255, 184, 77, 0.07);
-}
-
-.visionAiStatusBanner--error {
-  border-color: rgba(255, 95, 95, 0.32);
-  background: rgba(255, 95, 95, 0.07);
-}
-
-.visionAiStatusBanner--result {
-  border-color: rgba(183, 255, 23, 0.28);
-  background: rgba(183, 255, 23, 0.07);
-}
-
-/* =========================================
-   Vision AI Source / Notices
-   ========================================= */
-
-.visionSourceBadge {
-  width: max-content;
-  height: max-content;
-
-  padding: 8px 12px;
-  font-size: 0.74rem;
-  font-weight: 950;
-
-  border-radius: 999px;
-}
-
-.visionSourceBadge--backend {
-  color: #081006;
-  background: #b7ff17;
-}
-
-.visionSourceBadge--fallback {
-  color: #081006;
-  background: #ffb84d;
-}
-
-.visionResultCard__notice,
-.visionResultCard__fallbackNotice {
-  display: grid;
-  gap: 6px;
-
-  padding: 14px;
-  border-radius: 18px;
-}
-
-.visionResultCard__notice {
-  border: 1px solid rgba(145, 231, 255, 0.24);
-  background: rgba(145, 231, 255, 0.065);
-}
-
-.visionResultCard__fallbackNotice {
-  border: 1px solid rgba(255, 184, 77, 0.28);
-  background: rgba(255, 184, 77, 0.07);
-}
-
-.visionResultCard__notice strong,
-.visionResultCard__fallbackNotice strong {
-  color: #f4f7ef;
-  font-size: 0.84rem;
-  font-weight: 950;
-}
-
-.visionResultCard__notice p,
-.visionResultCard__fallbackNotice p {
-  margin: 0;
-
-  color: #c8d0c4;
-  line-height: 1.5;
-}
-
-/* =========================================
-   Vision Signals
-   ========================================= */
-
-.visionSignalList {
+.visionConfidenceCell {
+  min-width: 90px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  gap: 5px;
 }
 
-.visionSignalBadge {
-  display: grid;
-  gap: 4px;
-
-  min-width: 120px;
-  padding: 10px 12px;
-
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.045);
+.visionConfidenceCell i {
+  width: 50px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--av-neutral-200);
 }
 
-.visionSignalBadge span {
-  color: #8d988d;
-  font-size: 0.72rem;
-  font-weight: 800;
+.visionConfidenceCell b {
+  height: 100%;
+  display: block;
+  background: var(--av-green-400);
 }
 
-.visionSignalBadge strong {
-  color: #f4f7ef;
-  font-size: 0.86rem;
-  font-weight: 950;
+.visionHistoryPrediction {
+  color: var(--av-warning-text) !important;
 }
 
 /* =========================================
-   Vision Empty States
+   Responsive
    ========================================= */
 
-.visionAiEmptyState--analyzing {
-  border-color: rgba(183, 255, 23, 0.28);
-}
-
-.visionAiEmptyState--error {
-  border-color: rgba(255, 95, 95, 0.32);
-}
-
-.visionAiEmptyState--error p {
-  color: #ffb84d;
-}
-
-
-@media (max-width: 1080px) {
-  .visionAiGrid,
-  .visionResultCard__metrics {
+@media (max-width: 900px) {
+  .visionFigma__workspace {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 640px) {
-  .visionAiButton {
-    width: 100%;
+  .visionFigma__right {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .visionAiHero {
-    border-radius: 26px;
+  .visionPreliminaryNotice {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 650px) {
+  .visionFigma__controls,
+  .visionFigma__right {
+    grid-template-columns: 1fr;
+  }
+
+  .visionImagePreview {
+    height: 190px;
   }
 }
