@@ -92,8 +92,8 @@ h6 {
 .agrovisionContent {
   width: 100%;
   min-width: 0;
-
-  padding: 10px 12px 18px;
+  padding: 10px 22px 18px;
+  
 }
 
 /* =========================================
@@ -961,7 +961,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   background: var(--av-neutral-100);
 }
 
-.topbar__dateRow span {
+.topbar__dateRow > span {
   color: var(--av-text-muted);
 
   font-size: 0.59rem;
