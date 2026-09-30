@@ -41,16 +41,43 @@ export function DashboardPage() {
   const recommendation = summary.recommendations.mainRecommendation;
   const zoneId = summary.intelligence.mostAffectedZoneId ?? "zone-03";
 
+  // Datos de prueba para las cards - Salud general 
+  const saludDetails = [
+  { label: "Excelente", value: "18%", color: "#22c55e" },
+  { label: "Buena", value: "60%", color: "#a3e635" },
+  { label: "Regular", value: "16%", color: "#eab308" },
+  { label: "Mala", value: "6%", color: "#ef4444" }
+];
+
+// 2. Datos para Card de Alertas Activas
+const alertasDetails = [
+  { label: "Críticas", value: 2, color: "#ef4444" },
+  { label: "Altas", value: 3, color: "#f97316" },
+  { label: "Medias", value: 2, color: "#eab308" }
+];
+
+
   return (
     <section className="avScreen dashboardFigma">
       <h1 className="avScreenTitle">Resumen del cultivo</h1>
 
       <section className="avMetricGrid">
-        <MetricCard title="Salud general" value={summary.healthScore} valueSuffix="/100" description="Salud moderada" progress={summary.healthScore} actionLabel="↑ +4 vs. semana anterior" />
+        <MetricCard title="Salud general" value={summary.healthScore} valueSuffix="%" description="Salud moderada" progress={summary.healthScore} tone="LIME"  details={saludDetails} subBadge={<span>vs. semana anterior <b style={{color:'#22c55e'}}>↑ 6%</b></span>}/>
 
-        <MetricCard title="Alertas activas" value={summary.alerts.active} description={`${summary.alerts.critical} críticas · ${summary.alerts.warning} moderadas`} progress={Math.min(summary.alerts.active * 15, 100)} tone="AMBER" actionLabel="Ver todas las alertas" />
+        {/* <MetricCard title="Alertas activas" value={summary.alerts.active} description={`${summary.alerts.critical} críticas · ${summary.alerts.warning} moderadas`} progress={Math.min(summary.alerts.active * 15, 100)} tone="AMBER" actionLabel="Ver todas las alertas" /> */}
+        <MetricCard title="Alertas activas" value={summary.alerts.active} description="Requieren atención" tone="AMBER" details={alertasDetails} actionLabel="Ver todas las alertas" /> 
 
-        <MetricCard title="Recomendaciones urgentes" value={summary.recommendations.urgent} description="Requieren atención" progress={Math.min(summary.recommendations.urgent * 24, 100)} tone="TEAL" actionLabel="Ver recomendaciones" />
+        {/* <MetricCard title="Recomendaciones urgentes" value={summary.recommendations.urgent} description="Requieren atención" progress={Math.min(summary.recommendations.urgent * 24, 100)} tone="TEAL" actionLabel="Ver recomendaciones" /> */}
+        <MetricCard 
+          title="Recomendaciones urgentes"
+          value={summary.recommendations.urgent}
+          description="pendientes"
+          tone="TEAL"
+          progress={90}
+          icon={<span style={{fontSize: '4.3rem'}}>🌱</span>} // Icono de la planta dentro del anillo
+          actionLabel="Ver recomendaciones"
+        />        
+
       </section>
 
       <section className="dashboardFigma__main">

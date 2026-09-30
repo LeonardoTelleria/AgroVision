@@ -50,11 +50,9 @@
 
 .avMetricGrid {
   min-width: 0;
-
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-
-  gap: 12px;
+  gap: 18px;
 }
 
 /* =========================================
@@ -64,70 +62,43 @@
 .avMetricCard {
   position: relative;
   min-width: 0;
-  height: 144px;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 5px;
-  padding: 12px 14px 10px;
+  height: 210px; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14px 26px 12px;
   overflow: hidden;
   color: var(--av-neutral-50);
-  border: 1px solid var(--av-green-700);
-  border-radius: var(--av-radius-card);
-  background: #001E16;
-  box-shadow: var(--av-shadow-card);
-
-  transition:
-    transform 150ms ease,
-    box-shadow 150ms ease,
-    border-color 150ms ease;
+  border: 1px solid var(--av-green-700); /* Borde sutil */
+  border-radius: var(--av-radius-card);       
+  background: #031410;       
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  transition: border-color 150ms ease, transform 150ms ease; 
 }
 
+
 .avMetricCard::after {
-  content: "";
-
-  position: absolute;
-  right: -25px;
-  bottom: -45px;
-
-  width: 140px;
-  height: 140px;
-
-  border: 1px solid rgba(128, 213, 175, 0.1);
-  border-radius: 50%;
-
-  background:
-    radial-gradient(
-      circle at 40% 40%,
-      rgba(128, 213, 175, 0.08),
-      transparent 65%
-    );
-
+  display: none;
   pointer-events: none;
 }
 
 .avMetricCard:hover {
   transform: translateY(-2px);
-
   border-color: var(--av-lime-400);
-
-  box-shadow:
-    0 6px 14px rgba(21, 42, 39, 0.15);
+  box-shadow: 0 6px 24px rgba(3, 20, 16, 0.2);
 }
 
-.avMetricCard__header {
-  position: relative;
-  z-index: 1;
 
+.avMetricCard__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  gap: 8px;
+  position: relative;
 }
 
 .avMetricCard__header > span {
   color: #f8faf8;
-
   font-family: var(--av-font-heading);
   font-size: 0.72rem;
   font-weight: 700;
@@ -144,15 +115,150 @@
   border-radius: 4px;
 }
 
-.avMetricCard__body {
-  position: relative;
-  z-index: 1;
-
+.avMetricCard__titleRow {
   display: flex;
   align-items: center;
-
-  gap: 15px;
+  gap: 6px;
 }
+
+.avMetricCard__titleRow > span {
+  color: var(--av-neutral-100);
+  font-family: var(--av-font-heading);
+  font-size: 1.2rem;
+  letter-spacing: 0.008em;
+  font-weight: 600;
+}
+
+.avMetricCard__infoIcon {
+  width: 19px;
+  height: 19px;
+  color: #64748b;
+  cursor: help;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.avMetricCard__infoIcon:hover {
+  opacity: 1;
+}
+
+.avMetricCard__headerIcon {
+  position: absolute;
+  right: 0;
+  top: -2px;
+  color: #ffffff;
+  opacity: 0.08; 
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Cuerpo del layout asimétrico
+   ========================================================================== */
+.avMetricCard__body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.avMetricCard__leftCol {
+  display: flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.avMetricCard__rightCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  min-width: 180px;
+}
+
+/* Tipografías y Números Gigantes */
+.avMetricCard__bigNumberBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  
+}
+
+.avMetricCard__mainContainer {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.avMetricRing__number {
+  font-size: 2.3rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.avMetricRing__number small {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-left: 4px;
+}
+
+.avMetricCard--teal .avMetricCard__body {
+  border-right: none; 
+}
+
+.avMetricCard--teal .avMetricCard__rightCol {
+  display: flex;
+  align-items: center;
+}
+
+.avMetricCard--teal .avMetricCard__rightCol span{
+  display: flex;
+  align-items: center;
+}
+.avMetricCard--teal .avMetricCard__bigNumberBlock {
+  padding-right: 42px;    /* Genera espacio interno hacia la derecha */
+}
+
+.avMetricCard--teal .avMetricCard__value strong {
+  color: var(--av-lime-500)
+}
+
+.avMetricCard--amber .avMetricCard__leftCol {
+  flex: 1;
+  min-width: max-content; /* Fuerza a que el bloque mida lo necesario para el texto largo */
+  padding-right: 20px;    /* Crea una separación perfecta y generosa antes de la línea vertical */
+  box-sizing: border-box;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.avMetricCard--amber .avMetricCard__subLabel {
+  white-space: nowrap; 
+  display: block;
+  width: 100%;
+}
+
+.avMetricCard--amber .avMetricCard__rightCol{
+  padding-right: 16px; 
+  padding-left: 20px;     /* Separa la lista de métricas de la línea hacia la derecha */
+  flex: 1;
+}
+
+.avMetricCard--amber .avMetricCard__value strong {
+  color: var(--av-amber-500)
+}
+
+
+.avMetricCard__subLabel {
+  margin: 4px 0 0 2px;
+  color: var(--av-neutral-200);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+
 
 /* =========================================
    Ring
@@ -160,26 +266,18 @@
 
 .avMetricRing {
   --av-ring-color: var(--av-lime-400);
-
   position: relative;
-
   flex: 0 0 auto;
-
-  width: 66px;
-  height: 66px;
-
+  width: 120px;  /* Ajustado para que el anillo no se solape */
+  height: 120px;
   display: grid;
   place-items: center;
-
   border-radius: 50%;
-
-  background:
-    conic-gradient(
-      var(--av-ring-color) 0deg,
-      var(--av-ring-color) var(--av-ring-progress),
-      rgba(135, 147, 143, 0.42) var(--av-ring-progress),
-      rgba(135, 147, 143, 0.42) 360deg
-    );
+  background: conic-gradient(
+    var(--av-ring-color) 0deg,
+    var(--av-ring-color) var(--av-ring-progress),
+    #092019 var(--av-ring-progress),
+    #092019 360deg);
 }
 
 .avMetricCard--amber .avMetricRing {
@@ -192,53 +290,140 @@
 
 .avMetricRing::after {
   content: "";
-
   position: absolute;
-
-  width: 50px;
-  height: 50px;
-
+  width: 82px;
+  height: 82px;
   border-radius: 50%;
+  background: var(--av-green-900);
+}
 
-  background: var(--av-green-700);
+.avMetricRing__label {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin-top: 1px;
 }
 
 .avMetricRing__center {
   position: relative;
-  z-index: 1;
-
-  width: 30px;
-  height: 30px;
-
-  display: grid;
-  place-items: center;
+  z-index: 2;
+  text-align: center;
 }
 
 /* =========================================
-   Metric value
+   MetricRing value
    ========================================= */
 
 .avMetricCard__copy {
   min-width: 0;
 }
 
+.avMetricRing__innerValue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avMetricRing__innerValue strong{
+  font-size: 2rem;
+  color: #ffffff;
+  font-weight: 700;
+} 
+
+.avMetricRing__innerValue small {
+  font-size: 1rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+/* =========================================
+   Columna Derecha: Lista de desgloses y Badges
+   ========================================= */
+.avMetricCard__detailsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 100%;
+  min-width: 110px;
+}
+
+.avMetricCard__detailsList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 100%
+}
+
+.avMetricCard__detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  margin-left: 15px;
+}
+
+.avMetricCard__detailLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--av-neutral-200);
+}
+
+.avMetricCard__detailDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.avMetricCard__detailValue {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Micro-badge de comparativas ("vs semana anterior") */
+.avMetricCard__subBadge {
+  font-size: 0.68rem;
+  color: var(--av-neutral-300);
+  margin-top: auto;
+  text-align: right;
+  width: 100%;
+}
+
+/* Contenedor Ilustración Orbital (Card 3) */
+.avMetricCard__decorativeIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* =========================================
+   Metric value
+   ========================================= */
+/* =========================================
+   Footer y Acción "Ver todas"
+   ========================================= */
+.avMetricCard__footer {
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04); /* Línea sutil horizontal */
+}
+
 .avMetricCard__value {
   display: flex;
   align-items: baseline;
-
   gap: 4px;
 }
 
 .avMetricCard__value strong {
-  color: #f8faf8;
-
+  color: #ffffff;
   font-family: var(--av-font-heading);
-  font-size: 2rem;
+  font-size: 4rem;
   font-weight: 800;
-
   line-height: 1;
-
-  letter-spacing: -0.045em;
+  letter-spacing: -0.04em;
 }
 
 .avMetricCard__value span {
@@ -249,48 +434,43 @@
 
 .avMetricCard__copy p {
   margin: 4px 0 0;
-
   color: var(--av-neutral-200);
-
   font-size: 0.64rem;
   line-height: 1.25;
 }
 
 .avMetricCard__action {
-  position: relative;
-  z-index: 1;
-
-  width: max-content;
-
-  padding: 0;
-
-  color: var(--av-lime-400);
-
-  font-size: 0.6rem;
-  font-weight: 700;
-
-  border: 0;
-
   background: transparent;
-
+  border: none;
+  padding: 0;
+  color: var(--av-lime-500); 
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
+.avMetricCard--lime .avMetricCard__detailItem {
+  padding-right: 5px;
+}
 .avMetricCard--amber .avMetricCard__action {
   color: var(--av-amber-400);
 }
 
+.avMetricCard__action:hover {
+  text-decoration: underline;
+}
+
 .avMetricCard__action span {
-  display: inline-block;
-
-  margin-left: 4px;
-
-  transition: transform 120ms ease;
+  transition: transform 0.15s ease;
 }
 
 .avMetricCard__action:hover span {
   transform: translateX(3px);
 }
+
 
 /* =========================================
    Panel
