@@ -1,10 +1,23 @@
 import { useEffect, useState } from "react";
+
 import { MetricCard } from "../../../shared/components/ui/MetricCard";
 import { Panel } from "../../../shared/components/ui/Panel";
 import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
+
 import { getDashboardData } from "../services/dashboardService";
 import type { DashboardData } from "../types/dashboard.types";
+
 import "../dashboard.css";
+
+import warningAlertIcon from "../../../assets/icons/warning-icon.svg";
+import bugIcon from "../../../assets/icons/bug-icon.svg";
+import hidricStressIcon from "../../../assets/icons/hidric-stress-icon.svg";
+import nitrogenIcon from "../../../assets/icons/nitrogen-icon.svg";
+import irrigationIcon from "../../../assets/icons/water-icon.svg";
+import protectionIcon from "../../../assets/icons/protection-icon.svg";
+import infoIcon from '../../../assets/icons/info-icon2.svg'
+import arrowRightIcon from '../../../assets/icons/arrow-icon.png'
+
 
 export function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -15,7 +28,6 @@ export function DashboardPage() {
     async function loadDashboard() {
       try {
         const data = await getDashboardData();
-
         setDashboardData(data);
         setErrorMessage(null);
       } catch {
@@ -29,55 +41,110 @@ export function DashboardPage() {
   }, []);
 
   if (isLoading) {
-    return <section className="avState"><strong>Cargando Dashboard</strong><p>Preparando inteligencia agrícola.</p></section>;
+    return (
+      <section className="avState">
+        <strong>Cargando Dashboard</strong>
+        <p>Preparando inteligencia agrícola.</p>
+      </section>
+    );
   }
 
   if (errorMessage || !dashboardData) {
-    return <section className="avState"><strong>Dashboard no disponible</strong><p>{errorMessage}</p></section>;
+    return (
+      <section className="avState">
+        <strong>Dashboard no disponible</strong>
+        <p>{errorMessage}</p>
+      </section>
+    );
   }
 
   const { summary } = dashboardData;
-  const mainAlert = summary.alerts.criticalAlerts[0];
+  const mainAlert = summary.alerts.criticalAlerts; // [0] si solo quiero mostrar una sola alerta
   const recommendation = summary.recommendations.mainRecommendation;
   const zoneId = summary.intelligence.mostAffectedZoneId ?? "zone-03";
 
-  // Datos de prueba para las cards - Salud general 
+  /* Datos de prueba para Salud general. */
   const saludDetails = [
-  { label: "Excelente", value: "18%", color: "#22c55e" },
-  { label: "Buena", value: "60%", color: "#a3e635" },
-  { label: "Regular", value: "16%", color: "#eab308" },
-  { label: "Mala", value: "6%", color: "#ef4444" }
-];
+    { label: "Excelente", value: "18%", color: "#22c55e" },
+    { label: "Buena", value: "60%", color: "#a3e635" },
+    { label: "Regular", value: "16%", color: "#eab308" },
+    { label: "Mala", value: "6%", color: "#ef4444" },
+  ];
 
-// 2. Datos para Card de Alertas Activas
-const alertasDetails = [
-  { label: "Críticas", value: 2, color: "#ef4444" },
-  { label: "Altas", value: 3, color: "#f97316" },
-  { label: "Medias", value: 2, color: "#eab308" }
-];
+  /* Datos de prueba para Alertas activas. */
+  const alertasDetails = [
+    { label: "Críticas", value: 2, color: "#ef4444" },
+    { label: "Altas", value: 3, color: "#f97316" },
+    { label: "Medias", value: 2, color: "#eab308" },
+  ];
 
+  /*
+   * Diseño visual de las tres alertas con tipado explícito.
+   * Cada posición corresponde a un icono diferente y metadatos de la maqueta.
+   */
+  const alertVisuals: Array<{
+    icon: string;
+    circleClass: string;
+    subtitle: string;
+    timeLabel: string;
+  }> = [
+    {
+      icon: bugIcon, // Alta presión de plaga
+      circleClass: "alertIconCircle alertIconCircle--bug",
+      subtitle: "Lote 12A • Maíz",
+      timeLabel: "Hoy, 08:15"
+    },
+    {
+      icon: hidricStressIcon, // Estrés hídrico severo
+      circleClass: "alertIconCircle alertIconCircle--water",
+      subtitle: "Lote 7B • Soja",
+      timeLabel: "Hoy, 07:40"
+    },
+    {
+      icon: warningAlertIcon, // Riesgo de enfermedad
+      circleClass: "alertIconCircle alertIconCircle--warning",
+      subtitle: "Lote 3C • Trigo",
+      timeLabel: "Ayer, 18:30"
+    },
+  ];
+
+  /* Muestra como máximo tres alertas críticas. */
+  const criticalAlerts = summary.alerts.criticalAlerts.slice(0, 3);
 
   return (
     <section className="avScreen dashboardFigma">
       <h1 className="avScreenTitle">Resumen del cultivo</h1>
 
       <section className="avMetricGrid">
-        <MetricCard title="Salud general" value={summary.healthScore} valueSuffix="%" description="Salud moderada" progress={summary.healthScore} tone="LIME"  details={saludDetails} subBadge={<span>vs. semana anterior <b style={{color:'#22c55e'}}>↑ 6%</b></span>}/>
+        <MetricCard
+          title="Salud general"
+          value={summary.healthScore}
+          valueSuffix="%"
+          description="Salud moderada"
+          progress={summary.healthScore}
+          tone="LIME"
+          details={saludDetails}
+          subBadge={<span>vs. semana anterior <b style={{ color: "#22c55e" }}>↑ 6%</b></span>}
+        />
 
-        {/* <MetricCard title="Alertas activas" value={summary.alerts.active} description={`${summary.alerts.critical} críticas · ${summary.alerts.warning} moderadas`} progress={Math.min(summary.alerts.active * 15, 100)} tone="AMBER" actionLabel="Ver todas las alertas" /> */}
-        <MetricCard title="Alertas activas" value={summary.alerts.active} description="Requieren atención" tone="AMBER" details={alertasDetails} actionLabel="Ver todas las alertas" /> 
+        <MetricCard
+          title="Alertas activas"
+          value={summary.alerts.active}
+          description="Requieren atención"
+          tone="AMBER"
+          details={alertasDetails}
+          actionLabel="Ver todas las alertas"
+        />
 
-        {/* <MetricCard title="Recomendaciones urgentes" value={summary.recommendations.urgent} description="Requieren atención" progress={Math.min(summary.recommendations.urgent * 24, 100)} tone="TEAL" actionLabel="Ver recomendaciones" /> */}
-        <MetricCard 
+        <MetricCard
           title="Recomendaciones urgentes"
           value={summary.recommendations.urgent}
           description="pendientes"
           tone="TEAL"
           progress={90}
-          icon={<span style={{fontSize: '4.3rem'}}>🌱</span>} // Icono de la planta dentro del anillo
+          icon={<span style={{ fontSize: "4.3rem" }}>🌱</span>}
           actionLabel="Ver recomendaciones"
-        />        
-
+        />
       </section>
 
       <section className="dashboardFigma__main">
@@ -104,7 +171,10 @@ const alertasDetails = [
                 <button type="button">{/* SVG layer */}</button>
               </div>
 
-              <button type="button" className="dashboardMap__flight">{/* SVG drone */} Bajo aéreo</button>
+              <button type="button" className="dashboardMap__flight">
+                {/* SVG drone */}
+                Bajo aéreo
+              </button>
             </div>
           </Panel>
 
@@ -133,10 +203,22 @@ const alertasDetails = [
 
               <button className="avTextAction zoneInsightAction" type="button">Ver detalle de la zona →</button>
             </Panel>
+
+            <Panel title="Evidencias" showCardTag>
+              <ul className="dashboardEvidenceBullets">
+                {recommendation.evidence.slice(0, 4).map((evidence) => (
+                  <li key={`${evidence.source}-${evidence.metric}`}>
+                    {evidence.explanation ?? `${evidence.metric}: ${String(evidence.value ?? "—")}`}
+                  </li>
+                ))}
+              </ul>
+
+              <button type="button" className="avTextAction dashboardCenteredAction">Ver todas las evidencias →</button>
+            </Panel>
           </div>
         </div>
 
-        <div className="dashboardFigma__right">
+        {/* <div className="dashboardFigma__right">
           <Panel title="Resumen prescriptivo" showCardTag>
             <div className="prescriptiveRows">
               <SummaryRow label="Riesgo dominante" value={formatRisk(summary.intelligence.dominantRisk)} badge="DANGER" />
@@ -148,40 +230,158 @@ const alertasDetails = [
 
           <Panel title="Alertas críticas" showCardTag>
             <div className="avCompactList">
-              {summary.alerts.criticalAlerts.slice(0, 3).map((alert) => (
-                <div key={alert.id} className="avCompactRow">
-                  <div className="avCompactRow__main">
-                    <span className="alertTriangle">△</span>
+              {criticalAlerts.map((alert, index) => {
+                const visual = alertVisuals[index];
 
-                    <div className="avCompactRow__copy">
-                      <strong>{alert.title}</strong>
+                return (
+                  <div key={alert.id} className="avCompactRow">
+                    <div className="avCompactRow__main">
+                      <span className={visual.circleClass}>
+                        <img src={visual.icon} alt="" className="alertIcon" />
+                      </span>
+
+                      <div className="avCompactRow__copy">
+                        <strong>{alert.title}</strong>
+                      </div>
                     </div>
-                  </div>
 
-                  <StatusBadge tone={alert.severity === "CRITICAL" ? "DANGER" : "WARNING"}>{alert.severity === "CRITICAL" ? "Alto" : "Media"}</StatusBadge>
-                </div>
-              ))}
+                    <StatusBadge tone={alert.severity === "CRITICAL" ? "DANGER" : "WARNING"}>
+                      {alert.severity === "CRITICAL" ? "Alto" : "Media"}
+                    </StatusBadge>
+                  </div>
+                );
+              })}
             </div>
 
             <button type="button" className="avTextAction dashboardCenteredAction">Ver todas las alertas →</button>
           </Panel>
+        </div> */}
+        <div className="dashboardFigma__right">
+          
+          {/* NUEVO DISEÑO OPERATIVO DEL RESUMEN PRESCRIPTIVO */}
+          <Panel 
+            title={
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '12px', alignItems: 'center' }}>
+                <span>Resumen prescriptivo</span>
+                <img src={infoIcon} alt="" className="avPanel__infoIcon" />   
+                <button type="button" className="avPanelHeaderAction">Ver detalle</button>
+              </div>
+              
+            } 
+            showCardTag
+          >
+            <div className="avPrescriptiveModule">
+              
+              {/* FILA 1: NITRÓGENO */}
+              <div className="avPrescriptiveRow">
+                <div className="avPrescriptiveRow__left">
+                  <span className="avPrescriptiveRow__circle avPrescriptiveRow__circle--green">
+                    <img src={nitrogenIcon} alt="" />
+                  </span>
+                  <div className="avPrescriptiveRow__meta">
+                    <strong>Nitrógeno</strong>
+                    <span className="action-tag">Aplicar</span>
+                  </div>
+                </div>
+                <div className="avPrescriptiveRow__right">
+                  <span className="primary-value">32 <small>kg/ha</small></span>
+                  <span className="secondary-value percent-up">+12% vs. rec. base</span>
+                </div>
+              </div>
 
-          <Panel title="Evidencias" showCardTag>
-            <ul className="dashboardEvidenceBullets">
-              {recommendation.evidence.slice(0, 4).map((evidence) => (
-                <li key={`${evidence.source}-${evidence.metric}`}>{evidence.explanation ?? `${evidence.metric}: ${String(evidence.value ?? "—")}`}</li>
-              ))}
-            </ul>
+              {/* FILA 2: RIEGO */}
+              <div className="avPrescriptiveRow">
+                <div className="avPrescriptiveRow__left">
+                  <span className="avPrescriptiveRow__circle avPrescriptiveRow__circle--blue">
+                    <img src={irrigationIcon} alt="" />
+                  </span>
+                  <div className="avPrescriptiveRow__meta">
+                    <strong>Riego</strong>
+                    <span className="action-tag">Programar</span>
+                  </div>
+                </div>
+                <div className="avPrescriptiveRow__right">
+                  <span className="primary-value">18 <small>mm</small></span>
+                  <span className="secondary-value">Próx. 48 h</span>
+                </div>
+              </div>
 
-            <button type="button" className="avTextAction dashboardCenteredAction">Ver todas las evidencias →</button>
+              {/* FILA 3: PROTECCIÓN */}
+              <div className="avPrescriptiveRow">
+                <div className="avPrescriptiveRow__left">
+                  <span className="avPrescriptiveRow__circle avPrescriptiveRow__circle--orange">
+                    <img src={protectionIcon} alt="" />
+                  </span>
+                  <div className="avPrescriptiveRow__meta">
+                    <strong>Protección</strong>
+                    <span className="action-tag">Monitorear</span>
+                  </div>
+                </div>
+                <div className="avPrescriptiveRow__right">
+                  <span className="primary-value">2 <small>áreas</small></span>
+                  <span className="secondary-value risk-high">Riesgo alto</span>
+                </div>
+              </div>
+
+            </div>
           </Panel>
+
+          {/* NUEVO DISEÑO OPERATIVO DE ALERTAS CRÍTICAS */}
+          <Panel 
+            title={
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '12px', alignItems: 'center' }}>
+                <span>Alertas críticas</span>
+                <img src={infoIcon} alt="" className="avPanel__infoIcon" />   
+                <button type="button" className="avPanelHeaderAction">Ver todas →</button>
+              </div>
+            } 
+            showCardTag
+          >
+            <div className="avCompactList">
+              {criticalAlerts.map((alert, index) => {
+                const visual = alertVisuals[index] || alertVisuals[0];
+
+                return (
+                  <div key={alert.id} className="avCompactRow">
+                    <div className="avCompactRow__main">
+                      <span className={visual.circleClass}>
+                        <img src={visual.icon} alt="" className="alertIcon" />
+                      </span>
+
+                      <div className="avCompactRow__copy">
+                        <strong>{alert.title}</strong>
+                        <span className="avCompactRow__subtitle">{visual.subtitle}</span>
+                      </div>
+                    </div>
+
+                    <div className="avCompactRow__rightSide">
+                      <time className="avCompactRow__time">{visual.timeLabel}</time>
+                      <span className="avCompactRow__arrow">
+                        <img src={arrowRightIcon} alt="flecha de dirección" />
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Panel>
+
         </div>
       </section>
 
       <section className="dashboardFigma__bottom">
         <Panel title="Actividad reciente">
           <div className="dashboardTimeline">
-            {mainAlert && <TimelineItem time={formatTime(mainAlert.createdAt)} text={`Alerta crítica: ${mainAlert.title}`} status="Máxima" tone="DANGER" />}
+            {/* Recorremos las primeras 3 alertas críticas de la lista */}
+            {mainAlert && mainAlert.slice(0, 3).map((alert) => (
+              <TimelineItem 
+                key={alert.id}
+                time={formatTime(alert.createdAt)} 
+                text={`Alerta crítica: ${alert.title}`} 
+                status="Máxima" 
+                tone="DANGER" 
+              />
+            ))}
             <TimelineItem time="Hoy" text="Nueva evidencia registrada" status="Sistema" tone="LIME" />
             <TimelineItem time="Ayer" text={`Recomendación generada: ${recommendation.suggestedAction}`} status="AgroVision AI" tone="INFO" />
             <TimelineItem time="Ayer" text="Registro de campo actualizado" status="Productor" tone="SUCCESS" />
@@ -205,7 +405,20 @@ const alertasDetails = [
   );
 }
 
-function SatelliteMetric({ label, value, status }: { readonly label: string; readonly value: string; readonly status: string }) {
+
+/* ===========================================================
+   COMPONENTE — MÉTRICA SATELITAL
+   =========================================================== */
+
+function SatelliteMetric({
+  label,
+  value,
+  status,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly status: string;
+}) {
   return (
     <article className="satelliteMetric">
       <strong>{label}</strong>
@@ -217,7 +430,20 @@ function SatelliteMetric({ label, value, status }: { readonly label: string; rea
   );
 }
 
-function InfoRow({ label, value, highlight = false }: { readonly label: string; readonly value: string; readonly highlight?: boolean }) {
+
+/* ===========================================================
+   COMPONENTE — FILA DE INFORMACIÓN
+   =========================================================== */
+
+function InfoRow({
+  label,
+  value,
+  highlight = false,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly highlight?: boolean;
+}) {
   return (
     <div className="figmaInfoRow">
       <span>{label}</span>
@@ -226,7 +452,20 @@ function InfoRow({ label, value, highlight = false }: { readonly label: string; 
   );
 }
 
-function SummaryRow({ label, value, badge }: { readonly label: string; readonly value: string; readonly badge?: "DANGER" }) {
+
+/* ===========================================================
+   COMPONENTE — FILA PRESCRIPTIVA
+   =========================================================== */
+
+function SummaryRow({
+  label,
+  value,
+  badge,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly badge?: "DANGER";
+}) {
   return (
     <div className="prescriptiveRow">
       <span>{/* SVG */}</span>
@@ -237,7 +476,22 @@ function SummaryRow({ label, value, badge }: { readonly label: string; readonly 
   );
 }
 
-function TimelineItem({ time, text, status, tone }: { readonly time: string; readonly text: string; readonly status: string; readonly tone: "DANGER" | "LIME" | "INFO" | "SUCCESS" }) {
+
+/* ===========================================================
+   COMPONENTE — TIMELINE
+   =========================================================== */
+
+function TimelineItem({
+  time,
+  text,
+  status,
+  tone,
+}: {
+  readonly time: string;
+  readonly text: string;
+  readonly status: string;
+  readonly tone: "DANGER" | "LIME" | "INFO" | "SUCCESS";
+}) {
   return (
     <div className="dashboardTimeline__item">
       <span className="dashboardTimeline__point" />
@@ -248,7 +502,20 @@ function TimelineItem({ time, text, status, tone }: { readonly time: string; rea
   );
 }
 
-function NextAction({ text, date, priority }: { readonly text: string; readonly date: string; readonly priority: "Alta" | "Media" | "Baja" }) {
+
+/* ===========================================================
+   COMPONENTE — PRÓXIMA ACCIÓN
+   =========================================================== */
+
+function NextAction({
+  text,
+  date,
+  priority,
+}: {
+  readonly text: string;
+  readonly date: string;
+  readonly priority: "Alta" | "Media" | "Baja";
+}) {
   return (
     <div className="nextAction">
       <input type="checkbox" aria-label={text} />
@@ -259,10 +526,19 @@ function NextAction({ text, date, priority }: { readonly text: string; readonly 
   );
 }
 
+
+/* ===========================================================
+   HELPERS
+   =========================================================== */
+
 function formatRisk(value: string): string {
   return value.replaceAll("_", " ");
 }
 
 function formatTime(value: string): string {
-  return new Intl.DateTimeFormat("es-NI", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-NI", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
 }
+
