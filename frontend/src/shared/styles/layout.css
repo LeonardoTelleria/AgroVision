@@ -371,7 +371,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding-top: 8px;
+  padding-top: 20px;
   border-top: 1px solid rgba(228, 236, 231, 0.12);
 }
 
@@ -388,6 +388,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   overflow: hidden;
   gap: 10px;
   padding: 12px;
+  margin-bottom: 12px;
   background: rgba(12, 53, 41, 0.65);
   border: 1px solid rgba(228, 236, 231, 0.15);
   border-radius: 12px;
@@ -1105,12 +1106,9 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 .avPanel {
   min-width: 0;
-
   border: 1px solid var(--av-border);
   border-radius: var(--av-radius-md);
-
   background: var(--av-panel);
-
   box-shadow: var(--av-shadow-xs);
 }
 

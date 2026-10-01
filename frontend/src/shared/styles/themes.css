@@ -93,15 +93,17 @@
   --av-success: #30b76a;
   --av-success-text: #21824b;
 
-  --av-danger-hover: #ff6b68;
+  --av-danger-hover: #ff6b68;;
   --av-danger: #e31a16;
   --av-danger-text: #a21512;
 
   --av-warning-hover: #ef9a48;
+  --av-warning-base: #E98205;
   --av-warning: #e0661a;
   --av-warning-text: #b74d17;
 
   --av-info-hover: #1da4da;
+  --av-info-base: #2E9EC8;
   --av-info: #0e6a96;
   --av-info-text: #0f5576;
 
@@ -111,9 +113,8 @@
 
   --av-font-heading: "Manrope", sans-serif;
   --av-font-body: "Source Sans 3", sans-serif;
-
-  /* --av-font-heading:'Fredoka', sans-serif;
-  --av-font-body: 'Nunito Sans', sans-serif; */
+  --av-font-body2: 'Nunito Sans', sans-serif;
+  /* --av-font-heading:'Fredoka', sans-serif; */
 
   /* =========================================
      UI TOKENS
@@ -188,6 +189,7 @@
      elementos de menor jerarquía visual.
      ------------------------------------------------------- */
   --av-text-muted: #5d6d68;
+  --av-text-muted2: #75827e;
 
 
   /* -------------------------------------------------------

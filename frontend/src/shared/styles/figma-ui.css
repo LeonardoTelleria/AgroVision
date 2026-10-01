@@ -118,7 +118,7 @@
 .avMetricCard__titleRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .avMetricCard__titleRow > span {
@@ -130,8 +130,8 @@
 }
 
 .avMetricCard__infoIcon {
-  width: 19px;
-  height: 19px;
+  width: 20px;
+  height: 20px;
   color: #64748b;
   cursor: help;
   opacity: 0.7;
@@ -478,9 +478,7 @@
 
 .avPanel {
   min-width: 0;
-
-  padding: 11px;
-
+  padding: 14px 16px 16px 16px;
   border: 1px solid var(--av-border);
   border-radius: var(--av-radius-card);
 
@@ -504,34 +502,27 @@
 .avPanel__title {
   display: flex;
   align-items: center;
-
   gap: 5px;
+  white-space: nowrap; /* Evita que el texto del botón se rompa en dos líneas */
+ 
 }
 
 .avPanel__title h2 {
   margin: 0;
-
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
-  font-size: 0.76rem;
+  font-size: 1.2rem;
   font-weight: 700;
+  letter-spacing: 0.0008em;
 }
 
-.avInfoDot {
-  width: 12px;
-  height: 12px;
-
-  display: inline-grid;
-  place-items: center;
-
-  color: var(--av-neutral-600);
-
-  font-family: serif;
-  font-size: 0.5rem;
-
-  border: 1px solid var(--av-neutral-500);
-  border-radius: 50%;
+.avPanel__infoIcon {
+  width: 20px;
+  height: 20px;
+  color: #64748b;
+  cursor: help;
+  opacity: 0.7;
+  transition: opacity 0.15s;
 }
 
 .avCardTag {
