@@ -15,7 +15,7 @@
   width: 100%;  
   min-width: 0;
   display: grid;
-  gap: 12px;
+  gap: 14px;
   color: var(--av-text);
   font-family: var(--av-font-body);
 }
@@ -420,7 +420,7 @@
 .avMetricCard__value strong {
   color: #ffffff;
   font-family: var(--av-font-heading);
-  font-size: 4rem;
+  font-size: 4.3rem;
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.04em;

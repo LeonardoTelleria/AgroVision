@@ -166,7 +166,7 @@
    background: transparent;
   border: none;
   padding: 0;
-  color: var(--av-lime-600, #22c55e);
+  color: var(--av-green-600, );
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -190,10 +190,10 @@
 }
 
 .dashboardFigma__insights {
-  min-width: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
+  align-items: stretch;
 }
 
 /* =========================================
@@ -412,145 +412,183 @@
 .satelliteMiniGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-
-  gap: 5px;
+  gap: 6px;
 }
 
 .satelliteMetric {
-  min-width: 0;
-
-  display: grid;
-
-  padding: 5px;
-
-  border: 1px solid var(--av-border-soft);
-  border-radius: 4px;
-
-  background: var(--av-neutral-50);
+  background: #ffffff !important;
+  border: 1px solid var(--av-border-soft, #f0f0f0) !important;
+  border-radius: 8px !important;
+  padding: 12px 8px !important;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .satelliteMetric strong {
   color: var(--av-text-secondary);
-
-  font-size: 0.48rem;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .satelliteMetric b {
   margin-top: 2px;
-
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
-  font-size: 0.82rem;
+  font-size: 1.4rem;
+  display: block;
+  margin: 4px 0 4px 0;
+  font-weight: 700;
 }
 
 .satelliteMetric span {
-  color: var(--av-text-muted);
-
-  font-size: 0.45rem;
+  color: var(--av-lime-600); /* Verde indicador */
+  font-size: 0.7rem !important;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
+/* Simulación matemática del gráfico de área verde inferior */
 .satelliteSparkline {
-  position: relative;
-
-  height: 28px;
-
-  margin-top: 4px;
-
-  overflow: hidden;
-}
-
-.satelliteSparkline::before {
-  content: "";
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 6px;
-
-  height: 18px;
-
-  clip-path:
-    polygon(
-      0 76%,
-      14% 60%,
-      26% 75%,
-      38% 30%,
-      50% 52%,
-      62% 22%,
-      78% 46%,
-      88% 38%,
-      100% 56%,
-      100% 100%,
-      0 100%
-    );
-
-  background: rgba(167, 217, 30, 0.28);
-
-  border-top: 1px solid var(--av-lime-600);
-}
-
-.satelliteMetric small {
-  width: max-content;
-
-  justify-self: end;
-
-  padding: 1px 3px;
-
-  color: var(--av-text-muted);
-
-  font-size: 0.4rem;
-
-  border: 1px solid var(--av-border);
+  height: 32px;
+  margin-top: 8px;
+  background: linear-gradient(to top, rgba(34, 197, 94, 0.5), transparent);
+  border-top: 2px solid #22c55e;
   border-radius: 2px;
+  /* Dibuja las ondas ascendentes exactas del Figma */
+  clip-path: polygon(0 85%, 20% 60%, 40% 75%, 60% 35%, 80% 50%, 100% 25%, 100% 100%, 0 100%);
+}
+
+/* Texto informativo de la esquina inferior izquierda */
+.avFooterMetaText {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+  font-family: var(--av-font-body);
+}
+
+/* --------------------------------------------------------------------------
+  ZONE INSIGHT (DONA + FILAS)
+   -------------------------------------------------------------------------- */ 
+.zoneInsightRows {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 16px;
+  min-height: 120px;
+}
+
+/* Contenedor óptico del gráfico de dona */
+.avZoneInsightChartPlaceholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.avDonaMock {
+  width: 95px;
+  height: 100px;
+  border-radius: 50%;
+  /* Anillo base gris con el sector crítico activo en verde lima brillante */
+  border: 11px solid #d8dbde;
+  border-top-color: #a3e635; 
+  border-right-color: #a3e635;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+
+.avDonaMock strong {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #0f172a;
+  font-family: var(--av-font-body2);
+}
+
+.avDonaMock span {
+  font-size: 0.7rem;
+  color: var(--av-text-secondary);
+  line-height: 1.2;
+  margin-top: 2px;
+  max-width: 50px;
+}
+
+/* Bloque contenedor de tus InfoRows reutilizados */
+.avZoneInsightRowsExtended {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+/* Estilo y espaciado de cada fila InfoRow */
+.avZoneInsightRowsExtended .figmaInfoRow {
+  display: flex ;
+  justify-content: space-between ;
+  align-items: center ;
+  grid-template-columns: none ; /* Resetea el grid anterior */
+  padding: 6px 0 ;
+  border-bottom: 1px solid #f1f5f9 ;
+}
+
+.avZoneInsightRowsExtended .figmaInfoRow:last-child {
+  border-bottom: 0 ; /* Quita la línea final */
+}
+
+/* Texto descriptivo izquierdo */
+.avZoneInsightRowsExtended .figmaInfoRow span {
+  font-size: 0.95rem;
+  color: var(--av-text-muted);
+  font-weight: 500;
+}
+
+/* Cifras numéricas derechas */
+.avZoneInsightRowsExtended .figmaInfoRow strong {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* --------------------------------------------------------------------------
+   3. BLOQUE: EVIDENCIAS (MOSAICO MINIMALISTA)
+   -------------------------------------------------------------------------- */
+
+/* Rejilla de mosaico fotográfico simétrico de 2x2 */
+.avEvidenceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 60px); /* Mantiene la proporción horizontal de la captura */
+  gap: 8px;
+  width: 100%;
+}
+
+/* Miniatura de imagen limpia con esquinas redondeadas */
+.avEvidenceItem {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 8px; /* Bordes curvados idénticos a los del Figma */
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
 }
 
 /* =========================================
    Rows
    ========================================= */
 
-.zoneInsightRows,
 .prescriptiveRows {
   display: grid;
   gap: 0;
 }
 
-.figmaInfoRow {
-  min-height: 28px;
-
-  display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
-  align-items: center;
-
-  gap: 7px;
-
-  padding: 4px;
-
-  border-bottom: 1px solid var(--av-border-soft);
-}
-
-.figmaInfoRow:last-child {
-  border-bottom: 0;
-}
-
-.figmaInfoRow span {
-  color: var(--av-text-muted);
-
-  font-size: 0.5rem;
-}
-
-.figmaInfoRow strong {
-  color: var(--av-text-secondary);
-
-  font-size: 0.52rem;
-  font-weight: 600;
-}
-
-.figmaInfoRow strong.is-highlighted {
-  color: var(--av-warning);
-}
-
-.zoneInsightAction,
 .dashboardCenteredAction {
   display: block;
 
@@ -590,9 +628,9 @@
 
 /* Círculos contenedores de los vectores técnicos */
 .avPrescriptiveRow__circle {
-  width: 50px;
-  height: 50px;
-  flex: 0 0 50px;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 46px;
   display: grid;
   place-items: center;
   border-radius: 50%;
@@ -790,16 +828,34 @@
   font-size: 0.48rem;
 }
 
+.dashboardPanelFooter .avTextAction {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--av-green-600) !important; /* Verde corporativo agrícola de la maqueta */
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 120ms ease;
+}
+
+.dashboardPanelFooter .avTextAction:hover {
+  opacity: 0.8;
+}
+
+/* Fuerza el alineamiento del pie de página */
 .dashboardPanelFooter {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 14px;
+}
 
-  margin-top: 6px;
-
-  color: var(--av-text-muted);
-
-  font-size: 0.44rem;
+.dashboardPanelFooter.justify-end {
+ justify-content: flex-end;
 }
 
 /* =========================================

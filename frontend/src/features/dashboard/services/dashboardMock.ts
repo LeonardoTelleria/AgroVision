@@ -130,11 +130,11 @@ export const dashboardMock: DashboardData = {
           {
             source: "SATELLITE",
             metric: "ndvi",
-            value: 0.24,
+            value: 0.38,
             unit: "index",
             status: "CRITICAL",
             explanation:
-              "NDVI muy bajo (0.24), vigor vegetativo severamente reducido.",
+              "NDVI muy bajo (0.38), vigor vegetativo severamente reducido.",
           },
           {
             source: "WEATHER",

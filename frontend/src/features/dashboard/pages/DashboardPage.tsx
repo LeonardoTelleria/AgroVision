@@ -17,6 +17,10 @@ import irrigationIcon from "../../../assets/icons/water-icon.svg";
 import protectionIcon from "../../../assets/icons/protection-icon.svg";
 import infoIcon from '../../../assets/icons/info-icon2.svg'
 import arrowRightIcon from '../../../assets/icons/arrow-icon.png'
+import img1 from '../../../assets/images/image-mock-plant1.jfif'
+import img2 from '../../../assets/images/image-mock-plant2.jpg'
+import img3 from '../../../assets/images/image-mock-plant3.png'
+import img4 from '../../../assets/images/image-mock-plant4.png'
 
 
 export function DashboardPage() {
@@ -181,40 +185,103 @@ export function DashboardPage() {
           <div className="dashboardFigma__insights">
             <Panel title="Capa satelital simulada" showCardTag>
               <div className="satelliteMiniGrid">
-                <SatelliteMetric label="NDVI" value={summary.vegetation.ndvi?.toFixed(2) ?? "—"} status={summary.vegetation.vigorLevel} />
-                <SatelliteMetric label="NDWI" value="—" status="N/A" />
-                <SatelliteMetric label="GNDVI" value="—" status="N/A" />
-                <SatelliteMetric label="SAVI" value="—" status="N/A" />
+                {/* <SatelliteMetric label="NDVI" value={summary.vegetation.ndvi?.toFixed(2) ?? "—"} status={summary.vegetation.vigorLevel} /> */}
+                <SatelliteMetric label="NDVI" value="0.72" status={summary.vegetation.vigorLevel} />
+                <SatelliteMetric label="NDWI" value="0.45" status="↑ 0.03" />
+                <SatelliteMetric label="GNDVI" value="0.38" status="↑ 0.04" />
+                <SatelliteMetric label="SAVI" value="0.61" status="↑ 0.02" />
               </div>
 
               <footer className="dashboardPanelFooter">
-                <span>Última actualización: {formatTime(summary.lastUpdatedAt)}</span>
-                <button className="avTextAction" type="button">Ver detalles →</button>
+                {/* <span className="avFooterMetaText">Última actualización: {formatTime(summary.lastUpdatedAt)}</span> */}
+                <span className="avFooterMetaText">Imágenes: Sentinel-2 • 18 May 2025</span>
+                <button className="avTextAction" type="button">Ver detalles</button>
               </footer>
             </Panel>
 
-            <Panel title="Zone Insight" showCardTag>
+            {/* <Panel title="Zone Insight" showCardTag>
               <div className="zoneInsightRows">
                 <InfoRow label="Zona" value={zoneId} />
                 <InfoRow label="Score de riesgo" value={formatRisk(summary.intelligence.dominantRisk)} highlight />
                 <InfoRow label="Evidencia principal" value={recommendation.evidence[0]?.source ?? "—"} />
                 <InfoRow label="Acción sugerida" value={recommendation.suggestedAction} />
               </div>
-
               <button className="avTextAction zoneInsightAction" type="button">Ver detalle de la zona →</button>
+            </Panel> */}
+
+            <Panel title="Zone Insight" showCardTag>
+              <div className="zoneInsightRows">
+                <div className="avDonaMock">
+                  <strong>3</strong>
+                  <span>Zonas críticas</span>
+                </div>
+                <div className="zoneInsightRows avZoneInsightRowsExtended">
+                  <InfoRow label="Total Zonas" value="18" />
+                  <InfoRow label="Score de riesgo" value="5"/> {/* highlight activa el color de riesgo */}
+                  <InfoRow label="Evidencia principal" value="10" />
+                  <InfoRow label="Acción sugerida" value="3" />
+                </div>
+
+              </div>
+              <footer className="dashboardPanelFooter justify-end" style={{ marginTop: '12px' }}>
+                <button className="avTextAction" type="button">Ver insights</button>
+              </footer>
+
             </Panel>
 
-            <Panel title="Evidencias" showCardTag>
-              <ul className="dashboardEvidenceBullets">
-                {recommendation.evidence.slice(0, 4).map((evidence) => (
-                  <li key={`${evidence.source}-${evidence.metric}`}>
-                    {evidence.explanation ?? `${evidence.metric}: ${String(evidence.value ?? "—")}`}
-                  </li>
-                ))}
-              </ul>
+            {/* <Panel title="Evidencias show" showCardTag>
+              <div className="avEvidenceGrid">
+                {recommendation.evidence.slice(0, 4).map((evidence, index) => {
+                  const localPics = [img1, img2, img3, img4];
+                  const currentImage = localPics[index] || evidence.source; // Fallback a img1 si no hay suficiente evidencia
 
-              <button type="button" className="avTextAction dashboardCenteredAction">Ver todas las evidencias →</button>
+                  return (
+                    <div 
+                      key={`${evidence.source}-${evidence.metric}`}
+                      className="avEvidenceItem"
+                      style={{ backgroundImage: currentImage ?`url(${currentImage})` : "linear-gradient(135deg, #15803d 0%, #166534 100%)"}}
+                      title={`${evidence.source}: ${evidence.metric}`}
+                      />
+                  );
+                })}
+              </div>
+
+              <footer className="dashboardPanelFooter justify-end" style={{ marginTop: '12px' }}>
+                <button className="avTextAction" type="button">Ver todas</button>
+              </footer>
+            </Panel> */}
+                        <Panel title="Evidencias" showCardTag>
+              <div className="avEvidenceGrid">
+                {/* 
+                  Creamos un arreglo estático con tus 4 referencias locales.
+                  Esto garantiza que el bucle itere exactamente 4 veces pase lo que pase con los datos externos.
+                */}
+                {[img1, img2, img3, img4].map((currentImage, index) => {
+                  // Extraemos datos de soporte del servidor si existen en esa posición
+                  const evidenceData = recommendation.evidence[index];
+                  
+                  return (
+                    <div 
+                      key={evidenceData ? `${evidenceData.source}-${index}` : `fallback-pic-${index}`}
+                      className="avEvidenceItem"
+                      style={{ 
+                        // Forzamos el uso de tu imagen local importada. Si no existe, aplica el gradiente.
+                        backgroundImage: currentImage 
+                          ? `url(${currentImage})` 
+                          : "linear-gradient(135deg, #15803d 0%, #166534 100%)"
+                      }}
+                      title={evidenceData ? `${evidenceData.source}: ${evidenceData.metric}` : "Evidencia de campo"}
+                    />
+                  );
+                })}
+              </div>
+
+              <footer className="dashboardPanelFooter justify-end" style={{ marginTop: '12px' }}>
+                <button className="avTextAction" type="button">Ver todas →</button>
+              </footer>
             </Panel>
+
+
           </div>
         </div>
 
@@ -258,7 +325,7 @@ export function DashboardPage() {
         </div> */}
         <div className="dashboardFigma__right">
           
-          {/* NUEVO DISEÑO OPERATIVO DEL RESUMEN PRESCRIPTIVO */}
+          {/* NUEVO DISEÑO DEL RESUMEN PRESCRIPTIVO */}
           <Panel 
             title={
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '12px', alignItems: 'center' }}>
@@ -425,7 +492,7 @@ function SatelliteMetric({
       <b>{value}</b>
       <span>{status}</span>
       <div className="satelliteSparkline" />
-      <small>Chart</small>
+    
     </article>
   );
 }
@@ -445,7 +512,7 @@ function InfoRow({
   readonly highlight?: boolean;
 }) {
   return (
-    <div className="figmaInfoRow">
+    <div className="figmaInfoRow" style={{display: "flex", justifyContent: "flex-start"}}> 
       <span>{label}</span>
       <strong className={highlight ? "is-highlighted" : ""}>{value}</strong>
     </div>
