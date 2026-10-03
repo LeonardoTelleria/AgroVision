@@ -93,7 +93,6 @@ h6 {
   width: 100%;
   min-width: 0;
   padding: 10px 22px 18px;
-  
 }
 
 /* =========================================
@@ -662,7 +661,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   transform: translateY(-1px);
   border-color: var(--av-neutral-400);
   box-shadow: var(--av-shadow-xs);
-  background: #f8fafc
+  background: #f8fafc;
 }
 
 /* Campo / fecha */
@@ -735,7 +734,6 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 .topbar__iconSlot {
   width: 32px;
   height: 32px;
-  
 }
 
 /*Globo verde de notificaciones*/
@@ -743,7 +741,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   position: absolute;
   top: -1px;
   right: -1px;
-  background: #65a30d;       /* Verde lima exacto */
+  background: #65a30d; /* Verde lima exacto */
   color: #ffffff;
   font-size: 0.68rem;
   font-weight: 700;
@@ -763,7 +761,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   align-items: center;
   gap: 12px;
   background: #ffffff;
-  padding: 0px 22px 0 18px;   /* Reducido a la izquierda para empotrar el avatar */
+  padding: 0px 22px 0 18px; /* Reducido a la izquierda para empotrar el avatar */
   border: 1px solid var(--av-border);
   border-radius: 12px;
   height: 50px;
@@ -908,7 +906,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   height: 8px;
   border-right: 1.5px solid #64748b;
   border-bottom: 1.5px solid #64748b;
-  transform: rotate(45deg);  /* Forma de V perfecta */
+  transform: rotate(45deg); /* Forma de V perfecta */
   margin-left: 6px;
   transition: transform 0.2s ease;
 }
