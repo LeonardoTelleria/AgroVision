@@ -2,3 +2,8 @@ fastapi
 uvicorn
 pydantic
 python-multipart
+torch==2.14.0
+torchvision==0.29.0
+networkx==3.7
+numpy==2.5.3
+optuna==5.0.0
