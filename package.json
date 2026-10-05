@@ -11,9 +11,15 @@
   "devDependencies": {
     "@prisma/client": "^7.10.0",
     "@types/express": "^5.0.6",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^26.0.1",
     "prisma": "^7.10.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@geoman-io/maplibre-geoman-free": "^0.10.0",
+    "@turf/turf": "^7.4.0",
+    "maplibre-gl": "^6.12.0"
   }
 }
