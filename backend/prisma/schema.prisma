@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -11,5 +5,406 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+}
+
+// ENUMS
+
+enum UserRole {
+  ADMIN
+  FARM_MANAGER
+  AGRONOMIST
+  OPERATOR
+}
+
+enum CropStatus {
+  ACTIVE
+  HARVESTED
+  INACTIVE
+}
+
+enum SensorStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum VegetationSource {
+  SATELLITE
+  DRONE
+  UAV
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+  DISMISSED
+}
+
+enum RecommendationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+
+// USERS
+
+model User {
+  id           Int      @id @default(autoincrement())
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+  createdAt    DateTime @default(now())
+
+  farms                 Farm[]
+  fieldNotebookEntries  FieldNotebookEntry[]
+  reportsCreated        Report[]
+
+  @@map("users")
+}
+
+
+// FARMS
+
+model Farm {
+  id                     Int      @id @default(autoincrement())
+  ownerId                Int
+  name                   String
+  location               String
+  totalAreaSquareMeters  Decimal  @db.Decimal(12, 2)
+  createdAt              DateTime @default(now())
+
+  owner  User    @relation(fields: [ownerId], references: [id])
+  fields Field[]
+
+  @@index([ownerId])
+  @@map("farms")
+}
+
+
+// FIELDS
+
+model Field {
+  id                Int      @id @default(autoincrement())
+  farmId            Int
+  name              String
+  areaSquareMeters  Decimal  @db.Decimal(12, 2)
+  soilType          String
+  irrigationType    String
+  status            String
+  createdAt         DateTime @default(now())
+
+  farm                  Farm                    @relation(fields: [farmId], references: [id])
+  crops                 Crop[]
+  sensors               Sensor[]
+  telemetryReadings     TelemetryReading[]
+  visionInspections     VisionInspection[]
+  vegetationSnapshots   VegetationSnapshot[]
+  evidenceItems         EvidenceItem[]
+  zoneInsights          ZoneInsight[]
+  alerts                Alert[]
+  recommendations       Recommendation[]
+  notebookEntries       FieldNotebookEntry[]
+  reports               Report[]
+
+  @@index([farmId])
+  @@map("fields")
+}
+
+
+// CROP PROFILES
+
+model CropProfile {
+  id               Int      @id @default(autoincrement())
+  cropType         String
+  displayName      String
+  mainRisks        String?
+  preferredMetrics String?
+  createdAt        DateTime @default(now())
+
+  crops Crop[]
+
+  @@map("crop_profiles")
+}
+
+
+// CROPS
+
+model Crop {
+  id            Int      @id @default(autoincrement())
+  fieldId       Int
+  cropProfileId Int
+  cropType      String
+  name          String
+  growthStage   String
+  plantedAt     DateTime
+  status        CropStatus
+
+  field       Field      @relation(fields: [fieldId], references: [id])
+  cropProfile CropProfile @relation(fields: [cropProfileId], references: [id])
+
+  visionInspections    VisionInspection[]
+  zoneInsights         ZoneInsight[]
+  notebookEntries      FieldNotebookEntry[]
+
+  @@index([fieldId])
+  @@index([cropProfileId])
+  @@map("crops")
+}
+
+
+// SENSORS
+
+model Sensor {
+  id          Int      @id @default(autoincrement())
+  fieldId     Int
+  type        String
+  name        String
+  status      SensorStatus
+  installedAt DateTime
+
+  field             Field              @relation(fields: [fieldId], references: [id])
+  telemetryReadings TelemetryReading[]
+
+  @@index([fieldId])
+  @@map("sensors")
+}
+
+
+// TELEMETRY READINGS
+
+model TelemetryReading {
+  id         Int      @id @default(autoincrement())
+  sensorId   Int
+  fieldId    Int
+  metric     String
+  value      Decimal  @db.Decimal(12, 4)
+  unit       String
+  quality    String?
+  recordedAt DateTime
+
+  sensor Sensor @relation(fields: [sensorId], references: [id])
+  field  Field  @relation(fields: [fieldId], references: [id])
+
+  @@index([sensorId])
+  @@index([fieldId])
+  @@index([recordedAt])
+  @@map("telemetry_readings")
+}
+
+
+// VISION INSPECTIONS
+
+model VisionInspection {
+  id                       Int      @id @default(autoincrement())
+  fieldId                  Int
+  zoneId                   String
+  cropId                   Int
+  prediction               String
+  confidence               Decimal  @db.Decimal(5, 4)
+  greenCoveragePercentage  Decimal  @db.Decimal(5, 2)
+  dryAreaPercentage        Decimal  @db.Decimal(5, 2)
+  explanation              String?
+  createdAt                DateTime @default(now())
+
+  field Field @relation(fields: [fieldId], references: [id])
+  crop  Crop  @relation(fields: [cropId], references: [id])
+
+  @@index([fieldId])
+  @@index([cropId])
+  @@index([zoneId])
+  @@map("vision_inspections")
+}
+
+
+// VEGETATION SNAPSHOTS
+
+model VegetationSnapshot {
+  id              Int      @id @default(autoincrement())
+  fieldId         Int
+  zoneId          String
+  source          VegetationSource
+  ndvi            Decimal? @db.Decimal(8, 4)
+  ndwi            Decimal? @db.Decimal(8, 4)
+  gndvi           Decimal? @db.Decimal(8, 4)
+  vigorLevel      String
+  anomalyDetected Boolean  @default(false)
+  capturedAt      DateTime
+
+  field Field @relation(fields: [fieldId], references: [id])
+
+  @@index([fieldId])
+  @@index([zoneId])
+  @@index([capturedAt])
+  @@map("vegetation_snapshots")
+}
+
+
+// EVIDENCE ITEMS
+
+model EvidenceItem {
+  id          Int      @id @default(autoincrement())
+  fieldId     Int
+  zoneId      String
+  source      String
+  metric      String
+  value       Decimal  @db.Decimal(12, 4)
+  unit        String
+  status      String
+  explanation String?
+  createdAt   DateTime @default(now())
+
+  field Field @relation(fields: [fieldId], references: [id])
+
+  @@index([fieldId])
+  @@index([zoneId])
+  @@map("evidence_items")
+}
+
+
+// ZONE INSIGHTS
+
+model ZoneInsight {
+  id               Int      @id @default(autoincrement())
+  fieldId          Int
+  zoneId           String
+  cropId           Int
+  finalRiskLevel   RiskLevel
+  healthScore      Decimal  @db.Decimal(5, 2)
+  mainCause        String?
+  summary          String?
+  recommendedAction String?
+  generatedAt      DateTime @default(now())
+
+  field Field @relation(fields: [fieldId], references: [id])
+  crop  Crop  @relation(fields: [cropId], references: [id])
+
+  alerts          Alert[]
+  recommendations Recommendation[]
+  reports         Report[]
+
+  @@index([fieldId])
+  @@index([cropId])
+  @@index([zoneId])
+  @@index([finalRiskLevel])
+  @@map("zone_insights")
+}
+
+
+// ALERTS
+
+model Alert {
+  id                Int       @id @default(autoincrement())
+  fieldId           Int
+  zoneId            String
+  zoneInsightId     Int
+  type              String
+  severity          AlertSeverity
+  title             String
+  message           String
+  recommendedAction String?
+  status             AlertStatus
+  createdAt          DateTime  @default(now())
+  resolvedAt         DateTime?
+
+  field       Field       @relation(fields: [fieldId], references: [id])
+  zoneInsight ZoneInsight @relation(fields: [zoneInsightId], references: [id])
+
+  @@index([fieldId])
+  @@index([zoneId])
+  @@index([zoneInsightId])
+  @@index([status])
+  @@map("alerts")
+}
+
+
+// RECOMMENDATIONS
+
+model Recommendation {
+  id                       Int       @id @default(autoincrement())
+  fieldId                  Int
+  zoneId                   String
+  zoneInsightId            Int
+  priority                 RecommendationPriority
+  reason                   String?
+  suggestedAction          String
+  expectedImpactArea       Decimal?  @db.Decimal(12, 2)
+  expectedImpactDescription String?
+  createdAt                DateTime  @default(now())
+
+  field       Field       @relation(fields: [fieldId], references: [id])
+  zoneInsight ZoneInsight @relation(fields: [zoneInsightId], references: [id])
+
+  @@index([fieldId])
+  @@index([zoneId])
+  @@index([zoneInsightId])
+  @@index([priority])
+  @@map("recommendations")
+}
+
+
+// FIELD NOTEBOOK ENTRIES
+
+model FieldNotebookEntry {
+  id                Int      @id @default(autoincrement())
+  fieldId           Int
+  zoneId            String
+  cropId            Int
+  activityType      String
+  description       String?
+  problemObserved   String?
+  actionTaken       String?
+  responsibleUserId Int
+  createdAt         DateTime @default(now())
+
+  field           Field @relation(fields: [fieldId], references: [id])
+  crop            Crop  @relation(fields: [cropId], references: [id])
+  responsibleUser User  @relation(fields: [responsibleUserId], references: [id])
+
+  @@index([fieldId])
+  @@index([cropId])
+  @@index([responsibleUserId])
+  @@index([zoneId])
+  @@map("field_notebook_entries")
+}
+
+
+// REPORTS
+
+model Report {
+  id            Int      @id @default(autoincrement())
+  fieldId       Int
+  zoneId        String
+  zoneInsightId Int
+  title         String
+  summary       String?
+  riskLevel     RiskLevel
+  createdBy     Int
+  createdAt     DateTime @default(now())
+
+  field       Field       @relation(fields: [fieldId], references: [id])
+  zoneInsight ZoneInsight @relation(fields: [zoneInsightId], references: [id])
+  creator     User        @relation(fields: [createdBy], references: [id])
+
+  @@index([fieldId])
+  @@index([zoneId])
+  @@index([zoneInsightId])
+  @@index([createdBy])
+  @@map("reports")
 }
