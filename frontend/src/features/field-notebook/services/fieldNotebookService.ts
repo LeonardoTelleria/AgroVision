@@ -19,7 +19,29 @@
  */
 
 import { API_ENDPOINTS } from "../../../shared/api/endpoints";
-import type { ApiResponse, FieldNotebookData, FieldNotebookRecord, FieldObservationForm } from "../types/fieldNotebook.types";
+import spottedPlant from "../../../assets/images/image-mock-plant2.jpg";
+import irrigationImage from "../../../assets/images/riegoPorGoteo.png";
+import cropImage from "../../../assets/images/image-mock-plant4.png";
+import monitoringImage from "../../../assets/images/monitoreoMapp.png";
+import pestDetected from "../../../assets/images/plagaDetectada.png";
+import reportFert from "../../../assets/images/reporteFert.png";
+import planManejo from "../../../assets/images/planManejo.png";
+import type {
+  ApiResponse,
+  FieldNotebookData,
+  FieldNotebookRecord,
+  FieldObservationForm,
+} from "../types/fieldNotebook.types";
+
+const evidencePreviewByName: Readonly<Record<string, string>> = {
+  "Manchas-hojas.jpg": spottedPlant,
+  "Riego-zone-03.jpg": irrigationImage,
+  "Estado-cultivo.jpg": cropImage,
+  "Monitoreo-NDVI.jpg": monitoringImage,
+  "Plaga detectada.jpg": pestDetected,
+  "Plan-Manejo.pdf": planManejo,
+  "Reporte-Fert.pdf": reportFert,
+};
 
 /**
  * Endpoint centralizado.
@@ -120,44 +142,44 @@ const fieldNotebookFallback: FieldNotebookData = {
     {
       id: "evidence-001",
       type: "IMAGE",
-      name: "Inspeccion-zone-03.jpg",
+      name: "Hojas Manchadas.jpg",
       sizeLabel: "1.2 MB",
-      previewUrl: null,
+      previewUrl: spottedPlant,
     },
     {
       id: "evidence-002",
       type: "IMAGE",
-      name: "Riego-zone-03.jpg",
+      name: "Plaga detectada.jpg",
       sizeLabel: "1.1 MB",
-      previewUrl: null,
+      previewUrl: pestDetected,
     },
     {
       id: "evidence-003",
       type: "IMAGE",
-      name: "Estado-cultivo.jpg",
+      name: "Riego por goteo.jpg",
       sizeLabel: "2.3 MB",
-      previewUrl: null,
+      previewUrl: irrigationImage,
     },
     {
       id: "evidence-004",
       type: "PDF",
       name: "Reporte-prescriptivo.pdf",
       sizeLabel: "580 KB",
-      previewUrl: null,
+      previewUrl: reportFert,
     },
     {
       id: "evidence-005",
       type: "IMAGE",
       name: "Monitoreo-NDVI.jpg",
       sizeLabel: "1.6 MB",
-      previewUrl: null,
+      previewUrl: monitoringImage,
     },
     {
       id: "evidence-006",
       type: "PDF",
       name: "Plan-de-manejo.pdf",
       sizeLabel: "1.4 MB",
-      previewUrl: null,
+      previewUrl: planManejo,
     },
   ],
 };
@@ -184,7 +206,13 @@ export async function getFieldNotebookData(): Promise<FieldNotebookData> {
       return cloneFallbackData();
     }
 
-    return json.data;
+    return {
+      ...json.data,
+      evidenceFiles: json.data.evidenceFiles.map((file) => ({
+        ...file,
+        previewUrl: file.previewUrl ?? evidencePreviewByName[file.name] ?? null,
+      })),
+    };
   } catch {
     return cloneFallbackData();
   }
@@ -197,7 +225,9 @@ export async function getFieldNotebookData(): Promise<FieldNotebookData> {
  * Si backend aún no está disponible se genera
  * un registro local compatible para mantener la demo funcional.
  */
-export async function createFieldObservation(form: FieldObservationForm): Promise<FieldNotebookRecord> {
+export async function createFieldObservation(
+  form: FieldObservationForm,
+): Promise<FieldNotebookRecord> {
   try {
     const response = await fetch(FIELD_NOTEBOOK_ENDPOINT, {
       method: "POST",
@@ -252,7 +282,9 @@ function buildLocalRecord(form: FieldObservationForm): FieldNotebookRecord {
  * Convierte la acción del formulario
  * al tipo de evento que usa el historial.
  */
-function mapActionToEventType(action: FieldObservationForm["action"]): FieldNotebookRecord["eventType"] {
+function mapActionToEventType(
+  action: FieldObservationForm["action"],
+): FieldNotebookRecord["eventType"] {
   if (action === "IRRIGATION") return "IRRIGATION";
   if (action === "FERTILIZATION") return "FERTILIZATION";
   if (action === "PEST_CONTROL") return "PEST_CONTROL";

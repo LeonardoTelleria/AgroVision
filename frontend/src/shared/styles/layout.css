@@ -757,6 +757,8 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 /* Profile */
 
 .topbar__profileButton {
+  min-width: 0;
+  max-width: 220px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -789,23 +791,32 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 }
 
 .topbar__profileData {
+  min-width: 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
   text-align: left;
   line-height: 1.5;
+  overflow: hidden;
 }
 
 .topbar__profileButton strong {
+  overflow: hidden;
   color: var(--av-text);
   font-family: var(--av-font-heading);
   font-size: 0.85rem;
   font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .topbar__profileButton small {
+  overflow: hidden;
   color: var(--av-text-muted);
   font-size: 0.8rem;
   font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* =========================================
