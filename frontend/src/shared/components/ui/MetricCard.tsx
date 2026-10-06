@@ -17,6 +17,7 @@ interface MetricCardProps {
   readonly actionLabel?: string;
   readonly progress?: number;
   readonly tone?: "LIME" | "AMBER" | "TEAL";
+  readonly showRing?: boolean;
   readonly icon?: ReactNode;
   readonly details?: MetricDetailItem[]; // lista detallada de metricas a la derecha 
   readonly subBadge?: ReactNode;  // Para el "+6% vs semana anterior"
@@ -31,6 +32,7 @@ export function MetricCard({
   actionLabel, 
   progress = 72, 
   tone = "LIME", 
+  showRing = false,
   icon, 
   details, 
   subBadge 
@@ -63,7 +65,7 @@ export function MetricCard({
           {/* Columna Izquierda: Gráficos circulares o Números Grandes */}
           <div className="avMetricCard__leftCol">
             {/* Tarjeta LIME: Renderiza el anillo con el valor y su etiqueta interna */}
-            {tone === "LIME" && (
+            {(tone === "LIME" || showRing) && (
               <div className="avMetricRing" style={ringStyle}>
                 <div className="avMetricRing__center">
                   <div className="avMetricRing__innerValue">
@@ -78,7 +80,7 @@ export function MetricCard({
             )}
 
             {/* Tarjetas AMBER y TEAL: Renderizan el número gigante limpio a la izquierda */}
-            {(tone === "AMBER" || tone === "TEAL") && (
+            {tone !== "LIME" && !showRing && (
               <div className="avMetricCard__bigNumberBlock">
                 <div className="avMetricCard__value">
                   <strong>{value}</strong>

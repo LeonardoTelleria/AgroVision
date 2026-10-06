@@ -33,6 +33,7 @@
 .fieldNotebookForm {
   display: grid;
   gap: 9px;
+  padding: 20px 15px 15px;
 }
 
 .fieldNotebookForm__three {
@@ -65,7 +66,9 @@
   border-radius: 5px;
   outline: 0;
   background: var(--av-neutral-50);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .fieldNotebookField input,
@@ -97,12 +100,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 12px;
+  padding: 6px 16px 2px;
   gap: 8px;
   border: 1px dashed var(--av-neutral-500);
   border-radius: 5px;
   background: var(--av-neutral-50);
   cursor: pointer;
-  transition: border-color 130ms ease, background 130ms ease;
+  transition:
+    border-color 130ms ease,
+    background 130ms ease;
 }
 
 .fieldNotebookUpload:hover {
@@ -113,6 +120,14 @@
 .fieldNotebookUpload > span {
   width: 20px;
   height: 20px;
+}
+
+.fieldNotebookUpload > span img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .fieldNotebookUpload > div {
@@ -163,7 +178,9 @@
   font-weight: 700;
   border-radius: 5px;
   cursor: pointer;
-  transition: transform 120ms ease, background 120ms ease;
+  transition:
+    transform 120ms ease,
+    background 120ms ease;
 }
 
 .fieldNotebookButton:hover {
@@ -216,6 +233,15 @@
   height: 14px;
 }
 
+.fieldDaySummaryRow img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(10%) sepia(25%) saturate(1087%)
+    hue-rotate(117deg) brightness(94%) contrast(96%);
+}
+
 .fieldDaySummaryRow strong {
   color: var(--av-text-secondary);
   font-size: 0.49rem;
@@ -254,7 +280,9 @@
   border-bottom: 1px solid var(--av-border-soft);
   background: transparent;
   cursor: pointer;
-  transition: padding-left 120ms ease, background 120ms ease;
+  transition:
+    padding-left 120ms ease,
+    background 120ms ease;
 }
 
 .fieldNotebookShortcut:hover {
@@ -265,6 +293,15 @@
 .fieldNotebookShortcut > span {
   width: 14px;
   height: 14px;
+}
+
+.fieldNotebookShortcut img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(10%) sepia(25%) saturate(1087%)
+    hue-rotate(117deg) brightness(94%) contrast(96%);
 }
 
 .fieldNotebookShortcut strong {
@@ -291,6 +328,17 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.fieldNotebookEvidenceCount {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fieldNotebookEvidenceCount img {
+  width: 16px;
+  height: 16px;
 }
 
 .fieldNotebookHistoryTools button,
@@ -336,20 +384,32 @@
 }
 
 .fieldNotebookRelation__icon {
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.fieldNotebookRelation__icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scale(1.2);
 }
 
 .fieldNotebookRelation__icon--high {
-  background: var(--av-danger);
+  background: url("../../assets/icons/warning-red-icon.svg") center / contain
+    no-repeat;
 }
 
 .fieldNotebookRelation__icon--medium {
-  background: var(--av-warning);
+  background: url("../../assets/icons/warning-orange-icon.svg") center / contain
+    no-repeat;
 }
 
 .fieldNotebookRelation__icon--low {
-  background: var(--av-success);
+  background: url("../../assets/icons/plant-01-icon.svg") center / contain
+    no-repeat;
 }
 
 .fieldNotebookRelation > div {
@@ -391,7 +451,10 @@
   border: 1px solid var(--av-border-soft);
   border-radius: 5px;
   background: var(--av-neutral-50);
-  transition: transform 130ms ease, box-shadow 130ms ease, border-color 130ms ease;
+  transition:
+    transform 130ms ease,
+    box-shadow 130ms ease,
+    border-color 130ms ease;
 }
 
 .fieldEvidenceFile:hover {
@@ -405,23 +468,7 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-}
-
-.fieldEvidenceFile__preview--image {
-  background:
-    linear-gradient(150deg, rgba(183, 225, 58, 0.23), transparent 50%),
-    linear-gradient(30deg, #375e34, #8b9c48);
-}
-
-.fieldEvidenceFile__preview--image.fieldEvidenceFile__preview--2 {
-  background:
-    linear-gradient(135deg, rgba(206, 238, 104, 0.2), transparent),
-    linear-gradient(30deg, #334c26, #738447);
-}
-
-.fieldEvidenceFile__preview--image.fieldEvidenceFile__preview--3 {
-  background:
-    linear-gradient(90deg, #978259 0 15%, #4f7c36 15% 35%, #8f7049 35% 55%, #4a7737 55% 80%, #9b8354 80%);
+  background: transparent;
 }
 
 .fieldEvidenceFile__preview--pdf {
@@ -475,9 +522,17 @@
 }
 
 .fieldEvidenceFile--add > span {
-  font-family: var(--av-font-heading);
-  font-size: 1.6rem;
+  width: 28px;
+  height: 28px;
   line-height: 1;
+}
+
+.fieldEvidenceFile--add > span img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .fieldEvidenceFile--add > strong {

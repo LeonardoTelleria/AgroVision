@@ -13,13 +13,36 @@
  * - tipos existentes.
  */
 
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { MetricCard } from "../../../shared/components/ui/MetricCard";
 import { Panel } from "../../../shared/components/ui/Panel";
 import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
-import { createFieldObservation, getFieldNotebookData } from "../services/fieldNotebookService";
-import type { FieldNotebookData, FieldNotebookEventType, FieldNotebookRecord, FieldObservationForm, LinkedItemPriority } from "../types/fieldNotebook.types";
+import {
+  createFieldObservation,
+  getFieldNotebookData,
+} from "../services/fieldNotebookService";
+import type {
+  FieldNotebookData,
+  FieldNotebookEventType,
+  FieldNotebookRecord,
+  FieldObservationForm,
+  LinkedItemPriority,
+} from "../types/fieldNotebook.types";
 import "../field-notebook.css";
+import bugIcon from "../../../assets/icons/bug-icon.svg";
+import alertIcon from "../../../assets/icons/alert-icon.svg";
+import cameraIcon from "../../../assets/icons/camera-icon.svg";
+import infoIcon from "../../../assets/icons/info-icon.svg";
+import locationIcon from "../../../assets/icons/location-icon.svg";
+import plantIcon from "../../../assets/icons/plant-01-icon.svg";
+import notebookIcon from "../../../assets/icons/notebook-icon.svg";
+import uploadFileIcon from "../../../assets/icons/subirArchivo-icon.png";
 
 const INITIAL_FORM: FieldObservationForm = {
   cropType: "ORANGE",
@@ -32,8 +55,12 @@ const INITIAL_FORM: FieldObservationForm = {
 };
 
 export function FieldNotebookPage() {
-  const [notebookData, setNotebookData] = useState<FieldNotebookData | null>(null);
-  const [records, setRecords] = useState<ReadonlyArray<FieldNotebookRecord>>([]);
+  const [notebookData, setNotebookData] = useState<FieldNotebookData | null>(
+    null,
+  );
+  const [records, setRecords] = useState<ReadonlyArray<FieldNotebookRecord>>(
+    [],
+  );
   const [form, setForm] = useState<FieldObservationForm>(INITIAL_FORM);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -63,13 +90,21 @@ export function FieldNotebookPage() {
    * la actividad más reciente.
    */
   const sortedRecords = useMemo(() => {
-    return [...records].sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime());
+    return [...records].sort(
+      (first, second) =>
+        new Date(second.createdAt).getTime() -
+        new Date(first.createdAt).getTime(),
+    );
   }, [records]);
 
   /**
    * Control común de formulario.
    */
-  function handleFieldChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function handleFieldChange(
+    event: ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) {
     const { name, value } = event.target;
 
     setForm((currentForm) => ({
@@ -114,11 +149,19 @@ export function FieldNotebookPage() {
   }
 
   if (isLoading) {
-    return <section className="avState"><strong>Cargando Cuaderno de campo</strong></section>;
+    return (
+      <section className="avState">
+        <strong>Cargando Cuaderno de campo</strong>
+      </section>
+    );
   }
 
   if (!notebookData) {
-    return <section className="avState"><strong>No fue posible cargar el Cuaderno de campo</strong></section>;
+    return (
+      <section className="avState">
+        <strong>No fue posible cargar el Cuaderno de campo</strong>
+      </section>
+    );
   }
 
   return (
@@ -128,11 +171,33 @@ export function FieldNotebookPage() {
           ===================================== */}
 
       <section className="avMetricGrid">
-        <MetricCard title="Registros recientes" value="100%" description={`${records.length} actividades registradas.`} progress={100} actionLabel="Ver todos los registros" />
+        <MetricCard
+          title="Registros recientes"
+          value="100%"
+          description={`${records.length} actividades registradas.`}
+          progress={100}
+          actionLabel="Ver todos los registros"
+        />
 
-        <MetricCard title="Observaciones pendientes" value="25%" description="Requiere seguimiento." progress={25} tone="AMBER" actionLabel="Ver listado completo" />
+        <MetricCard
+          title="Observaciones pendientes"
+          value="25%"
+          description="Requiere seguimiento."
+          progress={25}
+          tone="AMBER"
+          showRing
+          actionLabel="Ver listado completo"
+        />
 
-        <MetricCard title="Acciones aplicadas" value="75%" description="Intervenciones documentadas." progress={75} tone="TEAL" actionLabel="Ver intervenciones" />
+        <MetricCard
+          title="Acciones aplicadas"
+          value="75%"
+          description="Intervenciones documentadas."
+          progress={75}
+          tone="TEAL"
+          showRing
+          actionLabel="Ver intervenciones"
+        />
       </section>
 
       {/* =====================================
@@ -144,7 +209,11 @@ export function FieldNotebookPage() {
           <form className="fieldNotebookForm" onSubmit={handleSubmit}>
             <div className="fieldNotebookForm__three">
               <NotebookField label="Cultivo *">
-                <select name="cropType" value={form.cropType} onChange={handleFieldChange}>
+                <select
+                  name="cropType"
+                  value={form.cropType}
+                  onChange={handleFieldChange}
+                >
                   <option value="ORANGE">Naranjo</option>
                   <option value="RED_BEAN">Frijol rojo</option>
                   <option value="CASSAVA">Yuca</option>
@@ -153,7 +222,11 @@ export function FieldNotebookPage() {
               </NotebookField>
 
               <NotebookField label="Zona *">
-                <select name="zoneId" value={form.zoneId} onChange={handleFieldChange}>
+                <select
+                  name="zoneId"
+                  value={form.zoneId}
+                  onChange={handleFieldChange}
+                >
                   <option value="zone-03">Zona 03</option>
                   <option value="zone-02">Zona 02</option>
                   <option value="zone-01">Zona 01</option>
@@ -161,17 +234,32 @@ export function FieldNotebookPage() {
               </NotebookField>
 
               <NotebookField label="Fecha *">
-                <input type="date" name="date" value={form.date} onChange={handleFieldChange} />
+                <input
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  onChange={handleFieldChange}
+                />
               </NotebookField>
             </div>
 
             <NotebookField label="Observación *">
-              <textarea name="observation" value={form.observation} placeholder="Describe lo observado en el lote..." rows={3} onChange={handleFieldChange} />
+              <textarea
+                name="observation"
+                value={form.observation}
+                placeholder="Describe lo observado en el lote..."
+                rows={3}
+                onChange={handleFieldChange}
+              />
             </NotebookField>
 
             <div className="fieldNotebookForm__three">
               <NotebookField label="Severidad">
-                <select name="severity" value={form.severity} onChange={handleFieldChange}>
+                <select
+                  name="severity"
+                  value={form.severity}
+                  onChange={handleFieldChange}
+                >
                   <option value="LOW">Baja</option>
                   <option value="MEDIUM">Moderada</option>
                   <option value="HIGH">Alta</option>
@@ -179,7 +267,11 @@ export function FieldNotebookPage() {
               </NotebookField>
 
               <NotebookField label="Acción tomada *">
-                <select name="action" value={form.action} onChange={handleFieldChange}>
+                <select
+                  name="action"
+                  value={form.action}
+                  onChange={handleFieldChange}
+                >
                   <option value="MONITORING">Monitoreo</option>
                   <option value="INSPECTION">Inspección</option>
                   <option value="IRRIGATION">Riego</option>
@@ -189,7 +281,11 @@ export function FieldNotebookPage() {
               </NotebookField>
 
               <NotebookField label="Responsable">
-                <select name="responsible" value={form.responsible} onChange={handleFieldChange}>
+                <select
+                  name="responsible"
+                  value={form.responsible}
+                  onChange={handleFieldChange}
+                >
                   <option value="Juan Pérez">Juan Pérez</option>
                   <option value="María López">María López</option>
                   <option value="Ana Torres">Ana Torres</option>
@@ -198,7 +294,9 @@ export function FieldNotebookPage() {
             </div>
 
             <label className="fieldNotebookUpload">
-              <span>{/* SVG upload */}</span>
+              <span>
+                <img src={uploadFileIcon} alt="" aria-hidden="true" />
+              </span>
 
               <div>
                 <strong>Arrastra y sube archivos aquí</strong>
@@ -208,11 +306,25 @@ export function FieldNotebookPage() {
               <input type="file" multiple />
             </label>
 
-            {feedbackMessage && <p className="fieldNotebookFeedback">{feedbackMessage}</p>}
+            {feedbackMessage && (
+              <p className="fieldNotebookFeedback">{feedbackMessage}</p>
+            )}
 
             <div className="fieldNotebookForm__actions">
-              <button type="button" className="fieldNotebookButton fieldNotebookButton--secondary" onClick={handleResetForm}>Cancelar</button>
-              <button type="submit" className="fieldNotebookButton fieldNotebookButton--primary" disabled={isSaving}>{isSaving ? "Guardando..." : "Guardar observación"}</button>
+              <button
+                type="button"
+                className="fieldNotebookButton fieldNotebookButton--secondary"
+                onClick={handleResetForm}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="fieldNotebookButton fieldNotebookButton--primary"
+                disabled={isSaving}
+              >
+                {isSaving ? "Guardando..." : "Guardar observación"}
+              </button>
             </div>
           </form>
         </Panel>
@@ -220,21 +332,44 @@ export function FieldNotebookPage() {
         <aside className="fieldNotebookFigma__sidebar">
           <Panel title="Resumen del día" showInfo={false}>
             <div className="fieldDaySummary">
-              <DaySummaryRow label="Registros totales" value={String(records.length)} />
-              <DaySummaryRow label="Zonas registradas" value={String(notebookData.registeredZones)} />
-              <DaySummaryRow label="Observaciones pendientes" value={String(notebookData.pendingObservations)} />
-              <DaySummaryRow label="Acciones aplicadas" value={String(notebookData.appliedActions)} />
-              <DaySummaryRow label="Evidencias registradas" value={String(notebookData.registeredEvidence)} />
+              <DaySummaryRow
+                label="Registros totales"
+                value={String(records.length)}
+                icon={notebookIcon}
+              />
+              <DaySummaryRow
+                label="Zonas registradas"
+                value={String(notebookData.registeredZones)}
+                icon={locationIcon}
+              />
+              <DaySummaryRow
+                label="Observaciones pendientes"
+                value={String(notebookData.pendingObservations)}
+                icon={alertIcon}
+              />
+              <DaySummaryRow
+                label="Acciones aplicadas"
+                value={String(notebookData.appliedActions)}
+                icon={plantIcon}
+              />
+              <DaySummaryRow
+                label="Evidencias registradas"
+                value={String(notebookData.registeredEvidence)}
+                icon={cameraIcon}
+              />
             </div>
           </Panel>
 
           <Panel title="Atajos de registro" showInfo={false}>
             <div className="fieldNotebookShortcuts">
-              <Shortcut label="Registrar inspección" />
-              <Shortcut label="Registrar riego" />
-              <Shortcut label="Registrar fertilización" />
-              <Shortcut label="Registrar control de plagas" />
-              <Shortcut label="Registrar control de enfermedades" />
+              <Shortcut label="Registrar inspección" icon={infoIcon} />
+              <Shortcut label="Registrar riego" icon={alertIcon} />
+              <Shortcut label="Registrar fertilización" icon={plantIcon} />
+              <Shortcut label="Registrar control de plagas" icon={bugIcon} />
+              <Shortcut
+                label="Registrar control de enfermedades"
+                icon={cameraIcon}
+              />
             </div>
           </Panel>
         </aside>
@@ -245,7 +380,18 @@ export function FieldNotebookPage() {
           ===================================== */}
 
       <section className="fieldNotebookFigma__information">
-        <Panel title="Historial de campo" showInfo={false} headerAction={<div className="fieldNotebookHistoryTools"><button type="button">▽ Filtrar</button><select><option>Todos</option></select></div>}>
+        <Panel
+          title="Historial de campo"
+          showInfo={false}
+          headerAction={
+            <div className="fieldNotebookHistoryTools">
+              <button type="button">▽ Filtrar</button>
+              <select>
+                <option>Todos</option>
+              </select>
+            </div>
+          }
+        >
           <div className="avTableWrap">
             <table className="avTable fieldNotebookHistoryTable">
               <thead>
@@ -266,8 +412,15 @@ export function FieldNotebookPage() {
                     <td>{formatDate(record.createdAt)}</td>
                     <td>{record.responsible}</td>
                     <td>{formatZone(record.zoneId)}</td>
-                    <td><EventBadge eventType={record.eventType} /></td>
-                    <td>{record.evidenceCount}</td>
+                    <td>
+                      <EventBadge eventType={record.eventType} />
+                    </td>
+                    <td>
+                      <span className="fieldNotebookEvidenceCount">
+                        <img src={cameraIcon} alt="" aria-hidden="true" />
+                        {record.evidenceCount}
+                      </span>
+                    </td>
                     <td>{record.note}</td>
                     <td>›</td>
                   </tr>
@@ -276,14 +429,23 @@ export function FieldNotebookPage() {
             </table>
           </div>
 
-          <button type="button" className="avTextAction fieldNotebookCenteredAction">Ver todo el historial →</button>
+          <button
+            type="button"
+            className="avTextAction fieldNotebookCenteredAction"
+          >
+            Ver todo el historial →
+          </button>
         </Panel>
 
         <Panel title="Relación con alertas y recomendaciones" showInfo={false}>
           <div className="fieldNotebookRelations">
             {notebookData.linkedItems.map((item) => (
               <article key={item.id} className="fieldNotebookRelation">
-                <span className={`fieldNotebookRelation__icon fieldNotebookRelation__icon--${item.priority.toLowerCase()}`}>{/* SVG */}</span>
+                <span
+                  className={`fieldNotebookRelation__icon fieldNotebookRelation__icon--${item.priority.toLowerCase()}`}
+                >
+                  {/*'<img src={warningAlertIcon} alt="" />'*/}
+                </span>
 
                 <div>
                   <strong>{item.title}</strong>
@@ -299,7 +461,12 @@ export function FieldNotebookPage() {
             ))}
           </div>
 
-          <button type="button" className="avTextAction fieldNotebookCenteredAction">Ver las vinculaciones →</button>
+          <button
+            type="button"
+            className="avTextAction fieldNotebookCenteredAction"
+          >
+            Ver las vinculaciones →
+          </button>
         </Panel>
       </section>
 
@@ -307,11 +474,21 @@ export function FieldNotebookPage() {
           ARCHIVOS
           ===================================== */}
 
-      <Panel title="Archivos evidencia" showInfo={false} headerAction={<button type="button" className="avTextAction">Ver todos los archivos →</button>}>
+      <Panel
+        title="Archivos evidencia"
+        showInfo={false}
+        headerAction={
+          <button type="button" className="avTextAction">
+            Ver todos los archivos →
+          </button>
+        }
+      >
         <div className="fieldEvidenceStrip">
-          {notebookData.evidenceFiles.slice(0, 6).map((file, index) => (
+          {notebookData.evidenceFiles.slice(0, 6).map((file) => (
             <article key={file.id} className="fieldEvidenceFile">
-              <div className={`fieldEvidenceFile__preview fieldEvidenceFile__preview--${file.type.toLowerCase()} fieldEvidenceFile__preview--${index + 1}`}>
+              <div
+                className={`fieldEvidenceFile__preview fieldEvidenceFile__preview--${file.type.toLowerCase()}`}
+              >
                 {file.previewUrl && <img src={file.previewUrl} alt="" />}
                 {file.type === "PDF" && <strong>PDF</strong>}
               </div>
@@ -325,7 +502,9 @@ export function FieldNotebookPage() {
           ))}
 
           <label className="fieldEvidenceFile fieldEvidenceFile--add">
-            <span>+</span>
+            <span>
+              <img src={uploadFileIcon} alt="" aria-hidden="true" />
+            </span>
             <strong>Subir más</strong>
             <small>evidencias</small>
             <input type="file" multiple />
@@ -336,7 +515,13 @@ export function FieldNotebookPage() {
   );
 }
 
-function NotebookField({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
+function NotebookField({
+  label,
+  children,
+}: {
+  readonly label: string;
+  readonly children: React.ReactNode;
+}) {
   return (
     <label className="fieldNotebookField">
       <span>{label}</span>
@@ -345,36 +530,78 @@ function NotebookField({ label, children }: { readonly label: string; readonly c
   );
 }
 
-function DaySummaryRow({ label, value }: { readonly label: string; readonly value: string }) {
+function DaySummaryRow({
+  label,
+  value,
+  icon,
+}: {
+  readonly label: string;
+  readonly value: string;
+  readonly icon: string;
+}) {
   return (
     <div className="fieldDaySummaryRow">
-      <span>{/* SVG */}</span>
+      <span>
+        <img src={icon} alt="" aria-hidden="true" />
+      </span>
       <strong>{label}</strong>
       <b>{value}</b>
     </div>
   );
 }
 
-function Shortcut({ label }: { readonly label: string }) {
+function Shortcut({
+  label,
+  icon,
+}: {
+  readonly label: string;
+  readonly icon: string;
+}) {
   return (
     <button type="button" className="fieldNotebookShortcut">
-      <span>{/* SVG */}</span>
+      <span>
+        <img src={icon} alt="" />
+      </span>
       <strong>{label}</strong>
       <b>›</b>
     </button>
   );
 }
 
-function EventBadge({ eventType }: { readonly eventType: FieldNotebookEventType }) {
-  const tone = eventType === "INSPECTION" ? "SUCCESS" : eventType === "IRRIGATION" ? "INFO" : eventType === "PEST_CONTROL" ? "DANGER" : "WARNING";
+function EventBadge({
+  eventType,
+}: {
+  readonly eventType: FieldNotebookEventType;
+}) {
+  const tone =
+    eventType === "INSPECTION"
+      ? "SUCCESS"
+      : eventType === "IRRIGATION"
+        ? "INFO"
+        : eventType === "PEST_CONTROL"
+          ? "DANGER"
+          : "WARNING";
 
   return <StatusBadge tone={tone}>{formatEventType(eventType)}</StatusBadge>;
 }
 
-function PriorityBadge({ priority }: { readonly priority: LinkedItemPriority }) {
-  const tone = priority === "HIGH" ? "DANGER" : priority === "MEDIUM" ? "WARNING" : "SUCCESS";
+function PriorityBadge({
+  priority,
+}: {
+  readonly priority: LinkedItemPriority;
+}) {
+  const tone =
+    priority === "HIGH"
+      ? "DANGER"
+      : priority === "MEDIUM"
+        ? "WARNING"
+        : "SUCCESS";
 
-  return <StatusBadge tone={tone}>{priority === "HIGH" ? "Alta" : priority === "MEDIUM" ? "Media" : "Baja"}</StatusBadge>;
+  return (
+    <StatusBadge tone={tone}>
+      {priority === "HIGH" ? "Alta" : priority === "MEDIUM" ? "Media" : "Baja"}
+    </StatusBadge>
+  );
 }
 
 function formatEventType(value: FieldNotebookEventType): string {
@@ -390,9 +617,14 @@ function formatZone(value: string): string {
 }
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat("es-NI", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-NI", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 function formatShortDate(value: string): string {
-  return new Intl.DateTimeFormat("es-NI", { dateStyle: "short" }).format(new Date(value));
+  return new Intl.DateTimeFormat("es-NI", { dateStyle: "short" }).format(
+    new Date(value),
+  );
 }
