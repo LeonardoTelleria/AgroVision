@@ -18,6 +18,7 @@ interface MetricCardProps {
   readonly progress?: number;
   readonly tone?: "LIME" | "AMBER" | "TEAL";
   readonly showRing?: boolean;
+  readonly showDescriptionWithRing?: boolean;
   readonly icon?: ReactNode;
   readonly details?: MetricDetailItem[]; // lista detallada de metricas a la derecha 
   readonly subBadge?: ReactNode;  // Para el "+6% vs semana anterior"
@@ -33,6 +34,7 @@ export function MetricCard({
   progress = 72, 
   tone = "LIME", 
   showRing = false,
+  showDescriptionWithRing = false,
   icon, 
   details, 
   subBadge 
@@ -93,7 +95,9 @@ export function MetricCard({
 
           {/* Columna Derecha: Listas de desglose o Ilustraciones decorativas */}
           <div className="avMetricCard__rightCol">
-            {details && details.length > 0 ? (
+            {showDescriptionWithRing ? (
+              <p className="avMetricCard__ringDescription">{description}</p>
+            ) : details && details.length > 0 ? (
               <div className="avMetricCard__detailsList">
                 {details.map((item, idx) => (
                   <div key={idx} className="avMetricCard__detailItem">
