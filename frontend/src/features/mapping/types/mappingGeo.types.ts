@@ -43,10 +43,7 @@ export type GISId= number | string;
  * =========================================
  */
 
-export type LngLat = [
-  number,
-  number,
-];
+export type LngLat = [number, number];
 
 /**
  * =========================================
@@ -55,11 +52,7 @@ export type LngLat = [
  */
 
 // Valores utilizados para clasificar visualmente las zonas agrícolas.
-export type GISRiskLevel =
-  | "LOW"
-  | "MEDIUM"
-  | "HIGH"
-  | "CRITICAL";
+export type GISRiskLevel = | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
 /**
  * =========================================
@@ -69,11 +62,7 @@ export type GISRiskLevel =
 
 // Estado general que puede utilizar
 // una entidad geográfica del sistema.
-export type GISStatus =
-  | "ACTIVE"
-  | "INACTIVE"
-  | "OFFLINE"
-  | "MAINTENANCE";
+export type GISStatus = | "ACTIVE" | "INACTIVE" | "OFFLINE" | "MAINTENANCE";
 
 /**
  * =========================================
@@ -150,6 +139,11 @@ export interface ZoneFeatureProperties {
   readonly riskLevel?: GISRiskLevel | null;
   // Puntuación sanitaria de la zona.
   readonly healthScore?: number | null;
+  // Resultado analítico opcional; la geometría base permanece independiente.
+  readonly mainCause?: string | null;
+  readonly summary?: string | null;
+  readonly recommendedAction?: string | null;
+  readonly generatedAt?: string | null;
   // Estado actual de la zona.
   readonly status?: string | null;
 }
@@ -163,14 +157,7 @@ export interface ZoneFeatureProperties {
  */
 
 // Tipos de puntos que AgroVision podrá renderizar.
-export type MapPointKind =
-  | "SENSOR"
-  | "SAMPLING_POINT"
-  | "ALERT"
-  | "INSPECTION"
-  | "ROVER"
-  | "EVENT"
-  | "FIELD_ANALYST";
+export type MapPointKind = | "SENSOR" | "SAMPLING_POINT" | "ALERT" | "INSPECTION" | "ROVER" | "EVENT" | "FIELD_ANALYST";
 
 // Propiedades comunes de un punto geográfico.
 export interface MapPointFeatureProperties {
@@ -200,11 +187,7 @@ export interface MapPointFeatureProperties {
  */
 
 // Tipos de líneas utilizadas por AgroVision.
-export type MapLineKind =
-  | "ROVER_TRAJECTORY"
-  | "PLANNED_ROUTE"
-  | "INTERNAL_PATH"
-  | "IRRIGATION_ROUTE";
+export type MapLineKind = | "ROVER_TRAJECTORY" | "PLANNED_ROUTE" | "INTERNAL_PATH" | "IRRIGATION_ROUTE";
 
 // Propiedades de una línea GIS.
 export interface MapLineFeatureProperties {
@@ -242,7 +225,6 @@ export type MapPointFeature = Feature<Point, MapPointFeatureProperties>;
 // Las trayectorias y caminos se representan mediante LineString.
 export type MapLineFeature = Feature<LineString, MapLineFeatureProperties>;
 
-
 /**
  * =========================================
  * Feature Collections
@@ -252,39 +234,19 @@ export type MapLineFeature = Feature<LineString, MapLineFeatureProperties>;
  */
 
 // Colección de fincas.
-export type FarmFeatureCollection =
-  FeatureCollection<
-    Polygon,
-    FarmFeatureProperties
-  >;
+export type FarmFeatureCollection = FeatureCollection< Polygon, FarmFeatureProperties >;
 
 // Colección de fields.
-export type FieldFeatureCollection =
-  FeatureCollection<
-    Polygon,
-    FieldFeatureProperties
-  >;
+export type FieldFeatureCollection = FeatureCollection< Polygon, FieldFeatureProperties >;
 
 // Colección de zonas.
-export type ZoneFeatureCollection =
-  FeatureCollection<
-    Polygon,
-    ZoneFeatureProperties
-  >;
+export type ZoneFeatureCollection = FeatureCollection< Polygon, ZoneFeatureProperties >;
 
 // Colección de puntos.
-export type MapPointFeatureCollection =
-  FeatureCollection<
-    Point,
-    MapPointFeatureProperties
-  >;
+export type MapPointFeatureCollection = FeatureCollection< Point, MapPointFeatureProperties >;
 
 // Colección de rutas.
-export type MapLineFeatureCollection =
-  FeatureCollection<
-    LineString,
-    MapLineFeatureProperties
-  >;
+export type MapLineFeatureCollection = FeatureCollection< LineString, MapLineFeatureProperties >;
 
 /**
  * =========================================
@@ -295,12 +257,7 @@ export type MapLineFeatureCollection =
  */
 
 // Permite tratar diferentes tipos de entidades como Features GIS de AgroVision.
-export type AgroVisionGISFeature =
-  | FarmFeature
-  | FieldFeature
-  | ZoneFeature
-  | MapPointFeature
-  | MapLineFeature;
+export type AgroVisionGISFeature = | FarmFeature | FieldFeature | ZoneFeature | MapPointFeature | MapLineFeature;
 
 /**
  * =========================================
@@ -310,15 +267,7 @@ export type AgroVisionGISFeature =
 
 // Colección genérica capaz de almacenar diferentes tipos de geometrías.
 // Se utilizará para estructuras mixtas cuando sea necesario.
-export type AgroVisionGISFeatureCollection =
-  FeatureCollection<
-    Point | LineString | Polygon,
-    FarmFeatureProperties
-    | FieldFeatureProperties
-    | ZoneFeatureProperties
-    | MapPointFeatureProperties
-    | MapLineFeatureProperties
-  >;
+export type AgroVisionGISFeatureCollection = FeatureCollection< Point | LineString | Polygon, FarmFeatureProperties | FieldFeatureProperties | ZoneFeatureProperties | MapPointFeatureProperties | MapLineFeatureProperties >;
 
 /**
  * =========================================
@@ -329,19 +278,7 @@ export type AgroVisionGISFeatureCollection =
  */
 
 // Capas que el usuario podrá activar o desactivar progresivamente.
-export type MapLayerId =
-  | "base"
-  | "farms"
-  | "fields"
-  | "zones"
-  | "riskZones"
-  | "sensors"
-  | "samplingPoints"
-  | "trajectory"
-  | "plannedRoute"
-  | "hydrography"
-  | "satellite"
-  | "ndvi";
+export type MapLayerId = "base" | "fields" | "zones" | "riskHeatmap" | "trajectory" | "rover" | "satellite" | "ndvi";
 
 /**
  * =========================================
@@ -362,6 +299,7 @@ export interface MapViewState {
   // Rotación de la cámara.
   readonly bearing: number;
 }
+
 
 /**              GIS
                   │

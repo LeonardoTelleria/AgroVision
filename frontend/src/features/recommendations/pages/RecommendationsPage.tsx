@@ -65,6 +65,7 @@ export function RecommendationsPage() {
 
   return (
     <section className="avScreen recommendationsFigma">
+       <h1 className="avScreenTitle">Recomendaciones</h1>
       <section className="avMetricGrid">
         <MetricCard
           title="Recomendaciones"

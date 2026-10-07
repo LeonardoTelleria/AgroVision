@@ -3,51 +3,44 @@
  * AgroVision Risk Heatmap Layer
  * =========================================
  *
- * Capa de calor utilizada para representar espacialmente la concentración de riesgo dentro de AgroVision.
+ * Capa de calor utilizada para representar espacialmente
+ * la concentración de riesgo dentro de AgroVision.
  *
  * Responsabilidad:
- * - convertir zonas agrícolas en puntos de intensidad para el heatmap;
- * - utilizar riskLevel como peso de riesgo;
- * - registrar la fuente GeoJSON del heatmap;
- * - controlar su visibilidad;
- * - mantener intactas las geometrías originales.
+ * - derivar puntos representativos de las zonas evaluadas;
+ * - asignar intensidad mediante el nivel de riesgo;
+ * - registrar y actualizar la fuente GeoJSON;
+ * - controlar la visibilidad del heatmap;
+ * - liberar la capa y su fuente.
  *
- * Flujo:
+ * Modelo geográfico:
+ * Cada punto se ubica dentro de su zona o sobre su límite
+ * mediante pointOnFeature. Las geometrías agrícolas originales
+ * se conservan como fuente de la representación derivada.
  *
- * ZoneFeatureCollection
- *        ↓
- *      Centroide
- *        ↓
- *   RiskHeatmapPoint
- *        ↓
- *    GeoJSON Source
- *        ↓
- *   MapLibre Heatmap
+ * Interpretación:
+ * El color representa densidad acumulada de puntos ponderados.
+ * Su apariencia depende del riesgo, la proximidad y el zoom.
+ * El nivel individual de cada zona se consulta en sus propiedades.
  *
- * IMPORTANTE:
- *
- * Esta capa NO modifica:
- * - Polygon de las zonas;
- * - FieldFeature;
- * - ZoneFeature;
- *
- * Solo crea una representación visual secundaria del riesgo.
+ * Integración:
+ * El consumidor proporciona zonas evaluadas y una instancia
+ * de MapLibre con el estilo cargado.
  *
  * =========================================
  */
 
+// Importamos los tipos GeoJSON de los puntos y sus colecciones.
+import type { Feature, FeatureCollection, Point } from "geojson";
 
-import type { Feature, FeatureCollection, Point} from "geojson";
-
-// Importamos Turf para calcular el centroide geométrico de cada zona sin modificarla.
-import { centroid } from "@turf/centroid";
+// Calculamos un punto representativo sobre la superficie de cada zona.
+import { pointOnFeature } from "@turf/turf";
 
 // Importamos los tipos de MapLibre.
-import type { GeoJSONSource, GeoJSONSourceSpecification, HeatmapLayerSpecification, Map} from "maplibre-gl";
+import type { GeoJSONSource, GeoJSONSourceSpecification, HeatmapLayerSpecification, Map } from "maplibre-gl";
 
-// Importamos la colección oficial de zonas.
-import type { ZoneFeatureCollection, GISRiskLevel} from "../types/mappingGeo.types";
-
+// Consumimos los contratos GIS compartidos.
+import type { GISRiskLevel, ZoneFeatureCollection } from "../types/mappingGeo.types";
 
 // =========================================
 // IDS
@@ -64,15 +57,15 @@ export const RISK_HEATMAP_LAYER_ID = "agrovision-risk-heatmap-layer";
 // =========================================
 
 // Peso numérico utilizado por MapLibre para determinar la intensidad de cada punto.
-const RISK_WEIGHT: Record<GISRiskLevel, number> = {
-  // Riesgo bajo.
-  LOW: 0.25,
-  // Riesgo medio.
-  MEDIUM: 0.5,
-  // Riesgo alto.
-  HIGH: 0.75,
-  // Riesgo crítico.
-  CRITICAL: 1,
+const RISK_WEIGHT: Readonly<Record<GISRiskLevel, number>> = {
+    // Riesgo bajo.
+    LOW: 0.25,
+    // Riesgo medio.
+    MEDIUM: 0.5,
+    // Riesgo alto.
+    HIGH: 0.75,
+    // Riesgo crítico.
+    CRITICAL: 1,
 };
 
 // =========================================
@@ -81,21 +74,21 @@ const RISK_WEIGHT: Record<GISRiskLevel, number> = {
 
 // Propiedades internas de cada punto del heatmap.
 interface RiskHeatmapPointProperties {
-  // ID original de la zona.
-  readonly zoneId: string;
-  // Nivel de riesgo original.
-  readonly riskLevel: GISRiskLevel;
-  // Peso utilizado por MapLibre.
-  readonly riskWeight: number;
-  // Puntuación sanitaria original.
-  readonly healthScore: number | null;
+    // ID original de la zona.
+    readonly zoneId: string;
+    // Nivel de riesgo original.
+    readonly riskLevel: GISRiskLevel;
+    // Peso utilizado por MapLibre.
+    readonly riskWeight: number;
+    // Puntuación sanitaria original.
+    readonly healthScore: number | null;
 }
 
 // =========================================
 // HEATMAP FEATURE TYPES
 // =========================================
 
-// Tipo de Feature puntual usado exclusivamente por la capa de calor.
+// Feature puntual utilizado por la capa de calor.
 type RiskHeatmapPoint = Feature<Point, RiskHeatmapPointProperties>;
 
 // Colección de puntos del heatmap.
@@ -106,63 +99,50 @@ type RiskHeatmapFeatureCollection = FeatureCollection<Point, RiskHeatmapPointPro
 // =========================================
 
 /**
- * Convierte las zonas Polygon originales en puntos centrales utilizados por el heatmap.
+ * Deriva un punto representativo por cada zona con riesgo disponible.
+ *
+ * @param zones Colección de polígonos agrícolas con geometrías válidas.
+ * @returns Colección de puntos ponderados para el heatmap.
  */
-export const buildRiskHeatmapData = (
-  zones: ZoneFeatureCollection,
-): RiskHeatmapFeatureCollection => {
-  // Creamos una colección vacía de puntos.
-  const features: RiskHeatmapPoint[] = [];
+export const buildRiskHeatmapData = (zones: ZoneFeatureCollection): RiskHeatmapFeatureCollection => {
+    // Creamos una colección vacía de puntos.
+    const features: RiskHeatmapPoint[] = [];
 
-  // Recorremos cada zona agrícola.
-  for (const zone of zones.features) {
-    // Las zonas sin riesgo no deben generar intensidad artificial en el heatmap.
-    if (!zone.properties.riskLevel) {
-      continue;
+    // Recorremos cada zona agrícola.
+    for (const zone of zones.features) {
+        // Incorporamos únicamente las zonas que tienen una clasificación de riesgo.
+        const riskLevel = zone.properties.riskLevel;
+        if (!riskLevel) continue;
+
+        // Ubicamos el punto sobre la zona, incluyendo polígonos cóncavos.
+        const representativePoint = pointOnFeature(zone);
+
+        // Creamos el punto de riesgo.
+        const point: RiskHeatmapPoint = {
+            type: "Feature",
+            // ID estable derivado del ID de zona.
+            id: `risk-${zone.properties.zoneId}`,
+            geometry: {
+                type: "Point",
+                // Conservamos una copia independiente de las coordenadas calculadas.
+                coordinates: [...representativePoint.geometry.coordinates],
+            },
+            // Propiedades analíticas de la representación derivada.
+            properties: {
+                zoneId: zone.properties.zoneId,
+                riskLevel,
+                riskWeight: RISK_WEIGHT[riskLevel],
+                healthScore: zone.properties.healthScore ?? null,
+            },
+        };
+
+        features.push(point);
     }
 
-    // Calculamos el centroide sin modificar la geometría original de la zona.
-    const zoneCentroid = centroid(zone);
-    // Obtenemos el nivel de riesgo y el peso correspondiente.
-    const riskLevel = zone.properties.riskLevel;
-    const riskWeight = RISK_WEIGHT[riskLevel];
-
-    // Creamos el punto de riesgo.
-    const point: RiskHeatmapPoint = {
-
-      type: "Feature",
-      // ID estable derivado del ID de zona.
-      id: `risk-${zone.properties.zoneId}`,
-      // Geometría puntual.
-      geometry: {
-        // Heatmap requiere Point.
-        type: "Point",
-        // Reutilizamos las coordenadas calculadas por Turf.
-        coordinates: zoneCentroid.geometry.coordinates,
-      },
-
-      // Propiedades analíticas.
-      properties: {
-        // Conservamos la relación con la zona original.
-        zoneId: zone.properties.zoneId,
-        // Conservamos el riesgo original y el peso para MapLibre.
-        riskLevel, 
-        riskWeight,
-
-        // Conservamos la salud de la zona.
-        healthScore: zone.properties.healthScore ?? null,
-      },
+    return {
+        type: "FeatureCollection",
+        features,
     };
-    // Agregamos el punto al dataset del heatmap.
-    features.push(point);
-  }
-
-  // Devolvemos una colección GeoJSON válida.
-  return {
-    // Tipo estándar y untos calculados.
-    type: "FeatureCollection",
-    features,
-  };
 };
 
 // =========================================
@@ -170,144 +150,117 @@ export const buildRiskHeatmapData = (
 // =========================================
 
 /**
- * Crea la definición de fuente GeoJSON utilizada por MapLibre.
+ * Crea la definición de fuente GeoJSON del heatmap.
+ *
+ * @param data Colección de puntos ponderados.
  */
-export const createRiskHeatmapSource = (
-  data: RiskHeatmapFeatureCollection,
-): GeoJSONSourceSpecification => {
-  // Devolvemos la configuración oficial.
-  return {
-    // Tipo de fuente y el ataset de puntos.
-    type: "geojson",
-    data,
-
-    // Reduce peticiones innecesarias al trabajar con geometrías locales.
-    generateId: false,
-  };
+export const createRiskHeatmapSource = (data: RiskHeatmapFeatureCollection): GeoJSONSourceSpecification => {
+    return {
+        type: "geojson",
+        data,
+        // Conservamos los identificadores explícitos de los puntos.
+        generateId: false,
+    };
 };
 
 // =========================================
 // LAYER
 // =========================================
 
-/**
- * Crea la capa heatmap de MapLibre.
- */
-export const createRiskHeatmapLayer =
-  (): HeatmapLayerSpecification => {
-    // Devolvemos la configuración del heatmap.
+/** Crea la capa heatmap conservando sus parámetros visuales originales. */
+export const createRiskHeatmapLayer = (): HeatmapLayerSpecification => {
     return {
-      // ID único.
-      id: RISK_HEATMAP_LAYER_ID,
-      // Tipo visual heatmap.
-      type: "heatmap",
-      // Fuente de puntos de riesgo.
-      source: RISK_HEATMAP_SOURCE_ID,
+        id: RISK_HEATMAP_LAYER_ID,
+        type: "heatmap",
+        source: RISK_HEATMAP_SOURCE_ID,
+        paint: {
+            // Peso individual de cada punto.
+            "heatmap-weight": ["get", "riskWeight"],
 
-      // Propiedades visuales.
-      paint: {
-        // Peso individual de cada punto.
-        "heatmap-weight": ["get", "riskWeight"],
+            // Intensidad global del heatmap.
+            "heatmap-intensity": [
+                "interpolate", ["linear"], ["zoom"],
+                5, 0.8,
+                10, 1.1,
+                15, 1.35,
+            ],
 
-        // Intensidad global del heatmap.
-        "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 5, 0.8, 10, 1.1, 15, 1.35],
+            // Radio adaptativo según el zoom.
+            "heatmap-radius": [
+                "interpolate", ["linear"], ["zoom"],
+                5, 18,
+                10, 28,
+                15, 42,
+            ],
 
-        // Radio adaptativo según el zoom.
-        "heatmap-radius": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          5,
-          18,
-          10,
-          28,
-          15,
-          42,
-        ],
+            // Opacidad adaptativa según el zoom.
+            "heatmap-opacity": [
+                "interpolate", ["linear"], ["zoom"],
+                5, 0.55,
+                10, 0.68,
+                15, 0.8,
+            ],
 
-        // Opacidad controlada.
-        "heatmap-opacity": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          5,
-          0.55,
-          10,
-          0.68,
-          15,
-          0.8,
-        ],
-
-        // Gradiente semántico de riesgo.
-        "heatmap-color": [
-          "interpolate",
-          ["linear"],
-          ["heatmap-density"],
-
-          // Sin intensidad.
-          0,
-          "rgba(0,0,0,0)",
-          // Intensidad baja.
-          0.2,
-          "#2ECC71",
-          // Intensidad media.
-          0.45,
-          "#F1C40F",
-          // Intensidad alta.
-          0.7,
-          "#E67E22",
-          // Intensidad crítica.
-          1,
-          "#E74C3C",
-        ],
-      },
-
-      // Permitimos que la capa sea mostrada/ocultada mediante el selector de capas.
-      layout: {visibility: "visible"},
+            // Gradiente aplicado a la densidad acumulada del heatmap.
+            "heatmap-color": [
+                "interpolate", ["linear"], ["heatmap-density"],
+                // Densidad nula.
+                0, "rgba(0,0,0,0)",
+                // Densidad baja.
+                0.2, "#2ECC71",
+                // Densidad intermedia.
+                0.45, "#F1C40F",
+                // Densidad alta.
+                0.7, "#E67E22",
+                // Densidad máxima del gradiente.
+                1, "#E74C3C",
+            ],
+        },
+        // La capa comienza visible después de registrarse.
+        layout: {
+            visibility: "visible",
+        },
     };
-  };
+};
 
 // =========================================
 // ADD LAYER
 // =========================================
 
 /**
- * Agrega la fuente y la capa heatmap al mapa.
+ * Registra la fuente y la capa del heatmap.
+ *
+ * Conserva los recursos existentes. Las actualizaciones posteriores
+ * de sus datos se realizan mediante updateRiskHeatmapData.
+ *
+ * @param map Instancia activa con el estilo cargado.
+ * @param zones Colección de zonas utilizada al crear la fuente.
+ * @param beforeLayerId Capa existente antes de la cual insertar el heatmap.
+ * @returns true cuando registra la capa; false cuando ya existe.
  */
 export const addRiskHeatmapLayer = (
-  map: Map,
-  zones: ZoneFeatureCollection,
-  beforeLayerId?: string,
+    map: Map,
+    zones: ZoneFeatureCollection,
+    beforeLayerId?: string,
 ): boolean => {
-  // Evitamos duplicar la fuente.
-  if (!map.getSource(RISK_HEATMAP_SOURCE_ID)) {
-    // Generamos los puntos del heatmap y Creamos la fuente.
-    const data = buildRiskHeatmapData(zones);
-    const source = createRiskHeatmapSource(data);
+    // Registramos la fuente cuando todavía falta.
+    if (!map.getSource(RISK_HEATMAP_SOURCE_ID)) {
+        const data = buildRiskHeatmapData(zones);
+        const source = createRiskHeatmapSource(data);
 
-    // Registramos la fuente en MapLibre.
-    map.addSource(RISK_HEATMAP_SOURCE_ID, source);
-  }
+        map.addSource(RISK_HEATMAP_SOURCE_ID, source);
+    }
 
-  // Evitamos duplicar la capa.
-  if (map.getLayer(RISK_HEATMAP_LAYER_ID)) {
-    return false;
-  }
+    // Conservamos la capa registrada.
+    if (map.getLayer(RISK_HEATMAP_LAYER_ID)) return false;
 
-  // Creamos la capa visual.
-  const layer = createRiskHeatmapLayer();
+    // Creamos la capa visual.
+    const layer = createRiskHeatmapLayer();
 
-  // Si existe una capa de referencia, insertamos el heatmap debajo de ella.
-  if (beforeLayerId && map.getLayer(beforeLayerId)) {
-    // Insertamos antes de la capa indicada.
-    map.addLayer(layer, beforeLayerId);
-  } else {
-    // En ausencia de referencia, agregamos al final.
-    map.addLayer(layer);
-  }
+    // Utilizamos la referencia cuando existe; en otro caso insertamos al final del estilo.
+    map.addLayer(layer, beforeLayerId && map.getLayer(beforeLayerId) ? beforeLayerId : undefined);
 
-  // Confirmamos que la capa fue creada.
-  return true;
+    return true;
 };
 
 // =========================================
@@ -315,25 +268,22 @@ export const addRiskHeatmapLayer = (
 // =========================================
 
 /**
- * Actualiza los puntos del heatmap cuando cambian las zonas o sus niveles de riesgo.
+ * Actualiza los puntos cuando cambian las zonas o sus niveles de riesgo.
+ *
+ * @param map Instancia activa de MapLibre.
+ * @param zones Nueva colección de zonas.
+ * @returns Promesa de actualización de la fuente registrada.
  */
-export const updateRiskHeatmapData = async (
-  map: Map,
-  zones: ZoneFeatureCollection,
-): Promise<void> => {
-  // Obtenemos la fuente existente.
-  const source = map.getSource<GeoJSONSource>(RISK_HEATMAP_SOURCE_ID);
+export const updateRiskHeatmapData = async (map: Map, zones: ZoneFeatureCollection): Promise<void> => {
+    // Obtenemos la fuente existente.
+    const source = map.getSource<GeoJSONSource>(RISK_HEATMAP_SOURCE_ID);
+    if (!source) return;
 
-  // Verificamos que la fuente exista
-  if (!source) {
-    return;
-  }
+    // Reconstruimos los puntos derivados.
+    const data = buildRiskHeatmapData(zones);
 
-  // Construimos nuevamente los puntos.
-  const data = buildRiskHeatmapData(zones);
-
-  // Actualizamos exclusivamente el dataset.
-  await source.setData(data);
+    // Actualizamos el dataset conservando la capa visual.
+    await source.setData(data);
 };
 
 // =========================================
@@ -341,70 +291,45 @@ export const updateRiskHeatmapData = async (
 // =========================================
 
 /**
- * Cambia la visibilidad del heatmap.
+ * Establece la visibilidad del heatmap registrado.
+ *
+ * @param map Instancia activa de MapLibre.
+ * @param visible true muestra la capa; false la oculta.
  */
-export const setRiskHeatmapVisibility = (
-  map: Map,
-  visible: boolean,
-): void => {
-  // Verificamos que la capa exista.
-  if (!map.getLayer(RISK_HEATMAP_LAYER_ID)) {
-    return;
-  }
+export const setRiskHeatmapVisibility = (map: Map, visible: boolean): void => {
+    if (!map.getLayer(RISK_HEATMAP_LAYER_ID)) return;
 
-  // Actualizamos solamente visibility.
-  map.setLayoutProperty(
-    RISK_HEATMAP_LAYER_ID,
-    "visibility",
-    visible ? "visible" : "none",
-  );
+    // Actualizamos únicamente la visibilidad.
+    map.setLayoutProperty(RISK_HEATMAP_LAYER_ID, "visibility", visible ? "visible" : "none");
 };
 
 // =========================================
 // TOGGLE
 // =========================================
 
-/**
- * Alterna el estado visible/oculto.
- */
-export const toggleRiskHeatmapVisibility = (
-  map: Map,
-): void => {
-  // Verificamos que exista.
-  if (!map.getLayer(RISK_HEATMAP_LAYER_ID)) {
-    return;
-  }
+/** Alterna la visibilidad del heatmap, incluyendo la visibilidad predeterminada del estilo. */
+export const toggleRiskHeatmapVisibility = (map: Map): void => {
+    if (!map.getLayer(RISK_HEATMAP_LAYER_ID)) return;
 
-  // Leemos el estado actual.
-  const visibility = map.getLayoutProperty(
-      RISK_HEATMAP_LAYER_ID,
-      "visibility",
-    );
+    // Leemos el estado actual.
+    const visibility = map.getLayoutProperty(RISK_HEATMAP_LAYER_ID, "visibility");
 
-  // Calculamos el siguiente estado.
-  const nextVisible = visibility !== "visible";
-
-  // Aplicamos el nuevo estado.
-  setRiskHeatmapVisibility(map, nextVisible);
+    // La visibilidad predeterminada se trata como visible.
+    const nextVisible = visibility === "none";
+    setRiskHeatmapVisibility(map, nextVisible);
 };
 
 // =========================================
 // REMOVE
 // =========================================
 
-/**
- * Elimina completamente la capa y su fuente.
- */
-export const removeRiskHeatmapLayer = (
-  map: Map,
-): void => {
-  // Eliminamos la capa visual.
-  if (map.getLayer(RISK_HEATMAP_LAYER_ID)) {
-    map.removeLayer(RISK_HEATMAP_LAYER_ID);
-  }
+/** Libera primero la capa del heatmap y después su fuente GeoJSON. */
+export const removeRiskHeatmapLayer = (map: Map): void => {
+    if (map.getLayer(RISK_HEATMAP_LAYER_ID)) {
+        map.removeLayer(RISK_HEATMAP_LAYER_ID);
+    }
 
-  // Eliminamos la fuente GeoJSON.
-  if (map.getSource(RISK_HEATMAP_SOURCE_ID)) {
-    map.removeSource(RISK_HEATMAP_SOURCE_ID);
-  }
+    if (map.getSource(RISK_HEATMAP_SOURCE_ID)) {
+        map.removeSource(RISK_HEATMAP_SOURCE_ID);
+    }
 };

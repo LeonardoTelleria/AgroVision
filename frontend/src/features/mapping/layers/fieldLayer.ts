@@ -30,7 +30,6 @@
  * =========================================*/
 
 // se importan los tipos GeoJSON que utilizaremos para representar una colección de polígonos.
-import type { FeatureCollection, Polygon } from "geojson" 
 
 /**
  * Importamos únicamente los tipos necesarios de MapLibre.
@@ -53,26 +52,9 @@ export const FIELD_FILL_LAYER_ID = "agrovision-fields-fill";
 // Identificador único de la capa que dibuja el perímetro de cada field.
 export const FIELD_BORDER_LAYER_ID = "agrovision-fields-border";
 
-// Propiedades mínimas que acompañarán a cada field. Estas propiedades provienen conceptualmente de la tabla "fields" de la ERD oficial.
-export interface FieldFeatureProperties {
-    // Identificador de la finca propietaria.
-    readonly farmId: number | string;
-    // Identificador único del field.
-    readonly fieldId: number | string;
-    // Nombre que verá el usuario.
-    readonly name: string;
-    // Área registrada del field en metros cuadrados.
-    readonly areaSquareMeters?: number | null;
-    // Tipo de suelo asociado al field.
-    readonly soilType?: string | null;
-    // Tipo de riego utilizado.
-    readonly irrigationType?: string | null;
-    // Estado operativo actual del field.
-    readonly status?: string | null;
-}
-
-// se define exactamente el formato GeoJSON esperado por esta capa.
-export type FieldFeatureCollection = FeatureCollection<Polygon, FieldFeatureProperties>;
+// Usamos una sola definición de geometría y propiedades para todo el GIS.
+import type { FieldFeatureCollection } from "../types/mappingGeo.types";
+export type { FieldFeatureCollection, FieldFeatureProperties } from "../types/mappingGeo.types";
 
 // Configuración de la fuente GeoJSON.
 // Separarla de addFieldLayer permite mantener la definición cartográfica fuera de la lógica.
@@ -131,12 +113,9 @@ export const FIELD_BORDER_LAYER: LineLayerSpecification = {
  *   ↓
  * border layer*/
 
-export function addFieldLayer(
-    map: Map,
-    data: FieldFeatureCollection
-): void {
-    // Si la fuente ya existe, se elimina junto con sus capas para evitar errores de IDs duplicados.
-    removeFieldLayer(map);
+export function addFieldLayer(map: Map, data: FieldFeatureCollection): void {
+    // Reutilizamos la fuente cuando la capa ya está registrada.
+    if (map.getSource(FIELD_SOURCE_ID)) updateFieldLayer(map, data);
 
     // Creamos una configuración nueva de la fuente.
     // No modificamos FIELD_SOURCE directamente porque queremos mantenerla como configuración base reutilizable.
@@ -148,13 +127,12 @@ export function addFieldLayer(
     };
 
     // Registramos la fuente geográfica en MapLibre.
-    map.addSource(FIELD_SOURCE_ID, source);
+    if (!map.getSource(FIELD_SOURCE_ID)) map.addSource(FIELD_SOURCE_ID, source);
     // Agregamos primero la capa de relleno. El field quedará visualmente debajo de su borde.
-    map.addLayer(FIELD_FILL_LAYER);
+    if (!map.getLayer(FIELD_FILL_LAYER_ID)) map.addLayer(FIELD_FILL_LAYER);
     // Agregamos después el borde.
-    map.addLayer(FIELD_BORDER_LAYER);
+    if (!map.getLayer(FIELD_BORDER_LAYER_ID)) map.addLayer(FIELD_BORDER_LAYER);
 }
-
 
 /**
  * Cambia la visibilidad de los fields.
@@ -163,31 +141,20 @@ export function addFieldLayer(
  * - map: instancia activa de MapLibre.
  * - visible: true muestra los fields; false los oculta.
  */
-export function setFieldLayerVisibility(
-  map: Map,
-  visible: boolean,
-): void {
+export function setFieldLayerVisibility(map: Map, visible: boolean): void {
     // Convertimos el booleano a la propiedad que MapLibre espera.
     const visibility = visible ? "visible" : "none";
 
     // Comprobamos que exista la capa antes de modificarla.
     if (map.getLayer(FIELD_FILL_LAYER_ID)) {
         // Ocultamos o mostramos el relleno.
-        map.setLayoutProperty(
-            FIELD_FILL_LAYER_ID,
-            "visibility",
-            visibility,
-        );
+        map.setLayoutProperty(FIELD_FILL_LAYER_ID, "visibility", visibility);
     }
 
     // Comprobamos que exista también el borde.
     if (map.getLayer(FIELD_BORDER_LAYER_ID)) {
         // Ocultamos o mostramos el perímetro.
-        map.setLayoutProperty(
-            FIELD_BORDER_LAYER_ID,
-            "visibility",
-            visibility,
-        );
+        map.setLayoutProperty(FIELD_BORDER_LAYER_ID, "visibility", visibility);
     }
 }
 
@@ -198,10 +165,7 @@ export function setFieldLayerVisibility(
  * - map: instancia activa de MapLibre.
  * - data: nueva colección GeoJSON.
  */
-export function updateFieldLayer(
-  map: Map,
-  data: FieldFeatureCollection,
-): void {
+export function updateFieldLayer(map: Map, data: FieldFeatureCollection): void {
     // Recuperamos la fuente registrada previamente e indicamos a MapLibre que esta fuente es específicamente GeoJSON.
     const source = map.getSource<GeoJSONSource>(FIELD_SOURCE_ID);
 
@@ -212,7 +176,6 @@ export function updateFieldLayer(
     // Reemplazamos únicamente los datos. La capa visual permanece intacta.
     source.setData(data);
 }
-
 
 /**
  * Elimina completamente la representación GIS de los fields.
@@ -225,9 +188,7 @@ export function updateFieldLayer(
  * ↓
  * source después
  */
-export function removeFieldLayer(
-  map: Map,
-): void {
+export function removeFieldLayer(map: Map): void {
     // Primero eliminamos el borde si está registrado.
     // Las capas deben eliminarse antes que su fuente.
     if (map.getLayer(FIELD_BORDER_LAYER_ID)) {

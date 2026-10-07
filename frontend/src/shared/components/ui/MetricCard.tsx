@@ -1,5 +1,6 @@
-import type { CSSProperties, ReactNode } from "react";
+import type {  ReactNode } from "react";
 import infoIcon from '../../../assets/icons/info-icon.svg';
+import { Cell, Pie, PieChart, ResponsiveContainer} from "recharts";
 
 // interfaz para los desgloses de lista opcionales (Card 1 y Card 2)
 interface MetricDetailItem {
@@ -41,10 +42,6 @@ export function MetricCard({
 }: MetricCardProps) {
   const normalizedProgress = Math.max(0, Math.min(progress, 100));
 
-  const ringStyle = {
-    "--av-ring-progress": `${normalizedProgress * 3.6}deg`,
-  } as CSSProperties;
-
   return (
     <article className={`avMetricCard avMetricCard--${tone.toLowerCase()}`}>
       
@@ -68,17 +65,13 @@ export function MetricCard({
           <div className="avMetricCard__leftCol">
             {/* Tarjeta LIME: Renderiza el anillo con el valor y su etiqueta interna */}
             {(tone === "LIME" || showRing) && (
-              <div className="avMetricRing" style={ringStyle}>
-                <div className="avMetricRing__center">
-                  <div className="avMetricRing__innerValue">
-                    <span className="avMetricRing__number">
-                      {value}
-                      {valueSuffix && <small>{valueSuffix}</small>}
-                    </span>
-                    {ringLabel && <span className="avMetricRing__label">{ringLabel}</span>}
-                  </div>
-                </div>
-              </div>
+              <MetricDonut
+                progress={normalizedProgress}
+                value={value}
+                valueSuffix={valueSuffix}
+                ringLabel={ringLabel}
+                tone={tone}
+              />
             )}
 
             {/* Tarjetas AMBER y TEAL: Renderizan el número gigante limpio a la izquierda */}
@@ -137,5 +130,104 @@ export function MetricCard({
         </footer>
       )}
     </article>
+  );
+}
+
+
+/* ===========================================================
+   COMPONENTE — DONUT REAL DE MÉTRICAS
+   =========================================================== */
+
+function MetricDonut({
+  progress,
+  value,
+  valueSuffix,
+  ringLabel,
+  tone,
+}: {
+  readonly progress: number;
+  readonly value: string | number;
+  readonly valueSuffix?: string;
+  readonly ringLabel?: string;
+  readonly tone: "LIME" | "AMBER" | "TEAL";
+}) {
+  const safeProgress = Math.max(0, Math.min(progress, 100));
+
+  const chartData = [
+    {
+      name: "Progreso",
+      value: safeProgress,
+    },
+    {
+      name: "Restante",
+      value: Math.max(100 - safeProgress, 0),
+    },
+  ];
+
+  const toneColors = {
+    LIME: {
+      progress: "#b7e13a",
+      remaining: "#092019",
+    },
+    AMBER: {
+      progress: "#fec111",
+      remaining: "#092019",
+    },
+    TEAL: {
+      progress: "#15b7a9",
+      remaining: "#092019",
+    },
+  };
+
+  const colors = toneColors[tone];
+
+  return (
+    <div className="avMetricRing">
+      <div className="avMetricRing__chart">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              dataKey="value"
+              cx="50%"
+              cy="50%"
+              innerRadius="71%"
+              outerRadius="94%"
+              startAngle={90}
+              endAngle={-270}
+              paddingAngle={0}
+              cornerRadius={4}
+              stroke="none"
+              isAnimationActive={true}
+              animationBegin={80}
+              animationDuration={700}
+            >
+              <Cell fill={colors.progress} />
+              <Cell fill={colors.remaining} />
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="avMetricRing__center">
+        <div className="avMetricRing__innerValue">
+          <span className="avMetricRing__number">
+            {value}
+
+            {valueSuffix && (
+              <small>
+                {valueSuffix}
+              </small>
+            )}
+          </span>
+
+          {ringLabel && (
+            <span className="avMetricRing__label">
+              {ringLabel}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

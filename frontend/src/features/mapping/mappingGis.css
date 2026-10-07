@@ -1,0 +1,1087 @@
+/**
+ * =========================================
+ * AgroVision GIS Interface
+ * =========================================
+ * Superficie cartográfica continua y controles flotantes compartidos por
+ * Mapping, Dashboard y la vista de validación independiente.
+ * Los selectores se limitan al módulo GIS y a sus contenedores de integración.
+ * =========================================
+ */
+
+/* El mapa define la superficie; sus capas de interfaz conservan un orden explícito. */
+.mappingGis {
+  --gis-ink: #183c32;
+  --gis-muted: #61746d;
+  --gis-accent: #26624b;
+  --gis-border: rgba(255, 255, 255, 0.78);
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: var(--gis-map-height, 560px);
+  min-width: 0;
+  min-height: 320px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: #e6ece3;
+  color: var(--gis-ink);
+  font-family: var(--av-font-body, system-ui, sans-serif);
+  font-size: 14px;
+}
+
+/* El canvas llena todo el espacio disponible, incluso detrás de los paneles. */
+.mappingGis__map {
+  position: absolute;
+  inset: 0;
+}
+.mappingGis__map > .agroMap {
+  height: 100%;
+}
+.mappingGis__overlays {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.mappingGis__overlays > * {
+  pointer-events: auto;
+}
+
+/* El fondo translúcido mantiene contraste sobre cartografía clara o imágenes satelitales. */
+.gisGlass {
+  border: 1px solid var(--gis-border, rgba(255, 255, 255, 0.78));
+  background: rgba(251, 253, 249, 0.94);
+  box-shadow:
+    0 8px 32px rgba(25, 51, 33, 0.1),
+    0 1px 3px rgba(25, 51, 33, 0.05);
+}
+@supports (backdrop-filter: blur(20px)) {
+  .gisGlass {
+    background: rgba(251, 253, 249, 0.87);
+    backdrop-filter: blur(22px) saturate(130%);
+  }
+}
+
+/* El inspector flota sobre el mapa y administra su propio desplazamiento. */
+.mappingGis__dock {
+  position: absolute;
+  z-index: 5;
+  top: 18px;
+  right: 18px;
+  width: 304px;
+  max-height: calc(100% - 55px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  overflow: hidden;
+}
+.mappingGis__dockHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(34, 71, 50, 0.08);
+}
+.mappingGis__dockBody {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.mappingGis__tabs {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+.mappingGis__tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 1;
+  min-height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--gis-muted);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.mappingGis__tabs button[aria-pressed="true"] {
+  color: var(--gis-ink);
+  background: #e6eedf;
+}
+.mappingGis__panelTrigger {
+  position: absolute;
+  z-index: 5;
+  top: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  color: var(--gis-ink);
+  font-weight: 650;
+  cursor: pointer;
+}
+
+/* Las acciones comparten una superficie táctil y una indicación de foco visible. */
+.gisIconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.gisIconButton:hover,
+.gisIconButton.is-active {
+  background: #e1ecdc;
+  color: #21573e;
+}
+.gisIconButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.mappingGis button:focus-visible,
+.mappingGis select:focus-visible,
+.mappingGis summary:focus-visible,
+.dashboardGisPanel__footer a:focus-visible {
+  outline: 3px solid #549878;
+  outline-offset: 3px;
+}
+.gisSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Cada fila de capas conserva su checkbox nativo y la disponibilidad calculada por el motor. */
+.mapLayerControl {
+  padding: 16px;
+  color: var(--gis-ink);
+}
+.mapLayerControl__header {
+  padding: 0 0 12px;
+}
+.mapLayerControl__title {
+  margin: 0;
+  font-size: 16px;
+}
+.mapLayerControl__subtitle {
+  color: var(--gis-muted);
+  font-size: 12px;
+}
+.mapLayerControl__list {
+  display: grid;
+  gap: 7px;
+}
+.mapLayerControl__item {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 61px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  cursor: pointer;
+}
+.mapLayerControl__item--active {
+  background: rgba(225, 236, 220, 0.65);
+}
+.mapLayerControl__item:hover {
+  border-color: #b9cdb8;
+}
+.mapLayerControl__item--locked {
+  cursor: default;
+}
+.mapLayerControl__item input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #326b4e;
+  cursor: inherit;
+}
+.mapLayerControl__content {
+  display: grid;
+  gap: 3px;
+}
+.mapLayerControl__label {
+  font-size: 13px;
+  font-weight: 650;
+}
+.mapLayerControl__description {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--gis-muted);
+}
+.mapLayerControl__status {
+  max-width: 55px;
+  font-size: 10px;
+  text-align: right;
+  color: var(--gis-muted);
+}
+.mapLayerControl__item--unavailable {
+  opacity: 0.6;
+}
+
+/* La navegación se concentra en una barra vertical para dejar libre el centro del mapa. */
+.mapToolbar {
+  position: absolute;
+  z-index: 4;
+  left: 18px;
+  bottom: 115px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 17px;
+  background: rgba(251, 253, 249, 0.94);
+  box-shadow: 0 4px 18px rgba(26, 52, 36, 0.12);
+}
+.mapToolbar__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mapToolbar__divider {
+  height: 1px;
+  margin: 3px 5px;
+  background: #dce5da;
+}
+.mapToolbar__button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--gis-ink);
+  font-size: 20px;
+  cursor: pointer;
+}
+.mapToolbar__button:hover,
+.mapToolbar__button--active {
+  background: #e1ecdc;
+}
+.mapToolbar__button:last-child span {
+  font-size: 12px;
+  font-weight: 700;
+}
+.mapToolbar__north {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Los modos de dibujo flotan por encima de las métricas sin ocupar el inspector. */
+.mappingGis__editing {
+  position: absolute;
+  z-index: 6;
+  left: 80px;
+  right: 345px;
+  bottom: 108px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 14px;
+  background: #fcfef8;
+  box-shadow: 0 6px 22px #244a2826;
+}
+.mappingGis__editing button,
+.mappingGisPreview__actions button {
+  min-height: 38px;
+  padding: 7px 11px;
+  border: 1px solid #d8e4d2;
+  border-radius: 9px;
+  background: #f3f7ee;
+  color: #234b36;
+  font-size: 12px;
+  cursor: pointer;
+}
+.mappingGis__editing button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.mappingGis__editing output {
+  padding: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Los mensajes de carga o disponibilidad conservan una única región de lectura. */
+.mappingGis__feedback {
+  position: absolute;
+  z-index: 4;
+  left: 80px;
+  right: 345px;
+  bottom: 110px;
+  pointer-events: none;
+}
+.mappingGis__feedback p {
+  display: table;
+  max-width: 100%;
+  margin: 5px 0 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #fcfef8ed;
+  color: #586e60;
+  box-shadow: 0 3px 12px #23442612;
+  font-size: 12px;
+}
+.mappingGis__feedback [role="alert"] {
+  color: #8c4326;
+}
+
+/* Mapping adapta su altura al viewport y entrega toda su superficie al GIS. */
+.mappingWorkspace {
+  --gis-map-height: max(560px, calc(100dvh - 92px));
+  min-width: 0;
+}
+.mappingWorkspace__context {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  max-width: calc(100% - 360px);
+  padding: 13px 16px;
+  border-radius: 20px;
+}
+.mappingWorkspace__identity {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.gisBrandMark {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  color: #f1f7e4;
+  background: #305b41;
+}
+.gisEyebrow {
+  display: block;
+  color: #70806f;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  line-height: 1.6;
+}
+.mappingWorkspace h1 {
+  margin: 2px 0 0;
+  color: var(--gis-ink);
+  font-size: 21px;
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.6px;
+}
+.gisFieldFilter select {
+  max-width: 190px;
+  min-height: 40px;
+  padding: 0 30px 0 12px;
+  border: 1px solid #d8e2d1;
+  border-radius: 12px;
+  color: #34543d;
+  background: #ffffff91;
+  font-size: 12px;
+  cursor: pointer;
+}
+.mappingWorkspace__actions {
+  display: flex;
+  gap: 3px;
+  margin-left: auto;
+}
+.mappingWorkspace__source {
+  position: absolute;
+  top: 104px;
+  left: 22px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: calc(100% - 370px);
+  padding: 7px 11px;
+  border-radius: 12px;
+  color: #637361;
+  font-size: 10px;
+}
+.mappingWorkspace__source button {
+  padding: 3px 4px;
+  border: 0;
+  border-radius: 4px;
+  color: #356648;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.mappingWorkspace__source button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.mappingWorkspace__sourceDivider {
+  width: 1px;
+  height: 12px;
+  background: #ccd8c4;
+}
+.gisLiveDot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #90a85e;
+}
+
+/* Las tarjetas inferiores describen la geometría realmente visible y el borrador local. */
+.mappingWorkspace__metrics {
+  position: absolute;
+  bottom: 27px;
+  left: 80px;
+  right: 345px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.mappingWorkspace__metrics > div {
+  padding: 14px 16px;
+  border-radius: 17px;
+}
+.mappingWorkspace__metrics span {
+  display: block;
+  color: #64745e;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.mappingWorkspace__metrics strong {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 5px;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+}
+.mappingWorkspace__metrics small {
+  color: #71806a;
+  font-size: 10px;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+/* El inspector presenta información de dominio, selección y análisis verificable. */
+.gisInspector {
+  padding: 18px;
+}
+.gisInspector__heading h2 {
+  margin: 7px 0 8px;
+  color: #254631;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  line-height: 1.25;
+}
+.gisInspector__heading p,
+.gisMuted {
+  margin: 0;
+  color: #73816d;
+  font-size: 12px;
+  line-height: 1.65;
+}
+.gisZoneDetails {
+  margin-top: 17px;
+}
+.gisZoneDetails__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: 15px;
+  background: rgba(232, 239, 222, 0.65);
+}
+.gisZoneDetails__summary strong {
+  text-align: right;
+  font-size: 24px;
+  font-weight: 550;
+}
+.gisZoneDetails__summary small {
+  display: block;
+  color: #7b8771;
+  font-size: 10px;
+  font-weight: 500;
+}
+.gisRisk {
+  display: inline-block;
+  padding: 6px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.gisRisk--unknown {
+  background: #e6ebe4;
+  color: #697661;
+}
+.gisRisk--low {
+  background: #dcebc5;
+  color: #466c22;
+}
+.gisRisk--medium {
+  background: #fff0c4;
+  color: #8a6a14;
+}
+.gisRisk--high {
+  background: #ffe2c9;
+  color: #9a511f;
+}
+.gisRisk--critical {
+  background: #fbe0da;
+  color: #a13b32;
+}
+.gisFacts {
+  margin: 12px 0 16px;
+}
+.gisFacts > div {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid #dce5d180;
+  font-size: 11px;
+}
+.gisFacts dt {
+  color: #76836c;
+}
+.gisFacts dd {
+  margin: 0;
+  max-width: 145px;
+  color: #355339;
+  text-align: right;
+  line-height: 1.5;
+}
+.gisRecommendation {
+  padding: 13px;
+  border-radius: 13px;
+  background: #edf2e5a1;
+}
+.gisRecommendation p,
+.gisRecommendation li {
+  font-size: 12px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.gisRecommendation summary {
+  color: #41673a;
+  font-size: 11px;
+  cursor: pointer;
+}
+.gisRecommendation ul {
+  padding-left: 16px;
+}
+.gisZoneList {
+  margin-top: 23px;
+}
+.gisSectionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.gisSectionTitle h3 {
+  margin: 0;
+  color: #45613b;
+  font-size: 12px;
+  font-weight: 650;
+}
+.gisSectionTitle > span {
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: #e8eddf;
+  color: #708261;
+  font-size: 10px;
+}
+.gisZoneList__item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 57px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: #3a5434;
+  text-align: left;
+  cursor: pointer;
+}
+.gisZoneList__item:hover {
+  background: #e7eddd80;
+}
+.gisZoneList__item[aria-pressed="true"] {
+  background: #e6eddc;
+  border-color: #c7d7b6;
+}
+.gisZoneList__item > span:nth-child(2) {
+  flex: 1;
+}
+.gisZoneList__item strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+.gisZoneList__item small {
+  display: block;
+  margin-top: 3px;
+  color: #819072;
+  font-size: 10px;
+}
+.gisZoneList__item > svg {
+  width: 14px;
+  color: #95a38a;
+}
+.gisRiskDot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #aab6a4;
+}
+.gisRiskDot--low {
+  background: #8bba4e;
+}
+.gisRiskDot--medium {
+  background: #d8b247;
+}
+.gisRiskDot--high {
+  background: #df974e;
+}
+.gisRiskDot--critical {
+  background: #db7065;
+}
+.gisRouteCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 17px;
+  padding: 12px;
+  border: 1px solid #dce4cf;
+  border-radius: 15px;
+  background: #f4f6eb85;
+}
+.gisRouteCard strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Dashboard conserva su cuadrícula y monta una instancia compacta del mismo GIS. */
+.dashboardGisPanel {
+  overflow: hidden;
+}
+.dashboardGisPanel__map {
+  --gis-map-height: 360px;
+  margin-top: 4px;
+}
+.dashboardGisPanel__map .mappingGis {
+  border-radius: 17px;
+}
+.dashboardGisPanel__context {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  color: #3b5e3e;
+  font-size: 12px;
+}
+.dashboardGisPanel__context small {
+  display: block;
+  margin-top: 3px;
+  color: #7a886f;
+  font-size: 9px;
+}
+.dashboardGisPanel__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0 1px;
+}
+.dashboardGisPanel__footer strong {
+  display: block;
+  color: #41563b;
+  font-size: 12px;
+  font-weight: 600;
+}
+.dashboardGisPanel__footer small {
+  display: block;
+  margin-top: 4px;
+  color: #859078;
+  font-size: 10px;
+}
+.dashboardGisPanel__footer a {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: #e5edda;
+  color: #3d6336;
+  font-size: 11px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.mappingGis--compact .mapToolbar {
+  bottom: 38px;
+  left: 12px;
+}
+.mappingGis--compact .mappingGis__feedback {
+  left: 70px;
+  right: 12px;
+  bottom: 32px;
+}
+.mappingGis--compact .mappingGis__dock {
+  width: min(280px, calc(100% - 28px));
+  top: 14px;
+  right: 14px;
+  max-height: calc(100% - 42px);
+}
+.mappingGis--compact .mappingGis__panelTrigger {
+  top: 14px;
+  right: 14px;
+  min-height: 40px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+/* En tabletas el encabezado aprovecha otra fila sin modificar el lienzo. */
+@media (max-width: 1180px) and (min-width: 901px) {
+  .mappingWorkspace__context {
+    gap: 9px;
+    padding: 11px;
+  }
+  .mappingWorkspace__source {
+    top: 143px;
+  }
+  .mappingWorkspace__metrics > div {
+    padding: 12px 9px;
+  }
+  .mappingWorkspace__metrics strong {
+    font-size: 22px;
+  }
+}
+
+/* Las hojas inferiores responden al ancho real del mapa, incluso dentro del Dashboard. */
+.mappingGis {
+  container-type: inline-size;
+}
+@container (max-width: 760px) {
+  .mappingWorkspace__context {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    max-width: none;
+    gap: 10px;
+    padding: 11px;
+  }
+  .mappingWorkspace__identity {
+    gap: 8px;
+  }
+  .mappingWorkspace h1 {
+    font-size: 19px;
+  }
+  .gisBrandMark {
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+  }
+  .mappingWorkspace__actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .gisFieldFilter {
+    grid-column: 1 / -1;
+  }
+  .gisFieldFilter select {
+    width: 100%;
+    max-width: none;
+    min-height: 35px;
+  }
+  .mappingWorkspace__source {
+    top: 133px;
+    left: 14px;
+    right: 14px;
+    max-width: none;
+    gap: 6px;
+    font-size: 9px;
+  }
+  .mappingWorkspace__source button {
+    font-size: 9px;
+  }
+  .mappingGis--workspace .mappingGis__dock {
+    top: auto;
+    bottom: 110px;
+    right: 14px;
+    left: 74px;
+    width: auto;
+    max-height: 42%;
+    border-radius: 18px;
+  }
+  .mappingGis--workspace .mappingGis__panelTrigger {
+    top: auto;
+    bottom: 113px;
+    right: 14px;
+  }
+  .mappingWorkspace__metrics {
+    left: 14px;
+    right: 14px;
+    bottom: 30px;
+    gap: 6px;
+  }
+  .mappingWorkspace__metrics > div {
+    padding: 10px 9px;
+    border-radius: 13px;
+  }
+  .mappingWorkspace__metrics span {
+    font-size: 9px;
+  }
+  .mappingWorkspace__metrics strong {
+    font-size: 20px;
+    gap: 3px;
+  }
+  .mappingWorkspace__metrics small {
+    font-size: 8px;
+  }
+  .mappingGis__editing {
+    left: 74px;
+    right: 14px;
+    top: 188px;
+    bottom: auto;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .mappingGis__feedback {
+    left: 74px;
+    right: 14px;
+    bottom: 110px;
+  }
+  .mapToolbar {
+    left: 14px;
+    bottom: 112px;
+  }
+  .gisInspector {
+    padding: 14px;
+  }
+  .gisInspector__heading h2 {
+    font-size: 20px;
+  }
+}
+
+/* En dispositivos pequeños la altura permite trabajar el mapa y cerrar su inspector. */
+@media (max-width: 680px) {
+  .mappingWorkspace {
+    --gis-map-height: max(650px, calc(100dvh - 80px));
+  }
+  .mappingGis {
+    border-radius: 17px;
+  }
+  .dashboardGisPanel__map {
+    --gis-map-height: 340px;
+  }
+  .dashboardGisPanel__context {
+    max-width: calc(100% - 100px);
+    padding: 8px;
+  }
+  .dashboardGisPanel__context > svg {
+    display: none;
+  }
+  .dashboardGisPanel__footer {
+    flex-wrap: wrap;
+  }
+}
+
+/* El mapa conserva sus atribuciones, escala y controles propios de MapLibre. */
+.mappingGis .maplibregl-ctrl-attrib {
+  font-size: 9px;
+  max-width: calc(100% - 70px);
+}
+.mappingGis .maplibregl-ctrl-scale {
+  font-size: 9px;
+  border-color: #55704e;
+  background: #f9fcf2cc;
+}
+.mappingGis .maplibregl-popup-content {
+  border-radius: 15px;
+  padding: 16px;
+  box-shadow: 0 8px 28px #25433126;
+}
+/* Contenido informativo de una zona. */
+/* Definimos la presentación textual del contenido construido por ZonePopup. */
+.agrovision-zone-popup {
+  color: var(--av-text, #123c35);
+  font: 13px/1.4 var(--av-font-body, sans-serif);
+  /* Permitimos partir identificadores y textos extensos para conservar el ancho del panel. */
+  overflow-wrap: anywhere;
+}
+
+/* Agrupamos nombre e identificador de la zona. */
+.agrovision-zone-popup__header {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 8px;
+}
+
+.agrovision-zone-popup__zone-id {
+  color: var(--av-text-muted, #5d6d68);
+  font-size: 11px;
+}
+
+/* Organizamos las filas y limitamos la altura del análisis visible. */
+.agrovision-zone-popup__body {
+  display: grid;
+  gap: 6px;
+  /* Los análisis extensos permanecen accesibles mediante desplazamiento. */
+  max-height: 280px;
+  /* Habilitamos desplazamiento cuando el contenido supera la altura disponible. */
+  overflow-y: auto;
+}
+
+/* Separamos cada etiqueta de su valor correspondiente. */
+.agrovision-zone-popup__row {
+  display: grid;
+  /* Reservamos una columna para etiquetas y otra flexible para sus valores. */
+  grid-template-columns: 75px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.agrovision-zone-popup__value,
+.agrovision-zone-popup__risk {
+  text-align: right;
+}
+
+.agrovision-zone-popup__risk {
+  font-weight: 700;
+}
+
+/* Colores asociados con la clasificación de riesgo. */
+.agrovision-zone-popup .risk-low {
+  color: #397326;
+}
+.agrovision-zone-popup .risk-medium {
+  color: #846300;
+}
+.agrovision-zone-popup .risk-high {
+  color: #a74208;
+}
+.agrovision-zone-popup .risk-critical {
+  color: #b52c2c;
+}
+.agrovision-zone-popup .risk-unknown {
+  color: #64748b;
+}
+
+/* Página independiente de validación manual. */
+/* Limitamos el ancho de lectura de la vista independiente. */
+.mappingGisPreview {
+  max-width: 1440px;
+  /* Centramos la página de prueba dentro del ancho disponible. */
+  margin: 0 auto;
+  padding: 24px;
+  color: var(--av-text, #123c35);
+  font-family: var(--av-font-body, sans-serif);
+}
+
+.mappingGisPreview__header h1,
+.mappingGisPreview__section h2 {
+  font-family: var(--av-font-heading, sans-serif);
+}
+
+/* Distribuimos los controles que modifican la sesión de prueba. */
+.mappingGisPreview__actions {
+  display: flex;
+  /* Distribuimos los elementos en varias filas cuando el ancho lo requiere. */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+/* Alineamos la etiqueta de edición con su checkbox. */
+.mappingGisPreview__actions label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.mappingGisPreview__actions input {
+  /* Aplicamos el color primario a los controles nativos. */
+  accent-color: var(--av-green-500, #155b44);
+}
+
+.mappingGisPreview__section {
+  margin-top: 24px;
+}
+.mappingGisPreview__compact .mappingGis {
+  --gis-map-height: 340px;
+}
+
+/* Reducimos transiciones de interfaz cuando el usuario solicita menor movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  .mappingGis *,
+  .dashboardGisPanel__footer a {
+    scroll-behavior: auto;
+    transition: none;
+  }
+}
+
+/**
+ * DOCUMENTACIÓN DE PRESENTACIÓN
+ *
+ * mappingGis define superficie, capas de interfaz y altura mediante
+ * --gis-map-height. MappingPage la calcula a partir del viewport; Dashboard
+ * utiliza una altura compacta dentro de su Panel existente.
+ *
+ * gisGlass proporciona contraste, borde y fondo translúcido, con respaldo
+ * opaco cuando el navegador carece de backdrop-filter. El mapa permanece
+ * visible debajo de los controles. El inspector dispone de scroll propio.
+ *
+ * Las consultas de contenedor transforman el inspector en hoja inferior
+ * cuando el canvas mide hasta 760px. Las consultas de viewport ajustan
+ * la altura de la página y la densidad de Dashboard en dispositivos móviles.
+ *
+ * La interacción conserva controles nativos, foco visible, superficies
+ * táctiles y atribución de MapLibre. Los colores de riesgo complementan
+ * etiquetas textuales y proceden del contrato analítico del módulo.
+ */

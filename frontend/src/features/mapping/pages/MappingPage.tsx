@@ -1,267 +1,400 @@
 /**
  * =========================================
- * MappingPage
+ * Mapping Page
  * =========================================
+ * Espacio operativo GIS de AgroVision: mapa continuo, inspector flotante
+ * y herramientas vinculadas al motor cartográfico compartido con Dashboard.
  *
- * Refactor visual basado en Figma.
- *
- * Se mantienen:
- * - service;
- * - adapter;
- * - mock fallback;
- * - useSimulationPlayback;
- * - playbackData;
- * - recarga de simulación.
- *
- * Se reemplaza únicamente la antigua
- * presentación rover-first.
+ * Responsabilidad:
+ * - seleccionar campos y zonas de la finca;
+ * - consultar y presentar análisis válidos por zona;
+ * - coordinar cámara, recorrido simulado y borradores exportables;
+ * - conservar el contexto geográfico en escritorio y dispositivos móviles.
+ * =========================================
  */
 
-import { useEffect, useState } from "react";
-import { Panel } from "../../../shared/components/ui/Panel";
-import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
-import { TerrainCanvas, type MappingLayerVisibility } from "../components/TerrainCanvas";
-import { useSimulationPlayback } from "../hooks/useSimulationPlayback";
-import { adaptMappingData } from "../services/mappingAdapter";
-import { mappingMock } from "../services/mappingMock";
-import { getMappingSimulation } from "../services/mappingServices";
-import type { RenderSimulationData } from "../types/mappingRender.types";
-import "../mapping.css";
+// Conservamos la selección de dominio y snapshots estables entre renders.
+import { useMemo, useState } from "react";
+// Calculamos superficies, longitudes y límites a partir de las geometrías recibidas.
+import { area, length } from "@turf/turf";
+// Aplicamos la política de encuadre compartida con la navegación del GIS.
+import { fitGisGeometry } from "../utils/gisCamera";
+// Tipamos la instancia cartográfica y los borradores creados por Geoman.
+import type { Map } from "maplibre-gl";
+import type { FeatureCollection } from "geojson";
+// Componemos el mapa y sus controles a través del componente GIS compartido.
+import { MappingGIS } from "../components/MappingGIS";
+import { GisIcon } from "../components/GisIcon";
+// Consultamos los análisis mediante el servicio común de zonas.
+import { useZoneInsights } from "../hooks/useZoneInsights";
+// Aplicamos las mismas reglas de identidad utilizadas por las capas del mapa.
+import { enrichZonesWithInsights } from "../services/zoneInsightMapAdapter";
+// Consumimos las geometrías desde su único punto de salida.
+import { farmsGeoJSON, fieldsGeoJSON, zonesGeoJSON } from "../utils/geojson";
+import { agroVisionRoverTrajectory } from "../data/roverTrajectoryData";
+import type { FieldFeatureCollection, ZoneFeatureCollection } from "../types/mappingGeo.types";
+import "../mappingGis.css";
 
-const DEFAULT_LAYERS: MappingLayerVisibility = {
-  boundary: true,
-  riskZones: true,
-  managementZones: true,
-  internalPaths: true,
-  samplingPoints: true,
-  hydrography: false,
-};
+// Compartimos el formato numérico de las superficies y distancias visibles.
+const NUMBER_FORMAT = new Intl.NumberFormat("es-NI", { maximumFractionDigits: 1 });
+// El catálogo representa exclusivamente los niveles permitidos por el contrato analítico.
+const RISK_LABELS = { LOW: "Bajo", MEDIUM: "Medio", HIGH: "Alto", CRITICAL: "Crítico" } as const;
+// Una colección vacía identifica el inicio de una sesión de borradores.
+const EMPTY_DRAFT: FeatureCollection = { type: "FeatureCollection", features: [] };
 
 export function MappingPage() {
-  const [data, setData] = useState<RenderSimulationData>(() => adaptMappingData(mappingMock));
-  const [isLoading, setIsLoading] = useState(false);
-  const [visibleLayers, setVisibleLayers] = useState<MappingLayerVisibility>(DEFAULT_LAYERS);
+  // La finca y sus geometrías proceden del dataset compartido por ambas páginas.
+  const farm = farmsGeoJSON.features[0];
+  // Conservamos la referencia cargada para encuadrar campos y zonas desde el inspector.
+  const [map, setMap] = useState<Map | null>(null);
+  // Un filtro vacío representa todos los campos de la finca.
+  const [fieldId, setFieldId] = useState("");
+  // Dashboard puede abrir esta vista con una zona concreta mediante su query string.
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(() => {
+    const id = new URLSearchParams(window.location.search).get("zone");
+    return zonesGeoJSON.features.some((zone) => zone.properties.zoneId === id) ? id : null;
+  });
+  // El usuario controla reproducción y edición de forma independiente.
+  const [animateRover, setAnimateRover] = useState(true);
+  const [enableEditing, setEnableEditing] = useState(false);
+  // Conservamos el último borrador recibido para exportarlo como GeoJSON.
+  const [draft, setDraft] = useState<FeatureCollection>(EMPTY_DRAFT);
+  // Una nueva identidad permite volver a consultar el mismo conjunto de zonas.
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  /**
-   * Playback continúa funcionando con los
-   * mismos datos utilizados anteriormente.
-   */
-  const { playbackData, progress, currentFrame, totalFrames, reset } = useSimulationPlayback(data);
+  // Consultamos una sola vez cada zona del dataset, independientemente del filtro visual.
+  const zoneIds = useMemo(() => zonesGeoJSON.features.map((zone) => zone.properties.zoneId), []);
+  const analysis = useZoneInsights(zoneIds, "", refreshKey);
+  // Validamos las relaciones zoneId/fieldId antes de presentar información de riesgo.
+  const enriched = useMemo(
+    () => enrichZonesWithInsights(zonesGeoJSON, analysis.insights),
+    [analysis.insights],
+  );
 
-  useEffect(() => {
-    void loadSimulation();
-  }, []);
+  // El filtro conserva la relación entre campos y zonas con nuevas referencias estables.
+  const fields = useMemo<FieldFeatureCollection>(
+    () => ({
+      ...fieldsGeoJSON,
+      features: fieldsGeoJSON.features.filter(
+        (field) => !fieldId || String(field.properties.fieldId) === fieldId,
+      ),
+    }),
+    [fieldId],
+  );
+  const zones = useMemo<ZoneFeatureCollection>(
+    () => ({
+      ...enriched.zones,
+      features: enriched.zones.features.filter(
+        (zone) => !fieldId || String(zone.properties.fieldId) === fieldId,
+      ),
+    }),
+    [enriched.zones, fieldId],
+  );
 
-  /**
-   * Backend → adapter → render.
-   */
-  async function loadSimulation() {
-    setIsLoading(true);
+  // La selección utiliza la misma colección enriquecida que recibe MapLibre.
+  const selected = zones.features.find((zone) => zone.properties.zoneId === selectedZoneId);
+  const selectedInsight = analysis.insights.find(
+    (insight) =>
+      insight.zoneId === selected?.properties.zoneId &&
+      insight.fieldId === String(selected.properties.fieldId),
+  );
+  // Calculamos métricas geométricas para evitar indicadores operativos inventados.
+  const hectares = area(fields) / 10_000;
+  const evaluated = zones.features.filter((zone) => zone.properties.riskLevel != null).length;
+  const routeMeters = length(agroVisionRoverTrajectory, { units: "meters" });
+  // El recorrido de demostración pertenece a la finca completa.
+  const trajectory = fieldId ? null : agroVisionRoverTrajectory;
 
-    try {
-      const simulation = await getMappingSimulation();
-      setData(adaptMappingData(simulation));
-    } finally {
-      setIsLoading(false);
-    }
+  /** Encuadra una geometría con la cámara y el espacio de interfaz vigentes. */
+  function focusGeometry(geometry: Parameters<typeof fitGisGeometry>[1]): void {
+    if (map) fitGisGeometry(map, geometry);
   }
 
-  /**
-   * Activa/desactiva una capa visual.
-   */
-  function toggleLayer(layer: keyof MappingLayerVisibility) {
-    setVisibleLayers((currentLayers) => ({
-      ...currentLayers,
-      [layer]: !currentLayers[layer],
-    }));
+  /** Cambia el campo y presenta sus límites utilizando la cámara existente. */
+  function selectField(id: string): void {
+    setFieldId(id);
+    setSelectedZoneId(null);
+    // El encuadre utiliza el siguiente filtro antes del próximo render de React.
+    const features = fieldsGeoJSON.features.filter((field) => !id || String(field.properties.fieldId) === id);
+    if (features.length) focusGeometry({ type: "FeatureCollection", features });
   }
 
-  /**
-   * Centra/reinicia el playback operativo.
-   */
-  function handleCenterMap() {
-    reset();
+  /** Descarga el borrador vigente o las geometrías actualmente visibles. */
+  function exportGeoJSON(): void {
+    // El borrador tiene prioridad; la vista exporta campos, zonas y recorrido disponible.
+    const payload = draft.features.length
+      ? draft
+      : {
+          type: "FeatureCollection",
+          features: [...fields.features, ...zones.features, ...(trajectory ? [trajectory] : [])],
+        };
+    // Generamos una descarga local que conserva el formato GeoJSON estándar.
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(payload, null, 2)], { type: "application/geo+json" }),
+    );
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = draft.features.length ? "agrovision-borrador.geojson" : "agrovision-mapa.geojson";
+    anchor.click();
+    // Liberamos el recurso temporal después de iniciar la descarga.
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
+
+  // El inspector presenta una selección real y mantiene disponibles las demás zonas.
+  const inspector = (
+    <div className="gisInspector">
+      <header className="gisInspector__heading">
+        <span className="gisEyebrow">EXPLORA TU FINCA</span>
+        <h2>{selected?.properties.name ?? "Cada zona, una decisión"}</h2>
+        <p>
+          {selected
+            ? `${selected.properties.zoneId} · ${fieldsGeoJSON.features.find((field) => field.properties.fieldId === selected.properties.fieldId)?.properties.name ?? "Campo agrícola"}`
+            : "Selecciona una zona en el mapa o en la lista para conocer su estado."}
+        </p>
+      </header>
+
+      {selected && (
+        <section className="gisZoneDetails" aria-label="Información de la zona seleccionada">
+          {/* Riesgo y salud aparecen únicamente cuando existe un análisis compatible. */}
+          <div className="gisZoneDetails__summary">
+            <span className={`gisRisk gisRisk--${selected.properties.riskLevel?.toLowerCase() ?? "unknown"}`}>
+              {selected.properties.riskLevel
+                ? `Riesgo ${RISK_LABELS[selected.properties.riskLevel].toLowerCase()}`
+                : "Sin evaluar"}
+            </span>
+            <strong>
+              {selected.properties.healthScore != null ? `${selected.properties.healthScore}/100` : "—"}
+              <small>Salud</small>
+            </strong>
+          </div>
+          <dl className="gisFacts">
+            <div>
+              <dt>Superficie geométrica</dt>
+              <dd>{NUMBER_FORMAT.format(area(selected) / 10_000)} ha</dd>
+            </div>
+            <div>
+              <dt>Última evaluación</dt>
+              <dd>
+                {selectedInsight
+                  ? new Intl.DateTimeFormat("es-NI", { dateStyle: "medium", timeStyle: "short" }).format(
+                      new Date(selectedInsight.generatedAt),
+                    )
+                  : "Sin datos"}
+              </dd>
+            </div>
+          </dl>
+          {/* El backend proporciona el resumen y la acción sustentada por su evidencia. */}
+          {selectedInsight ? (
+            <div className="gisRecommendation">
+              <span className="gisEyebrow">ACCIÓN RECOMENDADA</span>
+              <p>{selectedInsight.recommendedAction}</p>
+              <details>
+                <summary>Ver evidencia del análisis</summary>
+                <p>{selectedInsight.summary}</p>
+                <ul>
+                  {selectedInsight.evidence.map((item, index) => (
+                    <li key={`${item.source}-${item.metric}-${index}`}>
+                      <strong>{item.metric}</strong>: {item.explanation}
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          ) : (
+            <p className="gisMuted">
+              La geometría está disponible. El análisis de esta zona aún no está disponible.
+            </p>
+          )}
+        </section>
+      )}
+
+      <section className="gisZoneList" aria-label="Zonas del campo">
+        <div className="gisSectionTitle">
+          <h3>Zonas de la finca</h3>
+          <span>{zones.features.length}</span>
+        </div>
+        {/* La lista permite seleccionar y encuadrar zonas mediante teclado o pantalla táctil. */}
+        {zones.features.map((zone) => (
+          <button
+            className="gisZoneList__item"
+            type="button"
+            key={zone.properties.zoneId}
+            aria-pressed={selectedZoneId === zone.properties.zoneId}
+            onClick={() => {
+              setSelectedZoneId(zone.properties.zoneId);
+              focusGeometry(zone);
+            }}
+          >
+            <span
+              className={`gisRiskDot gisRiskDot--${zone.properties.riskLevel?.toLowerCase() ?? "unknown"}`}
+            />
+            <span>
+              <strong>{zone.properties.name}</strong>
+              <small>
+                {zone.properties.riskLevel ? RISK_LABELS[zone.properties.riskLevel] : "Sin evaluar"}
+              </small>
+            </span>
+            <GisIcon name="arrow" />
+          </button>
+        ))}
+      </section>
+
+      {/* El recorrido sintético se identifica como demostración y usa el mismo control del motor. */}
+      <section className="gisRouteCard" aria-label="Recorrido del rover">
+        <div>
+          <span className="gisEyebrow">ROVER · DEMOSTRACIÓN</span>
+          <strong>
+            {trajectory
+              ? `${NUMBER_FORMAT.format(routeMeters)} m de recorrido`
+              : "Recorrido de finca completa"}
+          </strong>
+        </div>
+        <button
+          className="gisIconButton"
+          type="button"
+          disabled={!trajectory}
+          aria-label={animateRover ? "Pausar rover" : "Reanudar rover"}
+          onClick={() => setAnimateRover((current) => !current)}
+        >
+          <GisIcon name={animateRover ? "pause" : "play"} />
+        </button>
+      </section>
+    </div>
+  );
 
   return (
-    <section className="avScreen mappingFigma">
-      <section className="mappingFigma__workspace">
-        {/* =====================================
-            MAPA PRINCIPAL
-            ===================================== */}
-
-        <Panel title="Mapa operativo del terreno" showInfo={false} className="mappingOperationalPanel">
-          <div className="mappingOperationalLayout">
-            <aside className="mappingLayerSelector">
-              <strong>Capas</strong>
-
-              <LayerToggle checked={visibleLayers.boundary} label="Límites del lote" onChange={() => toggleLayer("boundary")} />
-              <LayerToggle checked={visibleLayers.riskZones} label="Zonas de riesgo" onChange={() => toggleLayer("riskZones")} />
-              <LayerToggle checked={visibleLayers.managementZones} label="Zonas de manejo" onChange={() => toggleLayer("managementZones")} />
-              <LayerToggle checked={visibleLayers.internalPaths} label="Caminos internos" onChange={() => toggleLayer("internalPaths")} />
-              <LayerToggle checked={visibleLayers.samplingPoints} label="Puntos de muestreo" onChange={() => toggleLayer("samplingPoints")} />
-              <LayerToggle checked={visibleLayers.hydrography} label="Hidrografía" onChange={() => toggleLayer("hydrography")} />
-
-              <button type="button" className="mappingManageLayers">Gestionar capas</button>
-
-              <div className="mappingMapControls">
-                <button type="button">+</button>
-                <button type="button">−</button>
-                <button type="button" onClick={handleCenterMap}>{/* SVG center */}</button>
-              </div>
-            </aside>
-
-            <div className="mappingTerrainHost">
-              <TerrainCanvas data={playbackData} visibleLayers={visibleLayers} />
-
-              {isLoading && <span className="mappingLoadingBadge">Actualizando...</span>}
+    <section className="mappingWorkspace" aria-label="Explorador GIS de AgroVision">
+      {/* La página ocupa un único lienzo; los paneles se presentan encima de la cartografía. */}
+      <MappingGIS
+        fields={fields}
+        zones={zones}
+        trajectory={trajectory}
+        insights={analysis.insights}
+        sidePanel={inspector}
+        selectedZoneId={selectedZoneId}
+        animateRover={animateRover}
+        enableEditing={enableEditing}
+        onMapReady={setMap}
+        onZoneSelect={(zone) => setSelectedZoneId(zone.zoneId)}
+        onDraftChange={setDraft}
+      >
+        <header className="mappingWorkspace__context gisGlass">
+          <div className="mappingWorkspace__identity">
+            <span className="gisBrandMark">
+              <GisIcon name="location" />
+            </span>
+            <div>
+              <span className="gisEyebrow">MAPA DE LA FINCA</span>
+              <h1>{farm?.properties.name ?? "Mi finca"}</h1>
             </div>
           </div>
-        </Panel>
-
-        {/* =====================================
-            COLUMNA DERECHA
-            ===================================== */}
-
-        <aside className="mappingFigma__side">
-          <Panel title="Zona seleccionada" showInfo={false} className="mappingSelectedZonePanel">
-            <div className="mappingInfoRows">
-              <MappingInfoRow label="Zona crítica" value="Riesgo alto" danger />
-              <MappingInfoRow label="Área aproximada" value="18.6 ha" />
-              <MappingInfoRow label="Cultivo predominante" value="Naranjo" />
-              <MappingInfoRow label="Pendiente promedio" value="6–12%" />
-              <MappingInfoRow label="Última evaluación" value="Hoy, 09:15" />
-            </div>
-
-            <button type="button" className="avTextAction mappingCenteredAction">Ver recomendaciones →</button>
-          </Panel>
-
-          <Panel title="Resumen de ruta" showInfo={false}>
-            <div className="mappingInfoRows">
-              <MappingInfoRow label="Distancia total" value={`${playbackData.stats.distanceTraveled} m`} />
-              <MappingInfoRow label="Puntos de control" value={String(playbackData.stats.plantsDetected)} />
-              <MappingInfoRow label="Tiempo estimado" value={`${currentFrame + 1}/${totalFrames}`} />
-            </div>
-
-            <button type="button" className="avTextAction mappingCenteredAction">Ver detalle de ruta →</button>
-          </Panel>
-
-          <Panel title="Eventos detectados" showInfo={false} headerAction={<button type="button" className="avTextAction">Ver todos</button>}>
-            <div className="mappingEvents">
-              <MappingEvent label="Estrés hídrico severo" time="Hoy, 09:30" tone="DANGER" />
-              <MappingEvent label="Riesgo de enfermedad foliar" time="Hoy, 09:15" tone="DANGER" />
-              <MappingEvent label="Compactación de suelo" time="Ayer, 16:40" tone="WARNING" />
-            </div>
-          </Panel>
-        </aside>
-      </section>
-
-      {/* =====================================
-          FILA INFERIOR
-          ===================================== */}
-
-      <section className="mappingFigma__bottom">
-        <Panel title="Capas activas" showInfo={false}>
-          <div className="mappingActiveLayers">
-            <ActiveLayer color="lime" label="Límites del lote" active={visibleLayers.boundary} />
-            <ActiveLayer color="amber" label="Zonas de riesgo" active={visibleLayers.riskZones} />
-            <ActiveLayer color="green" label="Zonas de manejo" active={visibleLayers.managementZones} />
-            <ActiveLayer color="gray" label="Caminos internos" active={visibleLayers.internalPaths} />
-            <ActiveLayer color="yellow" label="Puntos de muestreo" active={visibleLayers.samplingPoints} />
-            <ActiveLayer color="blue" label="Hidrografía" active={visibleLayers.hydrography} />
+          <label className="gisFieldFilter">
+            <span className="gisSrOnly">Campo visible</span>
+            <select value={fieldId} onChange={(event) => selectField(event.target.value)}>
+              <option value="">Todos los campos</option>
+              {fieldsGeoJSON.features.map((field) => (
+                <option key={field.properties.fieldId} value={String(field.properties.fieldId)}>
+                  {field.properties.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="mappingWorkspace__actions">
+            <button
+              className={`gisIconButton${enableEditing ? " is-active" : ""}`}
+              type="button"
+              aria-label="Dibujar y medir"
+              title="Dibujar y medir"
+              aria-pressed={enableEditing}
+              onClick={() => setEnableEditing((current) => !current)}
+            >
+              <GisIcon name="draw" />
+            </button>
+            <button
+              className="gisIconButton"
+              type="button"
+              aria-label="Exportar GeoJSON"
+              title="Exportar GeoJSON"
+              onClick={exportGeoJSON}
+            >
+              <GisIcon name="download" />
+            </button>
           </div>
-        </Panel>
+        </header>
 
-        <Panel title="Indicadores del terreno" showInfo={false}>
-          <div className="mappingIndicatorGrid">
-            <TerrainIndicator label="Pendiente promedio" value="7.8" unit="%" status="Moderada" />
-            <TerrainIndicator label="Elevación promedio" value="612" unit="m msnm" status="Normal" />
-            <TerrainIndicator label="Índice de vegetación (NDVI)" value="0.64" unit="" status="Moderado" />
-            <TerrainIndicator label="Humedad del suelo promedio" value="21" unit="%" status="Bajo" />
+        {/* El origen de las geometrías y la disponibilidad analítica permanecen visibles. */}
+        <div className="mappingWorkspace__source gisGlass" role="status">
+          <span className="gisLiveDot" /> Geometrías de demostración
+          <span className="mappingWorkspace__sourceDivider" />
+          {analysis.isLoading
+            ? "Consultando análisis…"
+            : `${evaluated}/${zones.features.length} zonas evaluadas`}
+          <button
+            type="button"
+            disabled={analysis.isLoading}
+            onClick={() => setRefreshKey((current) => current + 1)}
+          >
+            Actualizar
+          </button>
+        </div>
+
+        {/* Las métricas describen el filtro actual y se calculan desde las geometrías. */}
+        <footer className="mappingWorkspace__metrics" aria-label="Resumen geográfico">
+          <div className="gisGlass">
+            <span>Superficie de campos</span>
+            <strong>
+              {NUMBER_FORMAT.format(hectares)}
+              <small>ha</small>
+            </strong>
           </div>
-
-          <button type="button" className="avTextAction mappingCenteredAction">Ver análisis completo →</button>
-        </Panel>
-
-        <Panel title="Acciones rápidas" showInfo={false}>
-          <div className="mappingQuickActions">
-            <QuickAction label="Medir distancia" />
-            <QuickAction label="Dibujar zona" />
-            <QuickAction label="Agregar punto de muestreo" />
-            <QuickAction label="Importar archivo (KML/Shape)" />
-            <QuickAction label="Generar reporte del mapa" />
+          <div className="gisGlass">
+            <span>Zonas visibles</span>
+            <strong>
+              {zones.features.length}
+              <small>zonas</small>
+            </strong>
           </div>
-        </Panel>
-      </section>
-
-      <footer className="mappingSyncStatus">
-        <span>{/* SVG sync */}</span>
-        Los datos del mapa se actualizan automáticamente. Playback: {progress}%.
-      </footer>
+          <div className="gisGlass">
+            <span>{draft.features.length ? "Borrador local" : "Campos visibles"}</span>
+            <strong>
+              {draft.features.length || fields.features.length}
+              <small>{draft.features.length ? "geometrías" : "campos"}</small>
+            </strong>
+          </div>
+        </footer>
+      </MappingGIS>
     </section>
   );
 }
 
-function LayerToggle({ checked, label, onChange }: { readonly checked: boolean; readonly label: string; readonly onChange: () => void }) {
-  return (
-    <label className="mappingLayerToggle">
-      <input type="checkbox" checked={checked} onChange={onChange} />
-      <span>{/* SVG layer */}</span>
-      <strong>{label}</strong>
-    </label>
-  );
-}
-
-function MappingInfoRow({ label, value, danger = false }: { readonly label: string; readonly value: string; readonly danger?: boolean }) {
-  return (
-    <div className="mappingInfoRow">
-      <span className={danger ? "mappingInfoRow__icon is-danger" : "mappingInfoRow__icon"}>{/* SVG */}</span>
-      <strong>{label}</strong>
-      <p>{value}</p>
-    </div>
-  );
-}
-
-function MappingEvent({ label, time, tone }: { readonly label: string; readonly time: string; readonly tone: "DANGER" | "WARNING" }) {
-  return (
-    <div className="mappingEvent">
-      <span className={`mappingEvent__icon mappingEvent__icon--${tone.toLowerCase()}`}>△</span>
-      <strong>{label}</strong>
-      <time>{time}</time>
-      <b>›</b>
-    </div>
-  );
-}
-
-function ActiveLayer({ color, label, active }: { readonly color: string; readonly label: string; readonly active: boolean }) {
-  return (
-    <div className={active ? "mappingActiveLayer" : "mappingActiveLayer is-disabled"}>
-      <i className={`mappingActiveLayer__dot mappingActiveLayer__dot--${color}`} />
-      <span>{label}</span>
-      <small>{active ? "◉" : "○"}</small>
-      <b>⌄</b>
-    </div>
-  );
-}
-
-function TerrainIndicator({ label, value, unit, status }: { readonly label: string; readonly value: string; readonly unit: string; readonly status: string }) {
-  return (
-    <article className="mappingIndicator">
-      <span>{label}</span>
-      <i>{/* SVG indicator */}</i>
-      <strong>{value}</strong>
-      <small>{unit}</small>
-      <p>{status}</p>
-    </article>
-  );
-}
-
-function QuickAction({ label }: { readonly label: string }) {
-  return (
-    <button type="button" className="mappingQuickAction">
-      <span>{/* SVG */}</span>
-      <strong>{label}</strong>
-      <b>›</b>
-    </button>
-  );
-}
+/**
+ * DOCUMENTACIÓN DE INTEGRACIÓN
+ *
+ * Ruta pública: /mapping. /mapping?zone=zone-03 conserva la selección
+ * procedente de Dashboard. AppRouter monta esta página en la aplicación
+ * normal; npm run dev:frontend ejecuta su integración con Vite.
+ *
+ * MappingGIS administra MapLibre, capas, navegación, eventos y Geoman.
+ * MappingPage administra filtro de campo, selección, análisis y presentación
+ * del inspector. Las geometrías proceden de utils/geojson.ts; actualmente
+ * corresponden a mappingGeoData.ts, cuyo origen de demostración es visible.
+ *
+ * useZoneInsights consulta /api/analysis/zone/:zoneId. Cada actualización
+ * cancela la ejecución previa y obtiene otro snapshot. El adapter exige
+ * coincidencia de zoneId y fieldId para incorporar riesgo y salud. La
+ * ausencia de análisis se presenta como Sin evaluar.
+ *
+ * La lista y los clicks sobre el mapa comparten selectedZoneId. Turf calcula
+ * superficie geométrica y distancia del recorrido; estos valores describen
+ * las coordenadas disponibles y no sustituyen una medición catastral.
+ *
+ * El recorrido demo se muestra para toda la finca. Filtrar un campo entrega
+ * trajectory=null. Pausar controla animateRover del motor. Dibujar y medir
+ * activa Geoman; los borradores se conservan en memoria de esta página.
+ * Exportar descarga el último borrador o la colección GIS visible. La
+ * persistencia requiere el servicio de geometrías y validación de dominio.
+ *
+ * El inspector flota a la derecha en escritorio y utiliza una hoja inferior
+ * cerrable en móvil. La superficie del mapa permanece continua y su tamaño
+ * responde al contenedor mediante el observador de useAgroMap.
+ */
