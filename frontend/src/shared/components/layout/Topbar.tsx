@@ -63,7 +63,7 @@ export function Topbar({ activeLabel }: TopbarProps) {
           <input 
             type="search" 
             placeholder={getSearchPlaceholder(activeLabel)} 
-            aria-label="Buscar en AgroVision" 
+            aria-label="Buscar" 
           />
       
         </label>

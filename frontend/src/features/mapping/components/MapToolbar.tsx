@@ -25,14 +25,16 @@
  * =========================================
  */
 
-
 import type { FC } from "react";
+// Compartimos la iconografía de orientación y encuadre.
+import { GisIcon } from "./GisIcon";
+import "../mappingGis.css";
 
 /**
  * =========================================
  * PROPS
  * =========================================
- */ 
+ */
 
 // Definimos las acciones que el toolbar necesita recibir.
 export interface MapToolbarProps {
@@ -55,14 +57,7 @@ export interface MapToolbarProps {
 // =========================================
 
 // Componente principal del toolbar.
-export const MapToolbar: FC<MapToolbarProps> = ({
-  onZoomIn,
-  onZoomOut,
-  onResetView,
-  onResetNorth,
-  isTilted = false,
-  onToggleTilt,
-}) => {
+export const MapToolbar: FC<MapToolbarProps> = ({ onZoomIn, onZoomOut, onResetView, onResetNorth, isTilted = false, onToggleTilt, }) => {
   // Renderizamos la barra de herramientas.
   return (
     <div
@@ -130,19 +125,14 @@ export const MapToolbar: FC<MapToolbarProps> = ({
           aria-label="Restablecer vista inicial"
         >
           {/* Símbolo visual de reinicio. */}
-          <span aria-hidden="true">⌂</span>
+          <GisIcon name="expand" />
         </button>
 
         {/* Solo mostramos la acción si fue implementada. */}
         {onToggleTilt && (
           <button
             type="button"
-            className={[
-              "mapToolbar__button",
-              isTilted ? "mapToolbar__button--active" : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
+            className={["mapToolbar__button", isTilted ? "mapToolbar__button--active" : ""] .filter(Boolean) .join(" ")}
             onClick={onToggleTilt}
             title={
               isTilted ? "Desactivar inclinación" : "Activar inclinación"

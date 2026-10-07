@@ -1,37 +1,33 @@
 /**
  * =========================================
- *  NDVI Layer
+ * NDVI Layer
  * =========================================
  *
- * Capa de vigor vegetal de AgroVision utilizando el producto NDVI de Sentinel-2 mediante Copernicus Data Space Sentinel Hub WMS.
+ * Capa de vigor vegetal de AgroVision utilizando el producto NDVI
+ * mediante Copernicus Data Space Sentinel Hub WMS.
  *
  * Responsabilidad:
- * - construir la fuente WMS de NDVI;
- * - agregar NDVI como raster a MapLibre;
- * - controlar su visibilidad;
- * - mantener NDVI independiente de las geometrías agrícolas y de las capas de riesgo.
+ * - definir la fuente raster del producto NDVI;
+ * - registrar su representación visual en MapLibre;
+ * - controlar su visibilidad y opacidad;
+ * - liberar la capa y su fuente.
  *
- * Flujo:
+ * Integración:
+ * copernicusWms.ts construye la plantilla de solicitudes.
+ * El consumidor proporciona un mapa con el estilo cargado
+ * y puede indicar una capa de referencia para ordenar el raster.
  *
- * Sentinel-2
- *      ↓
- * Copernicus Sentinel Hub
- *      ↓
- *      WMS
- *      ↓
- *     NDVI
- *      ↓
- *   MapLibre
+ * Configuración requerida:
+ * VITE_COPERNICUS_SENTINEL_INSTANCE_ID.
  *
  * =========================================
  */
 
+// Importamos los tipos necesarios desde MapLibre.
+import type { Map, RasterLayerSpecification, RasterSourceSpecification } from "maplibre-gl";
 
-import type {
-  Map,
-  RasterLayerSpecification,
-  RasterSourceSpecification,
-} from "maplibre-gl";
+// Consumimos el constructor WMS compartido.
+import { buildCopernicusWmsUrl } from "../utils/copernicusWms";
 
 // =========================================
 // IDS
@@ -47,7 +43,7 @@ export const NDVI_LAYER_ID = "agrovision-ndvi-layer";
 // CONFIGURATION
 // =========================================
 
-// Producto NDVI oficial expuesto por Sentinel Hub WMS.
+// Nombre del producto NDVI configurado en la instancia WMS.
 export const NDVI_WMS_LAYER = "NDVI";
 
 // Porcentaje máximo de nubosidad permitido.
@@ -56,63 +52,23 @@ export const NDVI_MAX_CLOUD_COVERAGE = 20;
 // Tamaño estándar del tile raster.
 export const NDVI_TILE_SIZE = 256;
 
-// Zoom mínimo para solicitar NDVI.
+// Límites de zoom configurados para la fuente raster.
 export const NDVI_MIN_ZOOM = 6;
-
-// Zoom máximo razonable para la capa.
 export const NDVI_MAX_ZOOM = 18;
 
-// Opacidad inicial para permitir que las geometrías GIS puedan visualizarse sobre el NDVI posteriormente.
+// Opacidad inicial del producto NDVI.
 export const NDVI_DEFAULT_OPACITY = 0.72;
-
-// =========================================
-// INSTANCE ID
-// =========================================
-
-// Obtiene el Instance ID configurado en Vite.
-const getSentinelInstanceId = (): string => {
-  // Leemos la variable pública configurada en .env.
-  return (
-    import.meta.env
-      .VITE_COPERNICUS_SENTINEL_INSTANCE_ID ?? ""
-  ).trim();
-};
 
 // =========================================
 // WMS URL
 // =========================================
 
 /**
- * Construye la URL WMS utilizada por MapLibre para solicitar los tiles NDVI.
+ * Construye la plantilla WMS del producto NDVI.
+ *
+ * @returns Plantilla de tiles o null cuando falta la configuración.
  */
-export const buildNdviWmsUrl = (): string | null => {
-  // Obtenemos el Instance ID real y Evitamos construir una URL inválida.
-  const instanceId = getSentinelInstanceId();
-
-  if (!instanceId) {
-    return null;
-  }
-
-  // Construimos el endpoint WMS de Sentinel Hub.
-  const baseUrl = `https://sh.dataspace.copernicus.eu/ogc/wms/${instanceId}`;
-
-  // Construimos la solicitud WMS.
-  return [
-    `${baseUrl}?`,
-    "SERVICE=WMS",
-    "&VERSION=1.1.1",
-    "&REQUEST=GetMap",
-    `&LAYERS=${NDVI_WMS_LAYER}`,
-    "&STYLES=",
-    "&FORMAT=image/png",
-    "&TRANSPARENT=true",
-    "&SRS=EPSG:3857",
-    `&WIDTH=${NDVI_TILE_SIZE}`,
-    `&HEIGHT=${NDVI_TILE_SIZE}`,
-    `&MAXCC=${NDVI_MAX_CLOUD_COVERAGE}`,
-    "&BBOX={bbox-epsg-3857}",
-  ].join("");
-};
+export const buildNdviWmsUrl = (): string | null => buildCopernicusWmsUrl(NDVI_WMS_LAYER, NDVI_TILE_SIZE, NDVI_MAX_CLOUD_COVERAGE);
 
 // =========================================
 // SOURCE
@@ -120,112 +76,82 @@ export const buildNdviWmsUrl = (): string | null => {
 
 /**
  * Crea la fuente raster NDVI para MapLibre.
+ *
+ * @returns Fuente raster o null cuando falta la configuración.
  */
-export const createNdviSource =
-  (): RasterSourceSpecification | null => {
+export const createNdviSource = (): RasterSourceSpecification | null => {
     // Construimos la URL WMS.
     const wmsUrl = buildNdviWmsUrl();
-
-    // Sin Instance ID no generamos una fuente inválida.
-    if (!wmsUrl) {
-      return null;
-    }
+    if (!wmsUrl) return null;
 
     // Devolvemos la definición raster.
     return {
-      // Tipo oficial de fuente.
-      type: "raster",
-      // URL WMS que MapLibre utilizará por tile.
-      tiles: [wmsUrl],
-      // Tamaño del tile solicitado.
-      tileSize: NDVI_TILE_SIZE,
-      // Nivel mínimo de zoom.
-      minzoom: NDVI_MIN_ZOOM,
-      // Nivel máximo de zoom.
-      maxzoom: NDVI_MAX_ZOOM,
+        type: "raster",
+        // URL WMS que MapLibre utilizará por tile.
+        tiles: [wmsUrl],
+        // Coincide con las dimensiones solicitadas al WMS.
+        tileSize: NDVI_TILE_SIZE,
+        minzoom: NDVI_MIN_ZOOM,
+        maxzoom: NDVI_MAX_ZOOM,
     };
-  };
+};
 
 // =========================================
 // LAYER
 // =========================================
 
-/**
- * Crea la definición visual de la capa NDVI.
- */
-export const createNdviLayer =
-  (): RasterLayerSpecification => {
-    // Definimos la capa raster.
+/** Crea la definición visual de la capa NDVI. */
+export const createNdviLayer = (): RasterLayerSpecification => {
     return {
-      // Identificador único.
-      id: NDVI_LAYER_ID,
-      // Tipo visual raster.
-      type: "raster",
-      // Fuente NDVI asociada.
-      source: NDVI_SOURCE_ID,
-      // Propiedades visuales del raster.
-      paint: {
-        // Permitimos ver las geometrías GIS debajo/sobre el raster durante la integración.
-        "raster-opacity": NDVI_DEFAULT_OPACITY,
-        // Suavizado entre píxeles.
-        "raster-resampling": "linear",
-      },
-      // NDVI comienza visible después de agregarse.
-      layout: {
-        visibility: "visible",
-      },
+        id: NDVI_LAYER_ID,
+        type: "raster",
+        source: NDVI_SOURCE_ID,
+        paint: {
+            // Conservamos la opacidad original.
+            "raster-opacity": NDVI_DEFAULT_OPACITY,
+            // Suavizado entre píxeles.
+            "raster-resampling": "linear",
+        },
+        // NDVI comienza visible después de agregarse.
+        layout: {
+            visibility: "visible",
+        },
     };
-  };
+};
 
 // =========================================
 // ADD LAYER
 // =========================================
 
 /**
- * Agrega la fuente y la capa NDVI al mapa.
+ * Registra la fuente y la capa NDVI.
+ *
+ * Reutiliza la fuente registrada y conserva una capa existente.
+ * La descarga de imágenes se realiza posteriormente por MapLibre.
+ *
+ * @param map Instancia activa con el estilo cargado.
+ * @param beforeLayerId Capa existente antes de la cual insertar el raster.
+ * @returns true cuando registra la capa; false si ya existe o falta configuración.
  */
-export const addNdviLayer = (
-  map: Map,
-  beforeLayerId?: string,
-): boolean => {
-  // Comprobamos si la fuente ya existe.
-  const sourceAlreadyExists =  Boolean(map.getSource(NDVI_SOURCE_ID));
+export const addNdviLayer = (map: Map, beforeLayerId?: string): boolean => {
+    // Creamos la fuente cuando todavía falta su registro.
+    if (!map.getSource(NDVI_SOURCE_ID)) {
+        const source = createNdviSource();
+        if (!source) return false;
 
-  // Creamos la fuente solamente una vez.
-  if (!sourceAlreadyExists) {
-    // Construimos la fuente raster.
-    const source = createNdviSource();
-
-    // Sin configuración válida no continuamos.
-    if (!source) {
-      return false;
+        map.addSource(NDVI_SOURCE_ID, source);
     }
 
-    // Registramos la fuente en MapLibre.
-    map.addSource( NDVI_SOURCE_ID, source);
-  }
+    // Conservamos la capa visual cuando ya está registrada.
+    if (map.getLayer(NDVI_LAYER_ID)) return false;
 
-  // Evitamos duplicar la capa.
-  if (map.getLayer(NDVI_LAYER_ID)) {
-    return false;
-  }
+    // Creamos la capa visual.
+    const layer = createNdviLayer();
 
-  // Creamos la capa visual.
-  const layer = createNdviLayer();
+    // Utilizamos la referencia cuando existe; en otro caso insertamos al final del estilo.
+    map.addLayer(layer, beforeLayerId && map.getLayer(beforeLayerId) ? beforeLayerId : undefined);
 
-  // Agregamos la capa normalmente o antes de otra capa cuando se indique.
-  if (
-    beforeLayerId && map.getLayer(beforeLayerId)
-  ) {
-    // Insertamos NDVI antes de la capa indicada.
-    map.addLayer(layer, beforeLayerId);
-  } else {
-    // Si todavía no conocemos una capa de referencia, agregamos NDVI al final del stack.
-    map.addLayer(layer);
-  }
-
-  // Indicamos que la capa fue creada.
-  return true;
+    return true;
 };
 
 // =========================================
@@ -233,51 +159,33 @@ export const addNdviLayer = (
 // =========================================
 
 /**
- * Controla la visibilidad de NDVI.
+ * Establece la visibilidad de la capa registrada.
+ *
+ * @param map Instancia activa de MapLibre.
+ * @param visible true muestra el raster; false lo oculta.
  */
-export const setNdviVisibility = (
-  map: Map,
-  visible: boolean,
-): void => {
-  // Verificamos que la capa exista.
-  if (!map.getLayer(NDVI_LAYER_ID)) {
-    return;
-  }
+export const setNdviVisibility = (map: Map, visible: boolean): void => {
+    // Verificamos que la capa exista.
+    if (!map.getLayer(NDVI_LAYER_ID)) return;
 
-  // Cambiamos únicamente la visibilidad.
-  map.setLayoutProperty(
-    NDVI_LAYER_ID,
-    "visibility",
-    visible ? "visible" : "none",
-  );
+    // Cambiamos únicamente la visibilidad.
+    map.setLayoutProperty(NDVI_LAYER_ID, "visibility", visible ? "visible" : "none");
 };
 
 // =========================================
 // TOGGLE
 // =========================================
 
-/**
- * Alterna la visibilidad actual de NDVI.
- */
-export const toggleNdviVisibility = (
-  map: Map,
-): void => {
-  // Verificamos que la capa exista.
-  if (!map.getLayer(NDVI_LAYER_ID)) {
-    return;
-  }
+/** Alterna la visibilidad de NDVI, incluyendo la visibilidad predeterminada del estilo. */
+export const toggleNdviVisibility = (map: Map): void => {
+    if (!map.getLayer(NDVI_LAYER_ID)) return;
 
-  // Leemos el estado actual.
-  const visibility = map.getLayoutProperty(
-    NDVI_LAYER_ID,
-    "visibility",
-  );
+    // Leemos el estado actual.
+    const visibility = map.getLayoutProperty(NDVI_LAYER_ID, "visibility");
 
-  // Calculamos el siguiente estado.
-  const nextVisible = visibility !== "visible";
-
-  // Aplicamos el nuevo estado.
-  setNdviVisibility(map, nextVisible);
+    // Una capa oculta pasa a visible; la visibilidad explícita o predeterminada pasa a oculta.
+    const nextVisible = visibility === "none";
+    setNdviVisibility(map, nextVisible);
 };
 
 // =========================================
@@ -285,45 +193,38 @@ export const toggleNdviVisibility = (
 // =========================================
 
 /**
- * Ajusta la opacidad de NDVI sin alterar el contenido ni la geometría del raster.
+ * Ajusta la opacidad del raster registrado.
+ *
+ * Los valores finitos se limitan al intervalo 0-1.
+ * Los valores no finitos conservan la opacidad vigente.
+ *
+ * @param map Instancia activa de MapLibre.
+ * @param opacity Opacidad solicitada.
  */
-export const setNdviOpacity = (
-  map: Map,
-  opacity: number,
-): void => {
-  // Verificamos que la capa exista.
-  if (!map.getLayer(NDVI_LAYER_ID)) {
-    return;
-  }
+export const setNdviOpacity = (map: Map, opacity: number): void => {
+    // Comprobamos la capa y la validez numérica del valor recibido.
+    if (!map.getLayer(NDVI_LAYER_ID) || !Number.isFinite(opacity)) return;
 
-  // Limitamos la opacidad al rango válido 0-1.
-  const safeOpacity = Math.min(1, Math.max(0, opacity));
+    // Limitamos la opacidad al rango válido 0-1.
+    const safeOpacity = Math.min(1, Math.max(0, opacity));
 
-  // Aplicamos la opacidad al raster.
-  map.setPaintProperty(
-    NDVI_LAYER_ID,
-    "raster-opacity",
-    safeOpacity,
-  );
+    // Aplicamos la opacidad al raster.
+    map.setPaintProperty(NDVI_LAYER_ID, "raster-opacity", safeOpacity);
 };
 
 // =========================================
 // REMOVE
 // =========================================
 
-/**
- * Elimina completamente la capa NDVI.
- */
-export const removeNdviLayer = (
-  map: Map,
-): void => {
-  // Eliminamos primero la capa visual.
-  if (map.getLayer(NDVI_LAYER_ID)) {
-    map.removeLayer(NDVI_LAYER_ID);
-  }
+/** Libera primero la capa NDVI y después su fuente raster. */
+export const removeNdviLayer = (map: Map): void => {
+    // Eliminamos primero la capa visual.
+    if (map.getLayer(NDVI_LAYER_ID)) {
+        map.removeLayer(NDVI_LAYER_ID);
+    }
 
-  // Eliminamos después la fuente.
-  if (map.getSource(NDVI_SOURCE_ID)) {
-    map.removeSource(NDVI_SOURCE_ID);
-  }
+    // Eliminamos después la fuente.
+    if (map.getSource(NDVI_SOURCE_ID)) {
+        map.removeSource(NDVI_SOURCE_ID);
+    }
 };

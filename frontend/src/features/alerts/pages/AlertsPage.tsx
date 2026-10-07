@@ -40,6 +40,7 @@ export function AlertsPage() {
 
   return (
     <section className="avScreen alertsFigma">
+       <h1 className="avScreenTitle">Panel de alertas</h1>
       <section className="avMetricGrid">
         <MetricCard title="Alertas activas" value={alertsData.totalActive} description="Requieren seguimiento." progress={100} actionLabel="Ver todas las alertas" />
 

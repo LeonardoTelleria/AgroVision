@@ -3,21 +3,23 @@
  * Sidebar
  * =========================================
  *
- * Navegación principal persistente.
+ * Navegación principal persistente de AgroVision.
  *
  * UX:
- * - siempre fija a la izquierda;
- * - nunca se transforma en navbar horizontal;
- * - no tiene scroll propio;
- * - puede reducirse;
- * - en modo compacto muestra tooltip glass.
+ * - fija a la izquierda;
+ * - compacta y de alta densidad;
+ * - navegación con separación visual;
+ * - estado activo contenido dentro del sidebar;
+ * - clima anclado y centrado en la zona inferior;
+ * - tarjeta climática preparada para glass + blur;
+ * - modo compacto con tooltips.
  */
 
 import { ROUTES, type AppRoutePath } from '../../../app/AppRouter';
 import agroVisionLogo from '../../../assets/logos/imagotipo-V-clara.svg';
-import settingsIcon from '../../../assets/icons/settings-icon.svg';
-import helpIcon from '../../../assets/icons/help-circle.svg';
-import weatherImage from '../../../assets/images/weather-images.webp'
+import weatherImage from '../../../assets/images/weather-images.webp';
+import fieldImage from '../../../assets/images/parcelasCampoConcept.png';
+
 
 interface SidebarProps {
   readonly activePath: AppRoutePath;
@@ -60,23 +62,56 @@ export function Sidebar({
               aria-current={isActive ? 'page' : undefined}
               onClick={() => onNavigate(route.path)}
             >
-              <span
-                className="sidebar__iconSlot"
-                data-route={route.path}
-                aria-hidden="true"
-              >
-                <img
-                  src={route.icon}
-                  alt="icono de inicio"
-                  className="sidebar__icon"
-                />
+              <span className="sidebar__iconSlot" aria-hidden="true">
+                <img src={route.icon} alt="" className="sidebar__icon" />
               </span>
-              <span className="sidebar__linkLabel">{route.label}</span>
+
+              <span className="sidebar__linkLabel">
+                {route.label}
+              </span>
             </button>
           );
         })}
       </nav>
 
+      <div className="sidebar__weatherZone">
+        <img
+          src={fieldImage}
+          alt=""
+          aria-hidden="true"
+          className="sidebar__weatherLandscape"
+        />
+
+        <div className="sidebar__weatherOverlay" />
+
+        <div className="sidebar__weather" data-label="Clima: 22°C">
+          <div className="sidebar__weatherMain">
+            <div className="sidebar__weatherIcon">
+              <img src={weatherImage} alt="" aria-hidden="true" />
+            </div>
+
+            <div className="sidebar__weatherTemp">
+              <strong>22°C</strong>
+              <small>Parcialmente nublado</small>
+            </div>
+          </div>
+
+          <div className="sidebar__weatherStats">
+            <span>Viento: 15 km/h</span>
+            <span className="sidebar__weatherDivider">|</span>
+            <span>Humedad: 68%</span>
+          </div>
+
+          <button type="button" className="sidebar__weatherBtn">
+            Ver pronóstico
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+/*{ 
       <div className="sidebar__secondary">
         <button type="button" className="sidebar__secondaryLink">
           <span className="sidebar__iconSlot" aria-hidden="true">
@@ -99,28 +134,4 @@ export function Sidebar({
           </span>
           <span>Configuración</span>
         </button>
-      </div>
-
-      <div className="sidebar__weather" data-label="Clima: 22°C">
-        <div className="sidebar__weatherMain">
-          <div className="sidebar__weatherIcon">
-            <img src={weatherImage} alt="icono del clima" />
-          </div>
-          <div className="sidebar__weatherTemp">
-            <strong>22°C</strong>
-            <small>Pacialmente nublado</small>
-          </div>
-        </div>
-
-        <div className="sidebar__weatherStats">
-          <span>Viento: 15 km/h</span>
-          <span className="sidebar__weatherDivider">|</span>
-          <span>Humedad: 68%</span>
-        </div>
-        <button type="button" className="sidebar__weatherBtn">
-          Ver pronóstico
-        </button>
-      </div>
-    </aside>
-  );
-}
+      </div> }*/

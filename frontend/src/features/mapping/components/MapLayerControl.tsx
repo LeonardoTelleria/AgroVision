@@ -27,8 +27,8 @@
  * =========================================
  */
 
-
 import type { FC } from "react";
+import "../mappingGis.css";
 // identificador oficial de las capas GIS.
 import type { MapLayerId } from "../types/mappingGeo.types";
 
@@ -36,7 +36,7 @@ import type { MapLayerId } from "../types/mappingGeo.types";
  * =========================================
  * PROPS
  * =========================================
- */ 
+ */
 
 // Definimos las propiedades que necesita el control.
 export interface MapLayerControlProps {
@@ -46,13 +46,15 @@ export interface MapLayerControlProps {
   readonly onToggle: (layerId: MapLayerId) => void;
   // Permite ocultar el título cuando el contenedor ya lo proporciona.
   readonly showTitle?: boolean;
+  // Capas soportadas por el motor y disponibles según su configuración actual.
+  readonly availableLayers?: ReadonlySet<MapLayerId>;
 }
 
 /**
  * =========================================
  * LAYER OPTION
  * =========================================
- */ 
+ */
 // estructura interna de cada opción visual.
 interface MapLayerOption {
   // Identificador técnico de la capa.
@@ -69,7 +71,7 @@ interface MapLayerOption {
  * =========================================
  * LAYER OPTIONS
  * =========================================
- */ 
+ */
 
 // Catálogo central de capas disponibles en el selector.
 const LAYER_OPTIONS: readonly MapLayerOption[] = [
@@ -80,17 +82,10 @@ const LAYER_OPTIONS: readonly MapLayerOption[] = [
     description: "Cartografía principal",
     toggleable: false,
   },
-  // Capa de fincas.
-  {
-    id: "farms",
-    label: "Fincas",
-    description: "Límites generales de las fincas",
-    toggleable: true,
-  },
   // Capa de fields.
   {
     id: "fields",
-    label: "Fields",
+    label: "Campos",
     description: "División de los campos agrícolas",
     toggleable: true,
   },
@@ -103,23 +98,9 @@ const LAYER_OPTIONS: readonly MapLayerOption[] = [
   },
   // Capa específica para riesgo.
   {
-    id: "riskZones",
+    id: "riskHeatmap",
     label: "Riesgo",
     description: "Visualización espacial del nivel de riesgo",
-    toggleable: true,
-  },
-  // Sensores.
-  {
-    id: "sensors",
-    label: "Sensores",
-    description: "Ubicación de sensores agrícolas",
-    toggleable: true,
-  },
-  // Puntos de muestreo.
-  {
-    id: "samplingPoints",
-    label: "Muestreo",
-    description: "Puntos de muestreo de campo",
     toggleable: true,
   },
   // Trayectoria del rover.
@@ -129,20 +110,8 @@ const LAYER_OPTIONS: readonly MapLayerOption[] = [
     description: "Recorrido registrado del rover",
     toggleable: true,
   },
-  // Ruta planificada.
-  {
-    id: "plannedRoute",
-    label: "Ruta planificada",
-    description: "Recorrido programado",
-    toggleable: true,
-  },
-  // Hidrografía.
-  {
-    id: "hydrography",
-    label: "Hidrografía",
-    description: "Ríos y cuerpos de agua",
-    toggleable: true,
-  },
+  // Vehículo simulado.
+  { id: "rover", label: "Rover", description: "Posición del vehículo simulado", toggleable: true },
   // Capa satelital.
   {
     id: "satellite",
@@ -163,13 +132,9 @@ const LAYER_OPTIONS: readonly MapLayerOption[] = [
  * =========================================
  * PRINCIPAL COMPONENT
  * =========================================
- */ 
+ */
 // Definimos el componente principal.
-export const MapLayerControl: FC<MapLayerControlProps> = ({
-  activeLayers,
-  onToggle,
-  showTitle = true,
-}) => {
+export const MapLayerControl: FC<MapLayerControlProps> = ({ activeLayers, onToggle, showTitle = true, availableLayers, }) => {
   // Renderizamos el panel completo del selector.
   return (
     <section className="mapLayerControl" aria-label="Control de capas del mapa">
@@ -189,27 +154,23 @@ export const MapLayerControl: FC<MapLayerControlProps> = ({
         {/* Recorremos el catálogo de capas. */}
         {LAYER_OPTIONS.map((layer) => {
           // Comprobamos si la capa está actualmente activa.
-          const isActive = activeLayers.has(layer.id);
+          const isAvailable = !availableLayers || availableLayers.has(layer.id);
+          const isActive = layer.id === "base" || isAvailable && activeLayers.has(layer.id);
 
           // Renderizamos una fila por cada capa.
           return (
             <label
               key={layer.id}
-              className={[
-                "mapLayerControl__item", isActive ? "mapLayerControl__item--active" : "mapLayerControl__item--inactive",
-                !layer.toggleable ? "mapLayerControl__item--locked" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className={["mapLayerControl__item", isActive ? "mapLayerControl__item--active" : "mapLayerControl__item--inactive", !layer.toggleable ? "mapLayerControl__item--locked" : ""] .filter(Boolean) .join(" ")}
             >
               {/* Checkbox nativo para accesibilidad y control de estado. */}
               <input
                 type="checkbox"
                 checked={isActive}
-                disabled={!layer.toggleable}
+                disabled={!layer.toggleable || !isAvailable}
                 onChange={() => {
                   // Solo notificamos cambios de capas modificables.
-                  if (layer.toggleable) {
+                  if (layer.toggleable && isAvailable) {
                     onToggle(layer.id);
                   }
                 }}
@@ -227,7 +188,7 @@ export const MapLayerControl: FC<MapLayerControlProps> = ({
 
               {/* Indicador visual del estado actual. */}
               <span className="mapLayerControl__status" aria-hidden="true">
-                {isActive ? "Visible" : "Oculta"}
+                {!isAvailable ? "No disponible" : isActive ? "Visible" : "Oculta"}
               </span>
             </label>
           );

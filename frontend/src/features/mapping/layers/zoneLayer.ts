@@ -3,77 +3,77 @@
  * Zone Layer
  * =========================================
  *
- * Capa GIS responsable de renderizar las zonas agrícolas
+ * Capa GIS responsable de renderizar las zonas agrícolas.
  *
  * Responsabilidad:
- * - registrar las zonas como GeoJSON;
+ * - registrar y actualizar las zonas como GeoJSON;
  * - representar cada zona como Polygon;
- * - colorear las zonas según su nivel de riesgo y dibujar sus límites;
- * - permitir mostrar/ocultar la capa;
- * - actualizar los datos sin reconstruir el mapa;
- * - preparar la identificación individual de cada zona.
+ * - colorear el relleno y el perímetro según su riesgo;
+ * - controlar conjuntamente la visibilidad de las capas;
+ * - proporcionar identificación estable mediante zoneId;
+ * - liberar las capas y su fuente geográfica.
  *
- * Relación conceptual con la BD:
- * fields
- *   ↓
- * zones
- *   ↓
- * zoneLayer
- *   ↓
- * GeoJSON Polygon
- *   ↓
- * MapLibre
- * =========================================*/
+ * Modelo geográfico:
+ * Cada zona pertenece a un field mediante fieldId.
+ * Su geometría y propiedades utilizan el contrato compartido
+ * de mappingGeo.types.ts.
+ *
+ * Integración:
+ * El consumidor proporciona una instancia de MapLibre con
+ * el estilo cargado y una colección con zoneId únicos y estables.
+ *
+ * Registro:
+ * addZoneLayer reutiliza la fuente y las capas existentes.
+ * Las llamadas posteriores actualizan los datos y registran
+ * cualquier capa faltante, conservando las capas presentes.
+ *
+ * =========================================
+ */
 
+// Importamos únicamente los tipos de MapLibre necesarios para describir y administrar las fuentes y capas.
+import type { ExpressionSpecification, FillLayerSpecification, GeoJSONSource, GeoJSONSourceSpecification, LineLayerSpecification, Map } from "maplibre-gl";
 
-import type { FeatureCollection, Polygon } from "geojson";
+// Consumimos el contrato GeoJSON compartido por el sistema GIS.
+import type { ZoneFeatureCollection } from "../types/mappingGeo.types";
 
-// Importamos únicamente los tipos de MapLibre que
-// necesitamos para describir source y layers.
-import type { FillLayerSpecification, GeoJSONSource, GeoJSONSourceSpecification, LineLayerSpecification, Map } from "maplibre-gl";
+// Conservamos la compatibilidad con los módulos que importan estos tipos desde zoneLayer.
+export type { ZoneFeatureCollection, ZoneFeatureProperties } from "../types/mappingGeo.types";
+export type { GISRiskLevel as ZoneRiskLevel } from "../types/mappingGeo.types";
 
 // ID único de la fuente GeoJSON de las zonas.
 export const ZONE_SOURCE_ID = "agrovision-zones-source";
+
 // ID de la capa visual que rellena cada zona.
 export const ZONE_FILL_LAYER_ID = "agrovision-zones-fill";
+
 // ID de la capa visual que dibuja el perímetro.
 export const ZONE_BORDER_LAYER_ID = "agrovision-zones-border";
 
-// Niveles de riesgo permitidos por el modelo GIS..
-export type ZoneRiskLevel =
-  | "LOW"
-  | "MEDIUM"
-  | "HIGH"
-  | "CRITICAL";
-
-
-// Propiedades que acompañarán a cada Polygon de zona.
-// Estas propiedades no contienen la geometría, contienen la información descriptiva de la zona.
-export interface ZoneFeatureProperties {
-    // Identificador lógico de la zona que a diferencia de "fieldId", este identificadorpuede ser un UUID o código como "zone-03".
-    readonly zoneId: string;
-    // Identificador del field al que pertenece la zona.
-    readonly fieldId: number | string;
-    // Nombre legible de la zona.
-    readonly name: string
-    // Identificador opcional del cultivo asociado.
-    readonly cropId?: number | null;
-    // Nivel de riesgo calculado para la zona.
-    readonly riskLevel?: ZoneRiskLevel | null;
-    // Puntuación sanitaria de la zona.
-    readonly healthScore?: number | null;
-    // Estado operativo de la zona.
-    readonly status?: string | null;
+/**
+ * Construye la expresión de color utilizada por las capas de zonas.
+ *
+ * La paleta de riesgo es compartida por el relleno y el perímetro.
+ * Cada capa proporciona su color para las zonas sin clasificación.
+ *
+ * @param fallbackColor Color aplicado cuando riskLevel carece de una clasificación reconocida.
+ */
+function createZoneRiskColorExpression(fallbackColor: string): ExpressionSpecification {
+    // ["get", "riskLevel"] obtiene la propiedad riskLevel del Polygon actual.
+    // ["match", ...] compara ese valor y devuelve un color diferente para cada estado.
+    return [
+        "match", ["get", "riskLevel"],
+        "CRITICAL", "#ef4444",
+        "HIGH", "#f97316",
+        "MEDIUM", "#eab308",
+        "LOW", "#84cc16",
+        fallbackColor,
+    ];
 }
-
-// Definimos el contrato GeoJSON completo esperado por esta capa.
-export type ZoneFeatureCollection =
-    FeatureCollection<Polygon, ZoneFeatureProperties>;
 
 // Configuración base de la fuente GeoJSON.
 export const ZONE_SOURCE: GeoJSONSourceSpecification = {
     type: "geojson",
-    // Activmos promoteId para que MapLibre utilice la propiedad "zoneId" como identificador interno de cada feature.
+    // Activamos promoteId para que MapLibre utilice zoneId como identificador interno de cada feature.
     promoteId: "zoneId",
     // Definimos inicialmente una FeatureCollection vacía.
     data: {
@@ -82,10 +82,8 @@ export const ZONE_SOURCE: GeoJSONSourceSpecification = {
     },
 };
 
-
 // Configuración visual del relleno de las zonas.
 export const ZONE_FILL_LAYER: FillLayerSpecification = {
-
     // Las zonas son polígonos, por lo tanto utilizamos el tipo de layer "fill".
     type: "fill",
     // Asociamos la capa con nuestra fuente GeoJSON.
@@ -94,208 +92,127 @@ export const ZONE_FILL_LAYER: FillLayerSpecification = {
     id: ZONE_FILL_LAYER_ID,
     // Definimos la apariencia visual.
     paint: {
-        // ["get", "riskLevel"] obtiene la propiedad riskLevel del Polygon actual.
-        // ["match", ...] compara ese valor y devuelve un color diferente para cada estado.
-        
-        "fill-color": [
-            "match", ["get", "riskLevel"],
-
-            "CRITICAL",
-            "#ef4444",
-
-            "HIGH",
-            "#f97316",
-
-            "MEDIUM",
-            "#eab308",
-
-            "LOW",
-            "#84cc16",
-
-            // Fallback cuando la zona todavía no tiene riesgo.
-            "#94a3b8",
-        ],
-
-        // relleno semitransparente
+        // Aplicamos la paleta de riesgo y el color original para zonas sin clasificación.
+        "fill-color": createZoneRiskColorExpression("#94a3b8"),
+        // Relleno semitransparente.
         "fill-opacity": 0.22,
         // Definimos un contorno de respaldo.
         "fill-outline-color": "#ffffff",
     },
 };
 
-
 // Configuración visual del perímetro de las zonas.
 export const ZONE_BORDER_LAYER: LineLayerSpecification = {
-
     type: "line",
     source: ZONE_SOURCE_ID,
     id: ZONE_BORDER_LAYER_ID,
     paint: {
-        // Utilizamos exactamente el mismo nivel de riesgo para colorear el perímetro.
-        "line-color": [
-            "match", ["get", "riskLevel"],
-
-            "CRITICAL",
-            "#ef4444",
-
-            "HIGH",
-            "#f97316",
-
-            "MEDIUM",
-            "#eab308",
-
-            "LOW",
-            "#84cc16",
-
-            // Fallback para zonas sin clasificación.
-            "#cbd5e1",
-        ],
+        // Utilizamos la misma paleta de riesgo con el color original de respaldo del perímetro.
+        "line-color": createZoneRiskColorExpression("#cbd5e1"),
         "line-width": 1.8,
         "line-opacity": 0.95,
     },
 };
 
-
 /**
- * Agrega las zonas al mapa.
+ * Registra o actualiza la representación cartográfica de las zonas.
  *
- * Parámetros:
- * - map: instancia activa de MapLibre.
- * - data: FeatureCollection con los Polygon de las zonas.
+ * Reutiliza la fuente existente y agrega las capas faltantes.
+ * La visibilidad y configuración de las capas presentes se conservan.
  *
- * Flujo:
- *
- * GeoJSON
- *   ↓
- * source
- *   ↓
- * fill
- *   ↓
- * border
+ * @param map Instancia activa de MapLibre con el estilo cargado.
+ * @param data Colección GeoJSON de zonas con identificadores únicos.
  */
-export function addZoneLayer(
-  map: Map,
-  data: ZoneFeatureCollection,
-): void {
+export function addZoneLayer(map: Map, data: ZoneFeatureCollection): void {
+    // Actualizamos la fuente existente conservando sus capas.
+    if (map.getSource(ZONE_SOURCE_ID)) {
+        updateZoneLayer(map, data);
+    } else {
+        // Creamos una copia de la configuración base de la fuente.
+        const source: GeoJSONSourceSpecification = {
+            // Copiamos type y promoteId.
+            ...ZONE_SOURCE,
+            // Sustituimos la colección vacía por el GeoJSON real.
+            data,
+        };
 
-    // Eliminamos una versión anterior si existiera.
-    removeZoneLayer(map);
+        // Registramos la fuente dentro del estilo de MapLibre.
+        map.addSource(ZONE_SOURCE_ID, source);
+    }
 
-    // Creamos una copia de la configuración basede la fuente.
-    const source: GeoJSONSourceSpecification = {
-        // Copiamos type y promoteId.
-        ...ZONE_SOURCE,
-        // Sustituimos la colección vacía por el GeoJSON real.
-        data,
-    };
+    // Agregamos primero el relleno cuando todavía falta su registro.
+    if (!map.getLayer(ZONE_FILL_LAYER_ID)) {
+        map.addLayer(ZONE_FILL_LAYER);
+    }
 
-    // Registramos la fuente dentro del estilo de MapLibre.
-    map.addSource(
-        ZONE_SOURCE_ID,
-        source,
-    );
-
-    // Agregamos primero el relleno. De esta manera ocupa el área interior de cada zona.
-    map.addLayer(
-        ZONE_FILL_LAYER,
-    );
-
-    // Agregamos después el borde.
-    map.addLayer(
-        ZONE_BORDER_LAYER,
-    );
+    // Agregamos después el borde para dibujarlo sobre el relleno.
+    if (!map.getLayer(ZONE_BORDER_LAYER_ID)) {
+        map.addLayer(ZONE_BORDER_LAYER);
+    }
 }
 
 /**
- * Actualiza las geometrías y propiedades de las zonas sin eliminar sus layers.
+ * Reemplaza las geometrías y propiedades de la fuente GeoJSON.
  *
- * Parámetros:
- * - map: instancia activa de MapLibre.
- * - data: nueva colección GeoJSON.
+ * La actualización se aplica cuando la fuente está registrada
+ * y conserva las capas visuales existentes.
  *
- * Esta función será especialmente importante cuando pasemos de mappingGeoData.ts a PostgreSQL/PostGIS.
+ * @param map Instancia activa de MapLibre.
+ * @param data Nueva colección GeoJSON de zonas.
  */
-export function updateZoneLayer(
-  map: Map,
-  data: ZoneFeatureCollection,
-): void {
-
+export function updateZoneLayer(map: Map, data: ZoneFeatureCollection): void {
     // Recuperamos directamente la fuente tipada como GeoJSONSource.
     const source = map.getSource<GeoJSONSource>(ZONE_SOURCE_ID);
-
-    // Si la fuente todavía no existe, no podemos actualizarla.
-    if (!source) {
-        return;
-    }
+    if (!source) return;
 
     // Actualizamos el contenido GeoJSON.
     source.setData(data);
 }
 
-
 /**
- * Cambia la visibilidad de las zonas.
+ * Cambia conjuntamente la visibilidad del relleno y el perímetro.
  *
- * Parámetros:
- * - map: instancia de MapLibre.
- * - visible: true muestra las zonas; false las oculta.
+ * @param map Instancia activa de MapLibre.
+ * @param visible true muestra las zonas; false las oculta.
  */
-export function setZoneLayerVisibility(
-  map: Map,
-  visible: boolean,
-): void {
+export function setZoneLayerVisibility(map: Map, visible: boolean): void {
+    // Convertimos el booleano a uno de los valores aceptados por la propiedad visibility de MapLibre.
+    const visibility = visible ? "visible" : "none";
 
-    // Convertimos el booleano a uno de los dos valores aceptados por la propiedad visibility de MapLibre.
-    const visibility =
-        visible ? "visible" : "none";
-
-    // Comprobamos que el relleno exista antes de tocarlo.
+    // Comprobamos que el relleno exista antes de modificarlo.
     if (map.getLayer(ZONE_FILL_LAYER_ID)) {
         // Mostramos u ocultamos el relleno.
-        map.setLayoutProperty(
-            ZONE_FILL_LAYER_ID,
-            "visibility",
-            visibility,
-        );
+        map.setLayoutProperty(ZONE_FILL_LAYER_ID, "visibility", visibility);
     }
 
     // Comprobamos que el borde exista.
-    if (map.getLayer(ZONE_BORDER_LAYER_ID,)) {
+    if (map.getLayer(ZONE_BORDER_LAYER_ID)) {
         // Mostramos u ocultamos el perímetro.
-        map.setLayoutProperty(
-            ZONE_BORDER_LAYER_ID,
-            "visibility",
-            visibility,
-        );
+        map.setLayoutProperty(ZONE_BORDER_LAYER_ID, "visibility", visibility);
     }
 }
 
 /**
- * Elimina completamente las zonas del mapa.
+ * Libera la representación cartográfica de las zonas.
  *
- * Parámetro:
- * - map: instancia activa de MapLibre.
+ * Retira primero las capas que dependen de la fuente
+ * y después elimina la fuente GeoJSON.
+ *
+ * @param map Instancia activa de MapLibre.
  */
-export function removeZoneLayer(
-  map: Map,
-): void {
-
-  // Eliminamos primero el borde. Las layers deben desaparecer antes que la fuentede la que dependen.
-  if (
-    map.getLayer(ZONE_BORDER_LAYER_ID,)) {
-        // Quitamos la capa de perímetro.
-        map.removeLayer(ZONE_BORDER_LAYER_ID,);
+export function removeZoneLayer(map: Map): void {
+    // Eliminamos primero el borde. Las capas deben eliminarse antes que su fuente.
+    if (map.getLayer(ZONE_BORDER_LAYER_ID)) {
+        map.removeLayer(ZONE_BORDER_LAYER_ID);
     }
 
     // Eliminamos después el relleno.
-    if (map.getLayer(ZONE_FILL_LAYER_ID,)) {
-        // Quitamos la capa de superficie.
-        map.removeLayer(ZONE_FILL_LAYER_ID,);
+    if (map.getLayer(ZONE_FILL_LAYER_ID)) {
+        map.removeLayer(ZONE_FILL_LAYER_ID);
     }
 
     // Finalmente eliminamos la fuente GeoJSON.
-    if (map.getSource(ZONE_SOURCE_ID,)) {
-        // Quitamos los datos geográficos asociados.
-        map.removeSource(ZONE_SOURCE_ID,);
+    if (map.getSource(ZONE_SOURCE_ID)) {
+        map.removeSource(ZONE_SOURCE_ID);
     }
 }

@@ -34,6 +34,7 @@ export function ReportsPage() {
 
   return (
     <section className="avScreen reportsFigma">
+       <h1 className="avScreenTitle">Reportes prescriptivos</h1>
       <section className="avMetricGrid">
         <MetricCard title="Reportes generados" value="1" description="Reporte prescriptivo disponible" progress={78} actionLabel="Ver todos los reportes" />
 

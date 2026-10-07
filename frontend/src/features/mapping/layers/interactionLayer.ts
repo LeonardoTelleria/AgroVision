@@ -9,436 +9,368 @@
  * - detectar zonas bajo el cursor;
  * - aplicar estado visual de hover;
  * - seleccionar una zona mediante click;
- * - exponer zoneId y propiedades al componente padre;
+ * - entregar su identificador, propiedades y coordenadas;
  * - controlar el cursor del mapa;
- * - limpiar correctamente estados y listeners.
+ * - liberar estados temporales y listeners.
  *
- * Este archivo NO obtiene datos del backend. Tampoco crea las geometrías.
- * Trabaja sobre las layers creadas por zoneLayer.ts.
+ * Integración:
+ * Utiliza la fuente y la capa de relleno de zoneLayer.ts.
+ * La propiedad zoneId identifica las zonas mediante promoteId.
  *
- * Flujo:
+ * Ciclo de vida:
+ * El consumidor registra una interacción por mapa y ejecuta
+ * su función de limpieza antes de retirar las capas de zonas.
+ * removeZoneInteractionLayer libera después la capa de resaltado.
  *
- * zoneLayer.ts
- *      ↓
- * GeoJSON + layers
- *      ↓
- * interactionLayer.ts
- *      ↓
- * hover / click
- *      ↓
- * ZonePopup / UI
  * =========================================
  */
 
-import type { MapGeoJSONFeature, MapLayerMouseEvent, LineLayerSpecification, Map } from 'maplibre-gl';
+// Importamos los tipos utilizados para las capas y eventos de MapLibre.
+import type { LineLayerSpecification, Map, MapGeoJSONFeature, MapLayerMouseEvent } from "maplibre-gl";
 
-// Importamos las propiedades que definimos anteriormente para nuestras zonas.
-import type { ZoneFeatureProperties } from './zoneLayer';
+// Consumimos las propiedades y coordenadas del contrato GIS compartido.
+import type { LngLat, ZoneFeatureProperties } from "../types/mappingGeo.types";
 
-// ID de la capa visual adicional utilizada xclusivamente para resaltar zonas en hover/selección.
-export const ZONE_INTERACTION_LAYER_ID = 'agrovision-zones-interaction';
-// ID de la fuente GeoJSON que contiene las zonas. Debe coincidir exactamente con zoneLayer.ts.
-export const ZONE_INTERACTION_SOURCE_ID = 'agrovision-zones-source';
-// ID de la layer sobre la cual escucharemos los eventos de interacción.
-export const ZONE_INTERACTION_TARGET_LAYER_ID = 'agrovision-zones-fill';
+// Consumimos los identificadores oficiales de la fuente y la capa de zonas.
+import { ZONE_FILL_LAYER_ID, ZONE_SOURCE_ID } from "./zoneLayer";
 
-// Propiedades entregadas al seleccionar una zona.
+// ID de la capa visual adicional utilizada para resaltar zonas en hover y selección.
+export const ZONE_INTERACTION_LAYER_ID = "agrovision-zones-interaction";
+
+// Conservamos los nombres públicos vinculándolos con los identificadores de zoneLayer.
+export const ZONE_INTERACTION_SOURCE_ID = ZONE_SOURCE_ID;
+export const ZONE_INTERACTION_TARGET_LAYER_ID = ZONE_FILL_LAYER_ID;
+
+// Información entregada al seleccionar una zona.
 export interface SelectedZoneData {
-  readonly zoneId: string;
-  readonly properties: ZoneFeatureProperties; // Propiedades completas del feature seleccionado.
+    readonly zoneId: string;
+    // Coordenadas del click utilizadas para posicionar el popup.
+    readonly coordinates: LngLat;
+    // Propiedades descriptivas y analíticas de la zona seleccionada.
+    readonly properties: ZoneFeatureProperties;
 }
 
 // Callbacks que el componente superior puede proporcionar.
 export interface ZoneInteractionOptions {
-  // Se ejecuta cuando el cursor entra, cambia de zona o sale de una zona.
-  readonly onZoneHover?: (zoneId: string | null) => void;
-
-  // Se ejecuta cuando el usuario hace click sobre una zona válida.
-  readonly onZoneSelect?: (zone: SelectedZoneData) => void;
-
-  // Se ejecuta cuando se limpia la selección.
-  readonly onZoneClear?: () => void;
+    // Se ejecuta cuando el cursor cambia de zona o sale de una zona.
+    readonly onZoneHover?: (zoneId: string | null) => void;
+    // Se ejecuta cuando el usuario hace click sobre una zona válida.
+    readonly onZoneSelect?: (zone: SelectedZoneData) => void;
+    // Se ejecuta cuando la limpieza libera la selección.
+    readonly onZoneClear?: () => void;
 }
 
 // Layer auxiliar utilizada para dibujar el resaltado visual de hover y selección.
 const ZONE_INTERACTION_LAYER: LineLayerSpecification = {
-  // Utilizamos "line" porque solo necesitamos dibujar el perímetro de la zona.
-  type: 'line',
-  // Utilizamos exactamente la misma fuente GeoJSON utilizada por zoneLayer.ts.
-  source: ZONE_INTERACTION_SOURCE_ID,
-  // Asignamos el ID único de esta layer.
-  id: ZONE_INTERACTION_LAYER_ID,
-  paint: {
-    'line-color': '#ffffff',
-
-    // El grosor depende del estado temporal de cada feature.
-    // selected -> más grueso
-    // hover    -> intermedio
-    // ninguno  -> invisible
-    'line-width': [
-      'case',
-
-      // Si la zona está seleccionada...
-      ['boolean', ['feature-state', 'selected'], false],
-      3.5, // ...utilizamos un borde más grueso.
-
-      // Si no está seleccionada, verificamos hover.
-      ['boolean', ['feature-state', 'hover'], false],
-      2.5, // Borde ligeramente más fino para hover.
-
-      // Si no tiene ningún estado, la layer no aporta grosor visible.
-      0,
-    ],
-
-    // La línea permanece completamente visible cuando alguno de los estados está activo.
-    'line-opacity': [
-      'case',
-
-      // selected activo.
-      ['boolean', ['feature-state', 'selected'], false],
-      1, // Opacidad del estado seleccionado.
-
-      // hover activo.
-      ['boolean', ['feature-state', 'hover'], false],
-      0.95, // Opacidad del estado hover.
-
-      // Sin interacción.
-      0,
-    ],
-  },
+    // Utilizamos "line" para dibujar el perímetro de la zona.
+    type: "line",
+    // Utilizamos la misma fuente GeoJSON registrada por zoneLayer.
+    source: ZONE_INTERACTION_SOURCE_ID,
+    id: ZONE_INTERACTION_LAYER_ID,
+    paint: {
+        "line-color": "#ffffff",
+        // La selección tiene prioridad sobre el hover.
+        "line-width": [
+            "case",
+            // Borde más grueso para la zona seleccionada.
+            ["boolean", ["feature-state", "selected"], false], 3.5,
+            // Borde intermedio para la zona bajo el cursor.
+            ["boolean", ["feature-state", "hover"], false], 2.5,
+            // Grosor del estado inactivo.
+            0,
+        ],
+        // La opacidad depende del estado temporal de la feature.
+        "line-opacity": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false], 1,
+            ["boolean", ["feature-state", "hover"], false], 0.95,
+            0,
+        ],
+    },
 };
 
 /**
- * Agrega la layer auxiliar de interacción.
+ * Registra la capa auxiliar de resaltado utilizando la fuente de zonas.
  *
- * Parámetro:
- * - map: instancia activa de MapLibre.
+ * Las llamadas posteriores conservan la capa registrada.
  *
- * Esta layer utiliza exactamente la misma fuenteGeoJSON que las zonas.
+ * @param map Instancia activa de MapLibre con la fuente de zonas registrada.
+ * @throws Error cuando falta la fuente GeoJSON de zonas.
  */
 export function addZoneInteractionLayer(map: Map): void {
-  // Si la layer ya existe, no la registramos nuevamente.
-  if (map.getLayer(ZONE_INTERACTION_LAYER_ID)) {
-    return;
-  }
+    // Conservamos la capa cuando ya está registrada.
+    if (map.getLayer(ZONE_INTERACTION_LAYER_ID)) return;
 
-  // Verificamos que la fuente de zonas exista.
-  if (!map.getSource(ZONE_INTERACTION_SOURCE_ID)) {
-    // Detenemos la ejecución porque registrar la layer sin su source produciría un error.
-    throw new Error('Zone interaction layer requires the zone GeoJSON source.');
-  }
+    // Comprobamos la dependencia cartográfica antes de registrar la capa.
+    if (!map.getSource(ZONE_INTERACTION_SOURCE_ID)) {
+        throw new Error("Zone interaction layer requires the zone GeoJSON source.");
+    }
 
-  // Agregamos la layer de interacción.
-  map.addLayer(ZONE_INTERACTION_LAYER);
+    // Agregamos la layer de interacción.
+    map.addLayer(ZONE_INTERACTION_LAYER);
 }
 
 /**
- * Registra todos los eventos interactivos de las zonas.
+ * Registra los eventos de hover y selección de las zonas.
  *
- * Parámetros:
- * - map: instancia activa de MapLibre.
- * - options: callbacks opcionales del consumidor.
+ * Mantiene una selección activa y una zona bajo el cursor.
+ * Los callbacks reciben los cambios producidos por la interacción.
  *
- * Retorna:
- * - función cleanup para eliminar listeners y estados temporales.
+ * @param map Instancia activa con la fuente y la capa de relleno de zonas registradas.
+ * @param options Callbacks opcionales del consumidor.
+ * @returns Función de limpieza de listeners, cursor y estados temporales.
  */
-export function setupZoneInteractions(
-  map: Map,
-  options: ZoneInteractionOptions = {}
-): () => void {
-  // Aseguramos que la layer visual de interacción exista antes de registrar los eventos.
-  addZoneInteractionLayer(map);
+export function setupZoneInteractions(map: Map, options: ZoneInteractionOptions = {}): () => void {
+    // Aseguramos que la layer visual de interacción exista antes de registrar los eventos.
+    addZoneInteractionLayer(map);
 
-  // Guardamos el ID de la zona que actualmente está debajo del cursor.
-  let hoveredZoneId: string | null = null;
+    // Guardamos el ID de la zona que actualmente está debajo del cursor.
+    let hoveredZoneId: string | null = null;
 
-  // Guardamos el ID de la última zona seleccionada.
-  let selectedZoneId: string | null = null;
+    // Guardamos el ID de la última zona seleccionada.
+    let selectedZoneId: string | null = null;
 
-  // Cambiamos el cursor cuando entra en una zona interactiva.
-  const handleMouseEnter = (): void => {
-    // El cursor pasa a indicar que el elemento puede ser seleccionado.
-    map.getCanvas().style.cursor = 'pointer';
-  };
+    // Controlamos que la limpieza se ejecute una sola vez por registro.
+    let disposed = false;
 
-  // Gestionamos el movimiento dentro de las zonas.
-  const handleMouseMove = (event: MapLayerMouseEvent): void => {
-    // Obtenemos la primera feature encontrada bajo el cursor.
-    const feature = event.features?.[0];
+    // Cambiamos el cursor cuando entra en una zona interactiva.
+    const handleMouseEnter = (): void => {
+        map.getCanvas().style.cursor = "pointer";
+    };
 
-    // Si no existe una feature válida, no hacemos nada.
-    if (!feature) {
-      return;
-    }
+    // Gestionamos el movimiento dentro de las zonas.
+    const handleMouseMove = (event: MapLayerMouseEvent): void => {
+        // Obtenemos la primera feature encontrada bajo el cursor.
+        const feature = event.features?.[0];
+        if (!feature) return;
 
-    // Extraemos el zoneId desde las propiedades GeoJSON de la feature.
-    const zoneId = getZoneIdFromFeature(feature);
+        // Extraemos el identificador de la zona detectada.
+        const zoneId = getZoneIdFromFeature(feature);
+        if (!zoneId || zoneId === hoveredZoneId) return;
 
-    // Si la zona actual ya es la misma que la zona anterior, no necesitamos actualizar el estado.
-    if (!zoneId || zoneId === hoveredZoneId) {
-      return;
-    }
+        // Liberamos el hover de la zona anterior.
+        if (hoveredZoneId) {
+            clearFeatureState(map, hoveredZoneId, "hover");
+        }
 
-    // Si existía una zona anterior bajo el cursor, eliminamos su estado hover.
-    if (hoveredZoneId) {
-      clearFeatureState(map, hoveredZoneId, 'hover');
-    }
+        // Guardamos la nueva zona bajo el cursor.
+        hoveredZoneId = zoneId;
 
-    // Guardamos la nueva zona bajo el cursor.
-    hoveredZoneId = zoneId;
+        // Activamos el estado hover en esa feature.
+        setFeatureState(map, zoneId, { hover: true });
 
-    // Activamos el estado hover en esa feature.
-    setFeatureState(map, zoneId, { hover: true });
+        // Informamos al componente consumidor qué zona está siendo inspeccionada.
+        options.onZoneHover?.(zoneId);
+    };
 
-    // Informamos al componente consumidor qué zona está siendo inspeccionada.
-    options.onZoneHover?.(zoneId);
-  };
+    // Gestionamos la salida del cursor de la superficie de la layer.
+    const handleMouseLeave = (): void => {
+        // Restauramos el cursor normal.
+        map.getCanvas().style.cursor = "";
 
-  // Gestionamos la salida del cursor de la superficie de la layer.
-  const handleMouseLeave = (): void => {
-    // Restauramos el cursor normal.
-    map.getCanvas().style.cursor = '';
+        // Liberamos el estado hover y su referencia local.
+        if (hoveredZoneId) {
+            clearFeatureState(map, hoveredZoneId, "hover");
+            hoveredZoneId = null;
+        }
 
-    // Si existe una zona actualmente en estado hover, la limpiamos.
-    if (hoveredZoneId) {
-      // Eliminamos solo la propiedad hover. Eliminamos nuestra referencia local.
-      clearFeatureState(map, hoveredZoneId, 'hover');
-      hoveredZoneId = null;
-    }
+        // Informamos que terminó la inspección de la zona.
+        options.onZoneHover?.(null);
+    };
 
-    // Informamos que ya no existe una zona debajo del cursor.
-    options.onZoneHover?.(null);
-  };
+    // Gestionamos el click sobre una zona.
+    const handleClick = (event: MapLayerMouseEvent): void => {
+        // Obtenemos la primera feature bajo el cursor.
+        const feature = event.features?.[0];
+        if (!feature) return;
 
-  // Gestionamos el click sobre una zona.
-  const handleClick = (event: MapLayerMouseEvent): void => {
-    // Obtenemos la primera feature bajo el cursor.
-    const feature = event.features?.[0];
+        // Extraemos el identificador de la zona.
+        const zoneId = getZoneIdFromFeature(feature);
+        if (!zoneId) return;
 
-    // Si no encontramos ninguna feature válida, cancelamos el proceso.
-    if (!feature) {
-      return;
-    }
+        // Liberamos la selección anterior cuando el usuario cambia de zona.
+        if (selectedZoneId && selectedZoneId !== zoneId) {
+            clearFeatureState(map, selectedZoneId, "selected");
+        }
 
-    // Extraemos el zoneId.
-    const zoneId = getZoneIdFromFeature(feature);
+        // Guardamos la nueva selección y activamos el estado selected.
+        selectedZoneId = zoneId;
+        setFeatureState(map, zoneId, { selected: true });
 
-    // Si el feature no tiene un zoneId válido, no puede convertirse en una zona AgroVision.
-    if (!zoneId) {
-      return;
-    }
+        // Normalizamos las propiedades utilizando el mismo identificador de la selección.
+        const properties = toZoneProperties(feature.properties, zoneId);
 
-    // Si había otra zona seleccionada, eliminamos su estado selected.
-    if (selectedZoneId && selectedZoneId !== zoneId) {
-      clearFeatureState(map, selectedZoneId, 'selected');
-    }
+        // Entregamos las propiedades y la posición del click al componente consumidor.
+        options.onZoneSelect?.({ zoneId, properties, coordinates: [event.lngLat.lng, event.lngLat.lat] });
+    };
 
-    // Guardamos la nueva selección y activamos el estado selected.
-    selectedZoneId = zoneId;
-    setFeatureState(map, zoneId, {selected: true});
+    // Registramos los eventos sobre la capa de relleno de las zonas.
+    map.on("mouseenter", ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseEnter);
+    map.on("mousemove", ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseMove);
+    map.on("mouseleave", ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseLeave);
+    map.on("click", ZONE_INTERACTION_TARGET_LAYER_ID, handleClick);
 
-    // Convertimos las propiedades del feature al contrato TypeScript esperado
-    const properties = toZoneProperties(feature.properties);
+    // Devolvemos la función de limpieza.
+    return () => {
+        if (disposed) return;
+        disposed = true;
 
-    // Entregamos toda la información relevante al componente padre.
-    options.onZoneSelect?.({zoneId, properties});
-  };
+        // Eliminamos todos los listeners registrados.
+        map.off("mouseenter", ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseEnter);
+        map.off("mousemove", ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseMove);
+        map.off("mouseleave", ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseLeave);
+        map.off("click", ZONE_INTERACTION_TARGET_LAYER_ID, handleClick);
 
-  // Registramos el evento cuando el cursor entra en la layer de zonas.
-  map.on('mouseenter', ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseEnter);
+        // Restauramos el cursor.
+        map.getCanvas().style.cursor = "";
 
-  // Registramos el movimiento del cursor dentro de las features de la layer.
-  map.on('mousemove', ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseMove);
+        // Liberamos los estados temporales administrados por este registro.
+        if (hoveredZoneId) {
+            clearFeatureState(map, hoveredZoneId, "hover");
+        }
 
-  // Registramos la salida del cursor.
-  map.on('mouseleave', ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseLeave);
+        if (selectedZoneId) {
+            clearFeatureState(map, selectedZoneId, "selected");
+        }
 
-  // Registramos el click.
-  map.on('click', ZONE_INTERACTION_TARGET_LAYER_ID, handleClick);
+        // Limpiamos las referencias locales.
+        hoveredZoneId = null;
+        selectedZoneId = null;
 
-  // Devolvemos la función de limpieza.
-  return () => {
-    // Eliminamos todos los listeners registrados.
-    map.off('mouseenter', ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseEnter);
-    map.off('mousemove', ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseMove);
-    map.off('mouseleave', ZONE_INTERACTION_TARGET_LAYER_ID, handleMouseLeave);
-    map.off('click', ZONE_INTERACTION_TARGET_LAYER_ID, handleClick);
-
-    // Restauramos el cursor.
-    map.getCanvas().style.cursor = '';
-
-    // Eliminamos el estado hover si todavía existe.
-    if (hoveredZoneId) {
-      clearFeatureState(map, hoveredZoneId, 'hover');
-    }
-
-    // Eliminamos el estado selected si todavía existe.
-    if (selectedZoneId) {
-      clearFeatureState(map, selectedZoneId, 'selected');
-    }
-
-    // Informamos al consumidor que ya no existe una selección activa.
-    options.onZoneClear?.();
-  };
+        // Sincronizamos el estado del consumidor con la limpieza de la interacción.
+        options.onZoneHover?.(null);
+        options.onZoneClear?.();
+    };
 }
 
 /**
- * Extrae el zoneId de una feature de MapLibre.
+ * Obtiene el identificador lógico de una zona.
  *
- * Parámetro:
- * - feature: feature detectada por un evento del mapa.
+ * Prioriza properties.zoneId y utiliza feature.id como respaldo.
  *
- * Priorizamos properties.zoneId porque es el metodo explícito de nuestras zonas.
- * Si no existe, utilizamos feature.id como respaldo.
+ * @param feature Feature detectada por un evento de MapLibre.
+ * @returns Identificador válido o null.
  */
-function getZoneIdFromFeature(
-  feature: MapGeoJSONFeature
-): string | null {
-  // Recuperamos el zoneId desde las propiedades.
-  const propertyZoneId = feature.properties?.zoneId;
+function getZoneIdFromFeature(feature: MapGeoJSONFeature): string | null {
+    // Revisamos primero la propiedad lógica y después el identificador espacial.
+    for (const value of [feature.properties?.zoneId, feature.id]) {
+        if (typeof value === "string" && value.trim().length > 0) return value;
+        if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    }
 
-  // Si existe, lo convertimos a string.
-  if (propertyZoneId !== undefined && propertyZoneId !== null) {
-    return String(propertyZoneId);
-  }
-  // Utilizamos feature.id como segundo mecanismo.
-  if (feature.id !== undefined && feature.id !== null) {
-    return String(feature.id);
-  }
-
-  // Si ninguno existe, no podemos identificar la zona de forma segura.
-  return null;
+    return null;
 }
 
 /**
- * Convierte propiedades GeoJSON a nuestro contrato Field/Zone de AgroVision.
+ * Normaliza las propiedades entregadas por MapLibre al contrato GIS.
  *
- * Parámetro:
- * - properties: propiedades crudas entregadas por MapLibre.
+ * Conserva los identificadores numéricos o textuales y las métricas
+ * analíticas disponibles para los consumidores de la selección.
+ *
+ * @param properties Propiedades crudas de la feature.
+ * @param zoneId Identificador resuelto para la zona seleccionada.
  */
-function toZoneProperties(
-  properties: Record<string, unknown> | null | undefined
-): ZoneFeatureProperties {
-  // Convertimos cada propiedad al tipo esperado.
-  return {
-    zoneId: String(properties?.zoneId ?? ''),
-    fieldId: String(properties?.fieldId ?? ''),
-    name: String(properties?.name ?? 'Zona sin nombre'),
-    cropId: toNullableNumber(properties?.cropId),
-    riskLevel: toNullableRiskLevel(properties?.riskLevel),
-    healthScore: toNullableNumber(properties?.healthScore),
-    status:
-      properties?.status !== undefined && properties?.status !== null ? String(properties.status) : null,
-  };
+function toZoneProperties(properties: Record<string, unknown> | null | undefined, zoneId: string): ZoneFeatureProperties {
+    return {
+        zoneId,
+        fieldId: typeof properties?.fieldId === "number" ? properties.fieldId : String(properties?.fieldId ?? ""),
+        name: String(properties?.name ?? "Zona sin nombre"),
+        cropId: typeof properties?.cropId === "string" || typeof properties?.cropId === "number" ? properties.cropId : null,
+        riskLevel: toNullableRiskLevel(properties?.riskLevel),
+        healthScore: toNullableNumber(properties?.healthScore),
+        mainCause: toNullableString(properties?.mainCause),
+        summary: toNullableString(properties?.summary),
+        recommendedAction: toNullableString(properties?.recommendedAction),
+        generatedAt: toNullableString(properties?.generatedAt),
+        status: toNullableString(properties?.status),
+    };
 }
 
 /**
- * Convierte un valor desconocido a number cuando es posible.
+ * Convierte números o cadenas numéricas a un valor finito.
  *
- * Parámetro:
- * - value: valor recibido desde GeoJSON.
+ * @param value Valor recibido desde GeoJSON.
+ * @returns Número normalizado o null.
  */
 function toNullableNumber(value: unknown): number | null {
-  // Si no existe ningún valor, devolvemos null.
-  if (value === undefined || value === null || value === '') {
+    // Admitimos números y cadenas con contenido numérico.
+    if (typeof value !== "number" && typeof value !== "string") return null;
+    if (typeof value === "string" && value.trim().length === 0) return null;
+
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+/**
+ * Normaliza y valida el nivel de riesgo recibido.
+ *
+ * @param value Valor recibido desde GeoJSON.
+ * @returns Nivel de riesgo reconocido o null.
+ */
+function toNullableRiskLevel(value: unknown): ZoneFeatureProperties["riskLevel"] {
+    const risk = typeof value === "string" ? value.trim().toUpperCase() : "";
+
+    // Validamos los niveles definidos por el contrato GIS.
+    if (risk === "LOW" || risk === "MEDIUM" || risk === "HIGH" || risk === "CRITICAL") return risk;
+
     return null;
-  }
-
-  // Convertimos el valor a número.
-  const numericValue = Number(value);
-
-  // Si la conversión produce NaN, consideramos que no existe un valor válido.
-  return Number.isFinite(numericValue) ? numericValue : null;
 }
 
 /**
- * Valida que un valor sea uno de nuestros niveles de riesgo conocidos.
+ * Conserva los valores textuales opcionales de una feature.
  *
- * Parámetro:
- * - value: valor recibido desde GeoJSON.
+ * @param value Valor recibido desde GeoJSON.
+ * @returns Texto disponible o null.
  */
-function toNullableRiskLevel(
-  value: unknown
-): ZoneFeatureProperties['riskLevel'] {
-  // Normalizamos el valor a string.
-  const risk = String(value ?? '').toUpperCase();
-
-  // Validamos cada nivel permitido.
-  if (
-    risk === 'LOW' ||
-    risk === 'MEDIUM' ||
-    risk === 'HIGH' ||
-    risk === 'CRITICAL'
-  ) {
-    return risk;
-  }
-  // Si el valor no coincide con el contrato, devolvemos null.
-  return null;
+function toNullableString(value: unknown): string | null {
+    return typeof value === "string" ? value : null;
 }
 
 /**
- * Activa un estado temporal sobre una feature.
+ * Activa estados temporales sobre una zona de la fuente registrada.
  *
- * Parámetros:
- * - map: instancia MapLibre.
- * - zoneId: identificador de la zona.
- * - state: valores temporales de la feature.
+ * @param map Instancia activa de MapLibre.
+ * @param zoneId Identificador de la zona.
+ * @param state Estados de hover o selección.
  */
-function setFeatureState(
-  map: Map,
-  zoneId: string,
-  state: {
-    readonly hover?: boolean;
-    readonly selected?: boolean;
-  }
-): void {
-  // MapLibre necesita el source y el ID de la feature para almacenar su estado.
-  map.setFeatureState(
-    {
-      source: ZONE_INTERACTION_SOURCE_ID,
-      id: zoneId,
-    }, state
-  );
+function setFeatureState(map: Map, zoneId: string, state: { readonly hover?: boolean; readonly selected?: boolean }): void {
+    // Comprobamos la fuente porque el estilo puede estar siendo reemplazado.
+    if (!map.getSource(ZONE_INTERACTION_SOURCE_ID)) return;
+
+    // MapLibre utiliza la fuente y el ID de la feature para almacenar su estado.
+    map.setFeatureState({ source: ZONE_INTERACTION_SOURCE_ID, id: zoneId }, state);
 }
 
 /**
- * Elimina una propiedad específica del estado temporal de una feature.
+ * Libera una propiedad del estado temporal de una zona.
  *
- * Parámetros:
- * - map: instancia MapLibre.
- * - zoneId: identificador de la zona.
- * - key: propiedad temporal que queremos limpiar.
+ * @param map Instancia activa de MapLibre.
+ * @param zoneId Identificador de la zona.
+ * @param key Estado que debe liberarse.
  */
-function clearFeatureState(
-  map: Map,
-  zoneId: string,
-  key: 'hover' | 'selected'
-): void {
-  // Eliminamos únicamente la propiedad indicada sin tocar otros estados temporales.
-  map.removeFeatureState(
-    {
-      source: ZONE_INTERACTION_SOURCE_ID,
-      id: zoneId,
-    }, key
-  );
+function clearFeatureState(map: Map, zoneId: string, key: "hover" | "selected"): void {
+    // Comprobamos que la fuente siga registrada durante la limpieza.
+    if (!map.getSource(ZONE_INTERACTION_SOURCE_ID)) return;
+
+    // Eliminamos únicamente la propiedad indicada.
+    map.removeFeatureState({ source: ZONE_INTERACTION_SOURCE_ID, id: zoneId }, key);
 }
 
 /**
- * Elimina completamente la layer auxiliar de interacción.
+ * Libera la capa auxiliar y los estados temporales de la fuente de zonas.
  *
- * Parámetro:
- * - map: instancia MapLibre.
+ * El consumidor ejecuta previamente la limpieza de setupZoneInteractions.
+ *
+ * @param map Instancia activa de MapLibre.
  */
 export function removeZoneInteractionLayer(map: Map): void {
-  // Primero eliminamos cualquier estado temporal  asociado a las features de la fuente.
-  if (map.getSource(ZONE_INTERACTION_SOURCE_ID)) {
-    map.removeFeatureState({
-      source: ZONE_INTERACTION_SOURCE_ID,
-    });
-  }
+    // Liberamos los estados temporales asociados a las features de la fuente.
+    if (map.getSource(ZONE_INTERACTION_SOURCE_ID)) {
+        map.removeFeatureState({ source: ZONE_INTERACTION_SOURCE_ID });
+    }
 
-  // Después eliminamos la layer auxiliar.
-  if (map.getLayer(ZONE_INTERACTION_LAYER_ID)) {
-    map.removeLayer(ZONE_INTERACTION_LAYER_ID);
-  }
+    // Eliminamos la layer auxiliar cuando está registrada.
+    if (map.getLayer(ZONE_INTERACTION_LAYER_ID)) {
+        map.removeLayer(ZONE_INTERACTION_LAYER_ID);
+    }
 }
