@@ -28,7 +28,7 @@ import { getCropProfiles } from "../../crops/services/cropProfilesService";
 import type { CropProfile, CropType } from "../../crops/types/cropProfile.types";
 import { VisionResultCard } from "../components/VisionResultCard";
 import { analyzeVisionImage } from "../services/visionAIService";
-import type { VisionAnalysisResult, VisionAnalysisStatus, VisionInspection } from "../types/visionAi.types";
+import type { VisionAnalysisResult, VisionAnalysisStatus, VisionInspection } from "../types/visionAI.types";
 import "../vision-ai.css";
 
 /**

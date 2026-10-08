@@ -12,7 +12,7 @@
  * - evitar que la UI quede vacía durante la demo;
 */
 
-import type { VisionAnalyzeRequest, VisionInspection, VisionPrediction } from "../types/visionAi.types";
+import type { VisionAnalyzeRequest, VisionInspection, VisionPrediction } from "../types/visionAI.types";
 
 // Mock principal listo para consumir desde una futura VisionAIPage.
 // actualmente es el mock base del caso para la demo

@@ -15,7 +15,7 @@
 
 import { Panel } from "../../../shared/components/ui/Panel";
 import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
-import type { VisionAnalysisSource, VisionInspection } from "../types/visionAi.types";
+import type { VisionAnalysisSource, VisionInspection } from "../types/visionAI.types";
 
 interface VisionResultCardProps {
   readonly result: VisionInspection;

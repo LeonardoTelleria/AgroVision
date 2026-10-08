@@ -16,7 +16,7 @@
 
 
 import { API_ENDPOINTS } from "../../../shared/api/endpoints";
-import type { VisionInspection, VisionAnalyzeRequest, VisionAnalysisResult, ApiResponse } from "../types/visionAi.types";
+import type { VisionInspection, VisionAnalyzeRequest, VisionAnalysisResult, ApiResponse } from "../types/visionAI.types";
 import { analyzeVisionMock } from "./visionAIMock";
 
 
