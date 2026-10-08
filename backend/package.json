@@ -8,6 +8,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "mi:test": "ts-node src/modules/analysis/data/x.ts",
+    "telemetry:test": "tsx --test tests/telemetry.test.cjs",
+    "sensors:test": "tsx --test tests/sensors.test.cjs",
+    "crops:test": "tsx --test tests/crops.test.cjs",
     "field-report:test": "tsx src/modules/reports/services/fieldReportService.test.ts",
     "smoke:test": "tsx src/modules/pruebass/pruebamock.ts"
   },

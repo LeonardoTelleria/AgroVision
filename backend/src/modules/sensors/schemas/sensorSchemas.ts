@@ -1,7 +1,8 @@
 /** Validación HTTP de Sensor, alineada con el enum SensorStatus de Prisma. */
 import { z } from "zod";
 
-const positiveInteger = z.coerce.number().int().positive();
+const positiveInteger = z.number().int().positive().max(2147483647);
+const idParameter = z.string().regex(/^[1-9]\d*$/).transform(Number).pipe(positiveInteger);
 const nonEmptyString = z.string().trim().min(1);
 const sensorStatusSchema = z.enum(["ACTIVE", "INACTIVE", "MAINTENANCE"]);
 
@@ -23,9 +24,9 @@ export const updateSensorSchema = z.object({
 );
 
 export const sensorIdParamSchema = z.object({
-  id: positiveInteger,
+  id: idParameter,
 }).strict();
 
 export const fieldIdParamSchema = z.object({
-  fieldId: positiveInteger,
+  fieldId: idParameter,
 }).strict();

@@ -22,3 +22,8 @@ export interface CreateTelemetryReadingInput {
 
 export type CreateTelemetryBatchInput =
   readonly CreateTelemetryReadingInput[];
+
+/** Resultado atómico de createMany; no devuelve las filas insertadas. */
+export interface TelemetryBatchResponse {
+  readonly count: number;
+}

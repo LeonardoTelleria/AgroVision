@@ -1,11 +1,19 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { CropProfileController } from "../controllers/cropProfileControllers";
+import { CropController } from "../controllers/cropController";
 
 const router = Router();
-const controller = new CropProfileController();
-// Trae todos los perfiles al consultar /api/crops
-router.get("/", controller.getAllProfiles);
-// Trae un perfil específico al consultar /api/crops/RED_BEAN
-router.get("/:type", controller.getProfileByType);
+const controller = new CropController();
+const profileController = new CropProfileController();
+
+router.get("/cycles", controller.getCrops);
+router.get("/cycles/:id", controller.getCropById);
+router.get("/field/:fieldId", controller.getCropsByFieldId);
+router.post("/cycles", controller.createCrop);
+router.patch("/cycles/:id", controller.updateCrop);
+
+// Conservamos las rutas existentes del catálogo de perfiles.
+router.get("/", profileController.getAllProfiles);
+router.get("/:type", profileController.getProfileByType);
 
 export default router;
