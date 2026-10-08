@@ -19,6 +19,9 @@ import type { Map } from "maplibre-gl";
 import { createMappingEngine } from "../services/mappingEngine";
 import type { MappingEngine, MappingEngineCallbacks, MappingEngineData } from "../services/mappingEngine";
 import type { SelectedZoneData } from "../layers/interactionLayer";
+// Consumimos el contrato de progreso definido por el controlador del rover.
+import type { RoverProgress } from "../layers/roverLayer";
+
 
 /** Coordinador y último snapshot aplicado a una instancia concreta. */
 interface MappingSession {
@@ -37,6 +40,8 @@ export function useMappingLayers(
   // Los cambios de callbacks conservan la sesión cartográfica existente.
   const getData = useEffectEvent(() => data);
   const notifySelection = useEffectEvent((zone: SelectedZoneData) => callbacks.onZoneSelect?.(zone));
+  // Utilizamos el callback vigente sin reconstruir el motor por cada actualización.
+  const notifyRoverProgress = useEffectEvent((progress: RoverProgress) => callbacks.onRoverProgress?.(progress));
   const notifyUnmatched = useEffectEvent((ids: readonly string[]) => callbacks.onUnmatchedInsights?.(ids));
 
   const notifyError = useEffectEvent((error: unknown) => {
@@ -49,9 +54,15 @@ export function useMappingLayers(
     try {
       const initialData = getData();
 
+      // Creamos el coordinador y conectamos sus eventos con los callbacks vigentes.
       const engine = createMappingEngine(map, initialData, {
+        // Comunicamos la selección de una zona.
         onZoneSelect: (zone) => notifySelection(zone),
+        // Comunicamos análisis sin una geometría compatible.
         onUnmatchedInsights: (ids) => notifyUnmatched(ids),
+        // Comunicamos las métricas de la simulación.
+        onRoverProgress: (progress) => notifyRoverProgress(progress),
+        // Normalizamos los errores mediante la ruta compartida del hook.
         onError: (error) => notifyError(error),
       });
 

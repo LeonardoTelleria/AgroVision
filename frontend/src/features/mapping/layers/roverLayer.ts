@@ -65,6 +65,23 @@ export type RoverFeature = Feature<Point, RoverProperties>;
 // Trayectoria compatible con propiedades GeoJSON, incluido MapLineFeature.
 export type RoverRoute = Feature<LineString>;
 
+/** Snapshot del progreso simulado de una ruta, expresado en metros. */
+export interface RoverProgress {
+  // Identifica el recorrido al que pertenece este snapshot.
+  readonly routeId: string | number | null;
+
+  // Estado operativo del vehículo.
+  readonly status: RoverProperties["status"];
+
+  // Distancia de la vuelta actual y longitud completa de la ruta.
+  readonly distanceMeters: number;
+  readonly routeLengthMeters: number;
+
+  // Distancia acumulada desde el inicio y vueltas completadas.
+  readonly totalDistanceMeters: number;
+  readonly completedLaps: number;
+}
+
 // Contrato público del controlador de animación.
 export interface RoverController {
     start(route: RoverRoute): void;
@@ -196,149 +213,211 @@ export const updateRoverPosition = (
  * @param speedKmh Velocidad positiva de simulación.
  * @returns Controlador de inicio, pausa, reanudación y limpieza.
  */
-export function createRoverController(map: Map, speedKmh = ROVER_SPEED_KMH): RoverController {
-    // Validamos la velocidad antes de reemplazar una sesión existente.
-    if (!Number.isFinite(speedKmh) || speedKmh <= 0) {
-        throw new Error("La velocidad del rover debe ser positiva.");
+/**
+ * Crea un controlador de movimiento independiente para esta instancia.
+ *
+ * onProgress comunica cambios de estado inmediatamente y agrupa
+ * las actualizaciones de movimiento para la presentación en React.
+ */
+export function createRoverController(
+  map: Map,
+  speedKmh = ROVER_SPEED_KMH,
+  onProgress?: (progress: RoverProgress) => void,
+): RoverController {
+  // Verificamos la velocidad antes de iniciar una simulación.
+  if (!Number.isFinite(speedKmh) || speedKmh <= 0) {
+    throw new Error("La velocidad del rover debe ser positiva.");
+  }
+
+  // Finalizamos un controlador anterior asociado con este mapa.
+  controllers.get(map)?.destroy();
+
+  // Cada controlador conserva su propio reloj y frame pendiente.
+  let frame: number | null = null;
+  let lastTime: number | null = null;
+
+  // Conservamos la distancia actual, el acumulado y la longitud de la ruta.
+  let distanceKm = 0;
+  let totalDistanceKm = 0;
+  let routeLengthKm = 0;
+
+  // Limitamos las notificaciones de movimiento a cuatro por segundo.
+  let lastProgressTime: number | null = null;
+
+  // Conservamos la ruta y la posición utilizadas por esta simulación.
+  let route: RoverRoute | null = null;
+  let position: LngLat | null = null;
+  let destroyed = false;
+
+  // Cancelamos el siguiente frame y reiniciamos la referencia temporal.
+  const cancel = (): void => {
+    if (frame !== null) cancelAnimationFrame(frame);
+
+    frame = null;
+    lastTime = null;
+  };
+
+  // Sincronizamos el punto geográfico y publicamos las métricas disponibles.
+  const publish = (status: RoverProperties["status"], timestamp?: number): void => {
+    // El punto visual conserva la frecuencia de la animación.
+    if (position && !destroyed) updateRoverPosition(map, position, status, speedKmh);
+
+    // Los estados se entregan inmediatamente; el movimiento se agrupa.
+    if (
+      destroyed
+      || !route
+      || (
+        timestamp !== undefined
+        && lastProgressTime !== null
+        && timestamp - lastProgressTime < 250
+      )
+    ) {
+      return;
     }
 
-    controllers.get(map)?.destroy();
+    // Registramos el instante de la última notificación de movimiento.
+    lastProgressTime = timestamp ?? null;
 
-    // Estado privado de esta animación.
-    let frame: number | null = null;
-    let lastTime: number | null = null;
-    let distanceKm = 0;
-    let routeLengthKm = 0;
-    let route: RoverRoute | null = null;
-    let position: LngLat | null = null;
-    let destroyed = false;
+    // Convertimos kilómetros a metros para el contrato público.
+    onProgress?.({
+      routeId: route.id ?? null,
+      status,
+      distanceMeters: distanceKm * 1000,
+      routeLengthMeters: routeLengthKm * 1000,
+      totalDistanceMeters: totalDistanceKm * 1000,
+      completedLaps: Math.floor(totalDistanceKm / routeLengthKm),
+    });
+  };
 
-    // Cancelamos el frame pendiente y reiniciamos el reloj.
-    const cancel = (): void => {
-        if (frame !== null) cancelAnimationFrame(frame);
-        frame = null;
-        lastTime = null;
-    };
+  // Calculamos el avance sobre la ruta en cada frame disponible.
+  const animate = (timestamp: number): void => {
+    // Finalizamos cuando desaparece la sesión o su fuente geográfica.
+    if (destroyed || !route || !map.getSource(ROVER_SOURCE_ID)) {
+      cancel();
+      return;
+    }
 
-    // Publicamos la posición con el estado operativo correspondiente.
-    const publish = (status: RoverProperties["status"]): void => {
-        if (position && !destroyed) {
-            updateRoverPosition(map, position, status, speedKmh);
-        }
-    };
+    // El primer frame establece el inicio de la medición temporal.
+    if (lastTime === null) lastTime = timestamp;
 
-    // Calculamos el desplazamiento y solicitamos el siguiente frame.
-    const animate = (timestamp: number): void => {
-        if (destroyed || !route || !map.getSource(ROVER_SOURCE_ID)) {
-            cancel();
-            return;
-        }
+    const elapsed = timestamp - lastTime;
 
-        if (lastTime === null) lastTime = timestamp;
-        const elapsed = timestamp - lastTime;
+    // Conservamos la frecuencia visual configurada para el rover.
+    if (elapsed >= ROVER_FRAME_TIME) {
+      lastTime = timestamp;
 
-        // Limitamos las actualizaciones a la frecuencia visual configurada.
-        if (elapsed >= ROVER_FRAME_TIME) {
-            lastTime = timestamp;
+      // Limitamos el salto cuando la pestaña vuelve de una suspensión.
+      totalDistanceKm += speedKmh * Math.min(elapsed, 1000) / 3_600_000;
 
-            // Limitamos el salto al recuperar una pestaña suspendida.
-            const elapsedMs = Math.min(elapsed, 1000);
+      // La vuelta actual conserva el sobrante al alcanzar el final.
+      distanceKm = totalDistanceKm % routeLengthKm;
 
-            // Convertimos km/h a km/ms y conservamos el sobrante al completar la ruta.
-            distanceKm = (distanceKm + speedKmh * elapsedMs / 3_600_000) % routeLengthKm;
+      // Turf obtiene la posición correspondiente a la distancia recorrida.
+      const [longitude, latitude] = along(route, distanceKm, { units: "kilometers" }).geometry.coordinates;
 
-            // Calculamos la posición geográfica sobre el recorrido.
-            const currentPoint = along(route, distanceKm, { units: "kilometers" });
-            const [longitude, latitude] = currentPoint.geometry.coordinates;
+      position = [longitude, latitude];
 
-            position = [longitude, latitude];
-            publish("ACTIVE");
-        }
+      // Actualizamos el mapa y comunicamos el avance cuando corresponde.
+      publish("ACTIVE", timestamp);
+    }
 
-        frame = requestAnimationFrame(animate);
-    };
+    // Programamos el siguiente frame de esta simulación.
+    frame = requestAnimationFrame(animate);
+  };
 
-    // Pausamos el desplazamiento conservando la posición y la distancia.
-    const pause = (): void => {
-        cancel();
-        publish("PAUSED");
-    };
+  // Pausar conserva la posición y las distancias acumuladas.
+  const pause = (): void => {
+    cancel();
+    publish("PAUSED");
+  };
 
-    // Detenemos el desplazamiento y conservamos la última posición.
-    const stop = (): void => {
-        cancel();
-        publish("OFFLINE");
-    };
+  // Detener finaliza la animación y comunica el estado operativo.
+  const stop = (): void => {
+    cancel();
+    publish("OFFLINE");
+  };
 
-    // Reanudamos desde la posición conservada con un nuevo reloj.
-    const resume = (): void => {
-        if (destroyed || !route || frame !== null) return;
+  // Reanudamos únicamente cuando existe una ruta y no hay otro frame activo.
+  const resume = (): void => {
+    if (destroyed || !route || frame !== null) return;
 
-        publish("ACTIVE");
-        frame = requestAnimationFrame(animate);
-    };
+    publish("ACTIVE");
+    frame = requestAnimationFrame(animate);
+  };
 
-    // Liberamos la sesión y su asociación con el mapa.
-    const destroy = (): void => {
-        if (destroyed) return;
+  // Liberamos el controlador una sola vez.
+  const destroy = (): void => {
+    if (destroyed) return;
 
-        cancel();
-        destroyed = true;
-        route = null;
-        position = null;
+    cancel();
+    destroyed = true;
+    route = null;
+    position = null;
 
-        map.off("remove", destroy);
+    // Retiramos la escucha de destrucción de este mapa.
+    map.off("remove", destroy);
 
-        if (controllers.get(map) === controller) {
-            controllers.delete(map);
-        }
-    };
+    // Conservamos cualquier controlador posterior que pertenezca al mapa.
+    if (controllers.get(map) === controller) controllers.delete(map);
+  };
 
-    const controller: RoverController = {
-        start(nextRoute) {
-            if (destroyed) return;
+  // Exponemos las operaciones públicas de la simulación.
+  const controller: RoverController = {
+    start(nextRoute) {
+      if (destroyed) return;
 
-            // Validamos las posiciones antes de reemplazar el recorrido actual.
-            const coordinates = nextRoute.geometry.coordinates;
-            const invalidCoordinates = coordinates.length < 2 || coordinates.some((point) =>
-                point.length < 2 ||
-                !point.every(Number.isFinite) ||
-                Math.abs(point[0]) > 180 ||
-                Math.abs(point[1]) > 90,
-            );
+      // Verificamos la cantidad y validez de las coordenadas.
+      const coordinates = nextRoute.geometry.coordinates;
 
-            if (invalidCoordinates) {
-                throw new Error("Trayectoria GIS inválida.");
-            }
+      if (
+        coordinates.length < 2
+        || coordinates.some((point) =>
+          point.length < 2
+          || !point.every(Number.isFinite)
+          || Math.abs(point[0]) > 180
+          || Math.abs(point[1]) > 90
+        )
+      ) {
+        throw new Error("Trayectoria GIS inválida.");
+      }
 
-            const nextLength = length(nextRoute, { units: "kilometers" });
+      // Verificamos que la ruta permita un desplazamiento real.
+      const nextLength = length(nextRoute, { units: "kilometers" });
 
-            if (!Number.isFinite(nextLength) || nextLength <= 0) {
-                throw new Error("La trayectoria debe tener longitud positiva.");
-            }
+      if (!Number.isFinite(nextLength) || nextLength <= 0) {
+        throw new Error("La trayectoria debe tener longitud positiva.");
+      }
 
-            cancel();
+      // Finalizamos el recorrido anterior antes de aplicar otra geometría.
+      cancel();
 
-            // Aislamos la ruta frente a modificaciones externas.
-            route = structuredClone(nextRoute);
-            routeLengthKm = nextLength;
-            distanceKm = 0;
-            position = [coordinates[0][0], coordinates[0][1]];
+      // Aislamos la ruta frente a mutaciones externas.
+      route = structuredClone(nextRoute);
+      routeLengthKm = nextLength;
 
-            addRoverLayer(map, position);
-            resume();
-        },
-        pause,
-        resume,
-        stop,
-        destroy,
-    };
+      // Una nueva ruta inicia otra simulación desde su primer punto.
+      distanceKm = 0;
+      totalDistanceKm = 0;
+      lastProgressTime = null;
+      position = [coordinates[0][0], coordinates[0][1]];
 
-    // Registramos la sesión antes de entregar el controlador.
-    controllers.set(map, controller);
-    map.on("remove", destroy);
+      // Garantizamos que exista la representación visual del rover.
+      addRoverLayer(map, position);
 
-    return controller;
+      // Publicamos el estado inicial e iniciamos la animación.
+      resume();
+    },
+    pause,
+    resume,
+    stop,
+    destroy,
+  };
+
+  // Asociamos el controlador y su limpieza con la instancia cartográfica.
+  controllers.set(map, controller);
+  map.on("remove", destroy);
+
+  return controller;
 }
 
 // =========================================
@@ -380,3 +459,5 @@ export const removeRoverLayer = (map: Map): void => {
         map.removeSource(ROVER_SOURCE_ID);
     }
 };
+
+
