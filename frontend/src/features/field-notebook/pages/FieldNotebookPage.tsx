@@ -166,6 +166,7 @@ export function FieldNotebookPage() {
 
   return (
     <section className="avScreen fieldNotebookFigma">
+       <h1 className="avScreenTitle">Notebook</h1>
       {/* =====================================
           KPIS
           ===================================== */}

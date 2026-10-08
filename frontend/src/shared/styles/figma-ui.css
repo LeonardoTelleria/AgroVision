@@ -1,40 +1,20 @@
-/**
- * =========================================
- * AgroVision Figma UI
- * =========================================
- *
- * Componentes visuales compartidos por todas
- * las pantallas reconstruidas desde Figma.
- */
-
-/* =========================================
-   Screen
-   ========================================= */
-
 .avScreen {
-  width: 100%;  
+  width: 100%;
   min-width: 0;
   display: grid;
   gap: 14px;
   color: var(--av-text);
   font-family: var(--av-font-body);
 }
-
 .avScreen * {
   box-sizing: border-box;
 }
-
 .avScreen button,
 .avScreen input,
 .avScreen textarea,
 .avScreen select {
   font-family: var(--av-font-body);
 }
-
-/* =========================================
-   Simple screen title
-   ========================================= */
-
 .avScreenTitle {
   margin: 0;
   color: var(--av-text);
@@ -43,301 +23,264 @@
   font-weight: 800;
   letter-spacing: -0.025em;
 }
-
-/* =========================================
-   KPI grid
-   ========================================= */
-
 .avMetricGrid {
   min-width: 0;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
-
-/* =========================================
-   KPI card
-   ========================================= */
-
 .avMetricCard {
   position: relative;
   min-width: 0;
-  height: 210px; 
+  height: 172px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 14px 26px 12px;
+  padding: 12px 20px 10px;
   overflow: hidden;
   color: var(--av-neutral-50);
-  border: 1px solid var(--av-green-700); /* Borde sutil */
-  border-radius: var(--av-radius-card);       
-  background: #031410;       
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--av-green-700);
+  border-radius: 14px;
+  background: #031410;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.16);
   box-sizing: border-box;
-  transition: border-color 150ms ease, transform 150ms ease; 
+  transition: border-color 150ms ease, transform 150ms ease, box-shadow 150ms ease;
 }
-
-
 .avMetricCard::after {
   display: none;
   pointer-events: none;
 }
-
 .avMetricCard:hover {
   transform: translateY(-2px);
   border-color: var(--av-lime-400);
   box-shadow: 0 6px 24px rgba(3, 20, 16, 0.2);
 }
-
-
 .avMetricCard__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
 }
-
 .avMetricCard__header > span {
   color: #f8faf8;
   font-family: var(--av-font-heading);
   font-size: 0.72rem;
   font-weight: 700;
 }
-
 .avMetricCard__header small {
   padding: 2px 5px;
-
   color: var(--av-neutral-300);
-
   font-size: 0.48rem;
-
   border: 1px solid rgba(228, 236, 231, 0.34);
   border-radius: 4px;
 }
-
 .avMetricCard__titleRow {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
 }
-
 .avMetricCard__titleRow > span {
   color: var(--av-neutral-100);
   font-family: var(--av-font-heading);
-  font-size: 1.2rem;
-  letter-spacing: 0.008em;
+  font-size: 1rem;
+  letter-spacing: 0.005em;
   font-weight: 600;
 }
-
 .avMetricCard__infoIcon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   color: #64748b;
   cursor: help;
   opacity: 0.7;
   transition: opacity 0.15s;
 }
-
 .avMetricCard__infoIcon:hover {
   opacity: 1;
 }
-
 .avMetricCard__headerIcon {
   position: absolute;
   right: 0;
   top: -2px;
   color: #ffffff;
-  opacity: 0.08; 
+  opacity: 0.08;
   pointer-events: none;
 }
-
-/* ==========================================================================
-   Cuerpo del layout asimétrico
-   ========================================================================== */
 .avMetricCard__body {
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex: 1;
-  margin-top: 8px;
-  margin-bottom: 4px;
+  margin-top: 4px;
+  margin-bottom: 2px;
 }
-
 .avMetricCard__leftCol {
   display: flex;
   align-items: center;
-  margin-left: 4px;
+  margin-left: 2px;
 }
-
 .avMetricCard__rightCol {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
   height: 100%;
-  min-width: 180px;
+  min-width: 145px;
 }
-
-/* Tipografías y Números Gigantes */
 .avMetricCard__bigNumberBlock {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  
 }
-
 .avMetricCard__mainContainer {
   display: flex;
   flex-direction: column;
   flex: 1;
 }
-
 .avMetricRing__number {
-  font-size: 1.8rem;
-  font-weight: 600;
   color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.05;
 }
-
 .avMetricRing__number small {
-  font-size: 0.75rem;
+  margin-left: 3px;
   color: #94a3b8;
-  margin-left: 4px;
+  font-size: 0.65rem;
 }
-
 .avMetricCard--teal .avMetricCard__body {
-  border-right: none; 
+  border-right: none;
 }
-
 .avMetricCard--teal .avMetricCard__rightCol {
   display: flex;
   align-items: center;
 }
-
-.avMetricCard--teal .avMetricCard__rightCol span{
+.avMetricCard--teal .avMetricCard__rightCol span {
   display: flex;
   align-items: center;
 }
 .avMetricCard--teal .avMetricCard__bigNumberBlock {
-  padding-right: 42px;    /* Genera espacio interno hacia la derecha */
+  padding-right: 26px;
 }
-
 .avMetricCard--teal .avMetricCard__value strong {
-  color: var(--av-lime-500)
+  color: var(--av-lime-500);
 }
-
 .avMetricCard--amber .avMetricCard__leftCol {
   flex: 1;
-  min-width: max-content; /* Fuerza a que el bloque mida lo necesario para el texto largo */
-  padding-right: 20px;    /* Crea una separación perfecta y generosa antes de la línea vertical */
+  min-width: max-content;
+  padding-right: 14px;
   box-sizing: border-box;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
-
 .avMetricCard--amber .avMetricCard__subLabel {
-  white-space: nowrap; 
+  white-space: nowrap;
   display: block;
   width: 100%;
 }
-
-.avMetricCard--amber .avMetricCard__rightCol{
-  padding-right: 16px; 
-  padding-left: 20px;     /* Separa la lista de métricas de la línea hacia la derecha */
+.avMetricCard--amber .avMetricCard__rightCol {
   flex: 1;
+  padding-right: 8px;
+  padding-left: 14px;
 }
-
 .avMetricCard--amber .avMetricCard__value strong {
-  color: var(--av-amber-500)
+  color: var(--av-amber-500);
 }
-
-
 .avMetricCard__subLabel {
-  margin: 4px 0 0 2px;
+  margin: 3px 0 0 2px;
   color: var(--av-neutral-200);
-  font-size: 1rem;
-  letter-spacing: 0.02em;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
 }
-
 
 /* =========================================
-   Ring
+   Metric Card — Real Donut Chart
    ========================================= */
-
 .avMetricRing {
-  --av-ring-color: var(--av-lime-400);
   position: relative;
-  flex: 0 0 auto;
-  width: 120px;  /* Ajustado para que el anillo no se solape */
+  width: 120px;
   height: 120px;
+  min-width: 120px;
+  flex: 0 0 94px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  background: conic-gradient(
-    var(--av-ring-color) 0deg,
-    var(--av-ring-color) var(--av-ring-progress),
-    #092019 var(--av-ring-progress),
-    #092019 360deg);
+}
+.avMetricRing__chart {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.avMetricRing__chart .recharts-wrapper,
+.avMetricRing__chart .recharts-surface {
+  overflow: visible;
+}
+.avMetricRing__center {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+.avMetricRing__innerValue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.avMetricRing__number {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  color: #ffffff;
+  font-family: var(--av-font-heading);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+.avMetricRing__number small {
+  margin-left: 3px;
+  color: var(--av-neutral-300);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.avMetricRing__label {
+  margin-top: 3px;
+  color: var(--av-neutral-300);
+  font-size: 0.61rem;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .avMetricCard--amber .avMetricRing {
   --av-ring-color: var(--av-amber-400);
 }
-
 .avMetricCard--teal .avMetricRing {
   --av-ring-color: var(--av-lime-400);
 }
 
-.avMetricRing::after {
-  content: "";
-  position: absolute;
-  width: 82px;
-  height: 82px;
-  border-radius: 50%;
-  background: var(--av-green-900);
-}
-
-.avMetricRing__label {
-  font-size: 1rem;
-  color: #94a3b8;
-  margin-top: 1px;
-}
-
-.avMetricRing__center {
-  position: relative;
-  z-index: 2;
-  text-align: center;
-}
-
-/* =========================================
-   MetricRing value
-   ========================================= */
 
 .avMetricCard__copy {
   min-width: 0;
 }
-
 .avMetricRing__innerValue {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
-.avMetricRing__innerValue strong{
+.avMetricRing__innerValue strong {
   font-size: 2rem;
   color: #ffffff;
   font-weight: 700;
-} 
-
-.avMetricRing__innerValue small {
-  font-size: 1rem;
-  color: #64748b;
-  margin-top: 1px;
 }
-
-/* =========================================
-   Columna Derecha: Lista de desgloses y Badges
-   ========================================= */
+.avMetricRing__innerValue small {
+  margin-top: 1px;
+  color: #94a3b8;
+  font-size: 0.65rem;
+}
 .avMetricCard__detailsSection {
   display: flex;
   flex-direction: column;
@@ -346,42 +289,35 @@
   height: 100%;
   min-width: 110px;
 }
-
 .avMetricCard__detailsList {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  width: 100%
+  gap: 4px;
 }
-
 .avMetricCard__detailItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1rem;
-  margin-left: 15px;
+  margin-left: 10px;
+  font-size: 0.82rem;
 }
-
 .avMetricCard__detailLabel {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--av-neutral-200);
 }
-
 .avMetricCard__detailDot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  width: 8px;
+  height: 8px;
   display: inline-block;
+  border-radius: 50%;
 }
-
 .avMetricCard__detailValue {
   color: #ffffff;
   font-weight: 600;
 }
-
-/* Micro-badge de comparativas ("vs semana anterior") */
 .avMetricCard__subBadge {
   font-size: 0.68rem;
   color: var(--av-neutral-300);
@@ -389,124 +325,94 @@
   text-align: right;
   width: 100%;
 }
-
-/* Contenedor Ilustración Orbital (Card 3) */
 .avMetricCard__decorativeIconWrapper {
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
 }
-
-/* =========================================
-   Metric value
-   ========================================= */
-/* =========================================
-   Footer y Acción "Ver todas"
-   ========================================= */
+.avMetricCard__decorativeIconWrapper > span {
+  font-size: 3.45rem !important;
+  line-height: 1;
+}
 .avMetricCard__footer {
   width: 100%;
   margin-top: 6px;
   padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04); /* Línea sutil horizontal */
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
-
 .avMetricCard__value {
   display: flex;
   align-items: baseline;
   gap: 4px;
 }
-
 .avMetricCard__value strong {
   color: #ffffff;
   font-family: var(--av-font-heading);
-  font-size: 4.3rem;
+  font-size: 3.45rem;
   font-weight: 800;
-  line-height: 1;
+  line-height: 0.95;
   letter-spacing: -0.04em;
 }
-
 .avMetricCard__value span {
   color: var(--av-neutral-300);
-
   font-size: 0.62rem;
 }
-
 .avMetricCard__copy p {
   margin: 4px 0 0;
   color: var(--av-neutral-200);
   font-size: 0.64rem;
   line-height: 1.25;
 }
-
 .avMetricCard__action {
-  background: transparent;
-  border: none;
-  padding: 0;
-  color: var(--av-lime-500); 
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
+  padding: 0;
+  color: var(--av-lime-500);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
-
 .avMetricCard--lime .avMetricCard__detailItem {
   padding-right: 5px;
 }
 .avMetricCard--amber .avMetricCard__action {
   color: var(--av-amber-400);
 }
-
 .avMetricCard__action:hover {
   text-decoration: underline;
 }
-
 .avMetricCard__action span {
   transition: transform 0.15s ease;
 }
-
 .avMetricCard__action:hover span {
   transform: translateX(3px);
 }
-
-
-/* =========================================
-   Panel
-   ========================================= */
-
 .avPanel {
   min-width: 0;
   padding: 14px 16px 16px 16px;
   border: 1px solid var(--av-border);
   border-radius: var(--av-radius-card);
-
   background: var(--av-neutral-50);
-
   box-shadow: var(--av-shadow-card);
 }
-
 .avPanel__header {
   min-height: 20px;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   gap: 10px;
-
   margin-bottom: 8px;
 }
-
 .avPanel__title {
   display: flex;
   align-items: center;
   gap: 5px;
-  white-space: nowrap; /* Evita que el texto del botón se rompa en dos líneas */
- 
+  white-space: nowrap;
 }
-
 .avPanel__title h2 {
   margin: 0;
   color: var(--av-text);
@@ -515,7 +421,6 @@
   font-weight: 700;
   letter-spacing: 0.0008em;
 }
-
 .avPanel__infoIcon {
   width: 20px;
   height: 20px;
@@ -524,348 +429,179 @@
   opacity: 0.7;
   transition: opacity 0.15s;
 }
-
 .avCardTag {
   padding: 2px 5px;
-
   color: var(--av-neutral-600);
-
   font-size: 0.45rem;
-
   border: 1px solid var(--av-border);
   border-radius: 3px;
-
   background: var(--av-neutral-100);
 }
 
-/* =========================================
-   Table
-   ========================================= */
-
-.avTableWrap {
-  width: 100%;
-  min-width: 0;
-
-  overflow-x: auto;
-}
-
-.avTable {
-  width: 100%;
-
-  border-collapse: separate;
-  border-spacing: 0;
-
-  font-size: 0.56rem;
-
-  border: 1px solid var(--av-border-soft);
-  border-radius: 5px;
-
-  overflow: hidden;
-}
-
-.avTable th {
-  padding: 5px 7px;
-
-  color: var(--av-text-secondary);
-
-  font-family: var(--av-font-heading);
-  font-size: 0.51rem;
-  font-weight: 700;
-
-  text-align: left;
-
-  background: var(--av-neutral-100);
-
-  border-bottom: 1px solid var(--av-border-soft);
-}
-
-.avTable td {
-  padding: 5px 7px;
-
-  color: var(--av-text-secondary);
-
-  border-bottom: 1px solid var(--av-border-soft);
-
-  background: var(--av-neutral-50);
-}
-
-.avTable tr:last-child td {
-  border-bottom: 0;
-}
-
-.avTable tbody tr {
-  transition: background 120ms ease;
-}
-
-.avTable tbody tr:hover td {
-  background: var(--av-lime-50);
-}
-
-/* =========================================
-   Status badges
-   ========================================= */
 
 .avStatusBadge {
   width: max-content;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  padding: 2px 7px;
-
-  font-size: 0.5rem;
+  padding: 4px 10px;
+  font-size: 0.7rem;
   font-weight: 700;
-
   line-height: 1.2;
-
-  border-radius: 4px;
+  border-radius: 10px;
 }
-
 .avStatusBadge--success {
   color: var(--av-success-text);
   background: rgba(48, 183, 106, 0.1);
 }
-
 .avStatusBadge--warning {
   color: var(--av-warning-text);
   background: rgba(224, 102, 26, 0.1);
 }
-
 .avStatusBadge--danger {
   color: var(--av-danger-text);
   background: rgba(227, 26, 22, 0.1);
 }
-
 .avStatusBadge--info {
   color: var(--av-info-text);
   background: rgba(14, 106, 150, 0.1);
 }
-
 .avStatusBadge--lime {
   color: var(--av-lime-800);
   background: var(--av-lime-100);
 }
-
 .avStatusBadge--neutral {
   color: var(--av-neutral-700);
   background: var(--av-neutral-200);
 }
-
-/* =========================================
-   Compact list
-   ========================================= */
-
 .avCompactList {
   display: grid;
 }
-
 .avCompactRow {
   min-width: 0;
   min-height: 32px;
-
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-
   gap: 8px;
-
   padding: 5px 6px;
-
   border-bottom: 1px solid var(--av-border-soft);
-
   transition: background 120ms ease;
 }
-
 .avCompactRow:last-child {
   border-bottom: 0;
 }
-
 .avCompactRow:hover {
   background: var(--av-lime-50);
 }
-
 .avCompactRow__main {
   min-width: 0;
-
   display: flex;
   align-items: center;
-
   gap: 7px;
 }
-
 .avCompactRow__icon {
   width: 18px;
   height: 18px;
-
   flex: 0 0 auto;
-
   display: grid;
   place-items: center;
 }
-
 .avCompactRow__copy {
   min-width: 0;
-
   display: grid;
 }
-
 .avCompactRow__copy strong {
   color: var(--av-text);
-
   font-size: 0.59rem;
   font-weight: 600;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .avCompactRow__copy small {
   color: var(--av-text-muted);
-
   font-size: 0.49rem;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* =========================================
-   Filter bar
-   ========================================= */
-
 .avFilterBar {
   display: flex;
   align-items: center;
-
   gap: 9px;
-
   padding: 7px 10px;
-
   border: 1px solid var(--av-border);
   border-radius: var(--av-radius-card);
-
   background: var(--av-neutral-50);
-
   box-shadow: var(--av-shadow-card);
 }
-
 .avFilterGroup {
   min-width: 0;
-
   display: flex;
   align-items: center;
-
   gap: 6px;
-
   flex: 1;
 }
-
 .avFilterGroup label {
   color: var(--av-text-secondary);
-
   font-size: 0.54rem;
   font-weight: 600;
 }
-
 .avFilterGroup select {
   min-width: 90px;
   height: 28px;
-
   padding: 0 7px;
-
   color: var(--av-text-secondary);
-
   font-size: 0.55rem;
-
   border: 1px solid var(--av-border);
   border-radius: 5px;
-
   background: var(--av-neutral-50);
 }
-
-/* =========================================
-   Text action
-   ========================================= */
-
 .avTextAction {
   width: max-content;
-
   padding: 0;
-
   color: var(--av-teal-400);
-
   font-size: 0.56rem;
   font-weight: 700;
-
   border: 0;
-
   background: transparent;
-
   cursor: pointer;
-
-  transition:
-    color 120ms ease,
-    transform 120ms ease;
+  transition: color 120ms ease, transform 120ms ease;
 }
-
 .avTextAction:hover {
   color: var(--av-teal-300);
-
   transform: translateX(2px);
 }
-
-/* =========================================
-   Empty / loading
-   ========================================= */
-
 .avState {
   min-height: 220px;
-
   display: grid;
   place-content: center;
   justify-items: center;
-
   gap: 4px;
-
   color: var(--av-text-muted);
-
   text-align: center;
-
   border: 1px solid var(--av-border);
   border-radius: var(--av-radius-card);
-
   background: var(--av-neutral-50);
 }
-
 .avState strong {
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
   font-size: 0.8rem;
 }
-
 .avState p {
   margin: 0;
-
   font-size: 0.65rem;
 }
-
-/* =========================================
-   Responsive
-   ========================================= */
-
 @media (max-width: 850px) {
   .avMetricGrid {
     grid-template-columns: 1fr;
   }
-
   .avMetricCard {
     height: 124px;
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .avMetricCard,
   .avMetricCard__action span,

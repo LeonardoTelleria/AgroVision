@@ -1,292 +1,1171 @@
+/**
+ * =========================================
+ * AgroVision — Cultivos
+ * =========================================
+ *
+ * Reskin visual basado en la Musa oficial.
+ *
+ * Objetivos:
+ * - conservar la estructura original;
+ * - mejorar jerarquía y legibilidad;
+ * - evitar cards planas;
+ * - mantener densidad de información;
+ * - garantizar que textos e imágenes no
+ *   deformen el layout;
+ * - responder correctamente a cambios
+ *   de viewport.
+ */
+
+/* =========================================
+   Pantalla
+   ========================================= */
+
 .cropsFigma {
-  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  gap: 12px;
 }
+
+.cropsFigma .avScreenTitle {
+  margin-bottom: 0;
+}
+
+/* =========================================
+   Paneles específicos de Cultivos
+   ========================================= */
+
+.cropsFigma .cropsPanel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(212, 222, 216, 0.95);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 5px 15px rgba(21, 42, 39, 0.055),
+    0 1px 3px rgba(21, 42, 39, 0.035);
+}
+
+.cropsFigma .cropsPanel .avPanel__header {
+  min-height: 44px;
+  padding: 11px 14px 6px;
+}
+
+.cropsFigma .cropsPanel .avPanel__title {
+  min-width: 0;
+}
+
+.cropsFigma .cropsPanel .avPanel__title h2 {
+  margin: 0;
+  color: var(--av-text);
+  font-size: 1rem;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+
+/* =========================================
+   Acción de header
+   ========================================= */
+.cropsHeaderAction {
+  
+   width: max-content;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 11px 0 12px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid rgba(118, 159, 17, 0.24);
+  border-radius: 10px 0 10px 0;
+  background: var(--av-lime-600);
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: blur(8px) saturate(120%);
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.cropsHeaderAction:hover {
+   color: var(--av-green-700);
+  background: rgba(206, 238, 190, 0.9);
+  border-color: rgba(118, 159, 17, 0.38);
+  box-shadow: 0 4px 11px rgba(21, 42, 39, 0.09);
+  transform: translateY(-1px);
+}
+
+.cropsHeaderAction img {
+  width: 20px;
+  height: 20px;
+  display: block;
+  object-fit: contain;
+  opacity: 0.78;
+}
+
+/* =========================================
+   Acción estándar de Cultivos
+   ========================================= */
+
+.cropsActionButton {
+  width: max-content;
+  min-height: 29px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  color: var(--av-green-600);
+  font-size: 0.62rem;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid rgba(118, 159, 17, 0.18);
+  border-radius: 8px;
+  background: rgba(227, 246, 216, 0.64);
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.cropsActionButton:hover {
+  color: var(--av-green-700);
+  transform: translateY(-1px);
+  border-color: rgba(118, 159, 17, 0.32);
+  background: rgba(215, 239, 201, 0.9);
+  box-shadow: 0 4px 10px rgba(21, 42, 39, 0.07);
+}
+
+.cropsActionButton:active {
+  transform: translateY(0);
+}
+
+.cropsActionButton img {
+  width: 11px;
+  height: 11px;
+  flex: 0 0 11px;
+  display: block;
+  object-fit: contain;
+  opacity: 0.82;
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease;
+}
+
+.cropsActionButton:hover img {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.cropsActionButton--center {
+  display: flex;
+  margin: 9px auto 11px;
+}
+
+.cropsActionButton--card {
+  min-height: 27px;
+  margin: 7px auto 0;
+  padding-inline: 9px;
+  font-size: 0.59rem;
+}
+
+/* =========================================
+   Perfiles agrícolas
+   ========================================= */
 
 .cropProfileStrip {
+  min-width: 0;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
   gap: 8px;
+  padding: 4px 14px 14px;
 }
 
+/* =========================================
+   Tarjeta individual de cultivo
+   ========================================= */
+
+/* =========================================
+   Tarjeta individual de cultivo
+   ========================================= */
+
 .figmaCropCard {
+  position: relative;
   min-width: 0;
-
-  padding: 8px;
-
-  border: 1px solid var(--av-border);
-  border-top: 2px solid var(--av-lime-500);
-  border-radius: 6px;
-
-  background: var(--av-neutral-50);
-
+  min-height: 158px;
+  padding: 52px 10px 9px;
+  overflow: hidden;
+  border: 1px solid var(--av-border-soft);
+  border-radius: 10px;
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgba(248, 250, 248, 0.98) 100%
+  );
+  box-shadow:
+    0 2px 5px rgba(21, 42, 39, 0.035);
   transition:
-    transform 130ms ease,
-    box-shadow 130ms ease;
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .figmaCropCard:hover {
   transform: translateY(-2px);
-
-  box-shadow: var(--av-shadow-card);
+  border-color: rgba(167, 217, 30, 0.38);
+  box-shadow:
+    0 9px 21px rgba(21, 42, 39, 0.09),
+    0 2px 5px rgba(21, 42, 39, 0.04);
 }
+
+/* =========================================
+   Imagen superior de la tarjeta
+   ========================================= */
+
+.figmaCropCard__cover {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  height: 58px;
+  overflow: hidden;
+  background: var(--av-green-700);
+}
+
+.figmaCropCard__cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.02);
+  filter:
+    saturate(1.08)
+    contrast(1.03)
+    brightness(0.88);
+  transition:
+    transform 260ms ease,
+    filter 260ms ease;
+}
+
+/**
+ * Overlay sutil.
+ *
+ * Da coherencia entre fotografías diferentes
+ * y mantiene la estética verde de AgroVision.
+ */
+.figmaCropCard__cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(4, 30, 23, 0.04) 0%,
+      rgba(4, 30, 23, 0.18) 100%
+    );
+}
+
+.figmaCropCard:hover .figmaCropCard__cover img {
+  transform: scale(1.06);
+  filter:
+    saturate(1.13)
+    contrast(1.04)
+    brightness(0.94);
+}
+
+/* =========================================
+   Header de perfil agrícola
+   ========================================= */
 
 .figmaCropCard header {
+  position: relative;
+  z-index: 3;
+  min-width: 0;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
+  grid-template-columns:
+    36px minmax(0, 1fr) 24px;
   align-items: center;
-
-  gap: 6px;
-
-  padding-bottom: 6px;
-
-  border-bottom: 1px solid var(--av-border-soft);
-}
-
-.figmaCropAvatar,
-.priorityCrop__image {
-  width: 30px;
-  height: 30px;
-
-  border-radius: 50%;
-
-  background:
-    radial-gradient(circle, var(--av-lime-300), var(--av-green-300));
+  gap: 7px;
+  margin-top: -18px;
+  padding-bottom: 7px;
 }
 
 .figmaCropCard header strong {
+  min-width: 0;
+  overflow: hidden;
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
-  font-size: 0.62rem;
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.figmaCropCard header button {
+/* =========================================
+   Avatar superpuesto del cultivo
+   ========================================= */
+
+.figmaCropAvatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: block;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.96);
+  border-radius: 50%;
+  background: var(--av-lime-300);
+  box-shadow:
+    0 3px 9px rgba(21, 42, 39, 0.16);
+}
+
+.figmaCropAvatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+
+.figmaCropMenu {
+  min-width: 22px;
+  min-height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--av-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 800;
   border: 0;
-
-  background: transparent;
-
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.72);
   cursor: pointer;
 }
 
+.figmaCropMenu:hover {
+  background: var(--av-neutral-100);
+}
+
+/* =========================================
+   Filas de cultivo
+   ========================================= */
+
 .figmaCropRow,
 .figmaCropSensitivity {
-  min-height: 25px;
-
+  min-width: 0;
+  min-height: 28px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-
-  gap: 5px;
-
+  justify-content: space-between;
+  gap: 6px;
   color: var(--av-text-secondary);
+  font-size: 0.55rem;
+  border-bottom: 1px solid rgba(228, 236, 231, 0.72);
+}
 
-  font-size: 0.49rem;
+.figmaCropRow > span:first-child,
+.figmaCropSensitivity > span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--av-text-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.figmaCropSensitivity {
+  border-bottom: 0;
 }
 
 .figmaCropSensitivity div {
+  flex: 0 0 auto;
   display: flex;
-
   gap: 3px;
 }
 
 .figmaCropSensitivity i {
   width: 5px;
   height: 5px;
-
   border-radius: 50%;
-
   background: var(--av-green-700);
 }
 
-.figmaCropAction,
-.cropsCenteredAction {
-  display: block;
-
-  margin: 7px auto 0;
+.figmaCropSensitivity i:last-child {
+  opacity: 0.35;
 }
 
-.cropsFigma__middle {
-  display: grid;
-  grid-template-columns: 1.25fr 0.9fr 0.95fr;
+/* =========================================
+   Middle grid
+   ========================================= */
 
+.cropsFigma__middle {
+  min-width: 0;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1.27fr)
+    minmax(0, 0.95fr)
+    minmax(0, 1fr);
+  align-items: stretch;
   gap: 10px;
 }
 
-.cropRiskMatrix {
-  overflow: hidden;
+.cropsFigma__middle > .avPanel {
+  height: 100%;
+}
 
+/* =========================================
+   Matriz de riesgo
+   ========================================= */
+
+.cropRiskMatrix {
+  min-width: 0;
+  margin: 4px 14px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
   border: 1px solid var(--av-border-soft);
-  border-radius: 5px;
+  border-radius: 8px;
+  background: #ffffff;
 }
 
 .cropRiskMatrix__head,
 .cropRiskMatrix__row {
-  min-height: 28px;
-
+  min-width: 615px;
+  min-height: 30px;
   display: grid;
-  grid-template-columns: 95px repeat(5, 1fr);
+  grid-template-columns:
+    minmax(112px, 1.2fr)
+    repeat(5, minmax(74px, 1fr));
   align-items: center;
-
   gap: 3px;
-
-  padding: 0 6px;
-
-  border-bottom: 1px solid var(--av-border-soft);
+  padding: 0 7px;
 }
 
 .cropRiskMatrix__head {
   color: var(--av-text-muted);
+  font-size: 0.48rem;
+  font-weight: 650;
+  background: linear-gradient(
+    180deg,
+    var(--av-neutral-100),
+    rgba(241, 245, 242, 0.75)
+  );
+  border-bottom: 1px solid var(--av-border-soft);
+}
 
-  font-size: 0.43rem;
+.cropRiskMatrix__head span {
+  text-align: center;
+  white-space: nowrap;
+}
 
-  background: var(--av-neutral-100);
+.cropRiskMatrix__row {
+  transition: background 130ms ease;
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.cropRiskMatrix__row:last-child {
+  border-bottom: 0;
+}
+
+.cropRiskMatrix__row:hover {
+  background: rgba(241, 251, 204, 0.24);
 }
 
 .cropRiskMatrix__row strong {
+  min-width: 0;
+  overflow: hidden;
   color: var(--av-text-secondary);
-
-  font-size: 0.5rem;
+  font-size: 0.56rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+/* =========================================
+   Risk dots
+   ========================================= */
 
 .cropRiskDot {
   width: 8px;
   height: 8px;
-
   justify-self: center;
-
   border-radius: 50%;
-
   background: var(--av-neutral-300);
+  box-shadow:
+    inset 0 0 0 1px rgba(21, 42, 39, 0.025);
 }
 
 .cropRiskDot--active {
   background: var(--av-lime-600);
+  box-shadow:
+    0 0 0 3px rgba(167, 217, 30, 0.08);
 }
 
 .cropRiskDot--warning {
   background: var(--av-amber-400);
+  box-shadow:
+    0 0 0 3px rgba(254, 193, 17, 0.08);
 }
 
+/* =========================================
+   Cultivo priorizado
+   ========================================= */
+
 .priorityCrop {
+  min-width: 0;
   display: grid;
-  gap: 5px;
+  gap: 7px;
+  padding: 4px 14px 12px;
 }
 
 .priorityCrop header {
+  min-width: 0;
+  display: grid;
+  grid-template-columns:
+    70px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1px;
+}
+
+.priorityCrop__image {
+  width: 70px;
+  height: 70px;
+  display: block;
+  overflow: hidden;
+  border-radius: 10px;
+  background:
+    radial-gradient(
+      circle at 36% 35%,
+      rgba(179, 50, 50, 0.75),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 68% 66%,
+      rgba(107, 23, 23, 0.68),
+      transparent 28%
+    ),
+    linear-gradient(
+      140deg,
+      #592d25,
+      #9c4439 52%,
+      #38522c
+    );
+  box-shadow:
+    0 4px 10px rgba(21, 42, 39, 0.11);
+}
+
+.priorityCrop__identity {
+  min-width: 0;
+}
+
+.priorityCrop__identity strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--av-text);
+  font-family: var(--av-font-heading);
+  font-size: 0.78rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================
+   Lista de riesgos priorizados
+   ========================================= */
+
+.priorityCrop__riskList {
+  display: grid;
+  gap: 1px;
+}
+
+.priorityCrop__riskRow {
+  min-width: 0;
+  min-height: 21px;
   display: flex;
   align-items: center;
-
-  gap: 7px;
-
-  margin-bottom: 3px;
-}
-
-.priorityCrop header strong {
-  font-family: var(--av-font-heading);
-  font-size: 0.65rem;
-}
-
-.priorityCrop > div {
-  display: flex;
   justify-content: space-between;
-
-  gap: 5px;
-
-  color: var(--av-text-secondary);
-
-  font-size: 0.47rem;
+  gap: 8px;
 }
 
-.priorityCrop > div strong {
+.priorityCrop__riskRow span {
+  color: var(--av-text-muted);
+  font-size: 0.52rem;
+}
+
+.priorityCrop__riskRow strong {
+  min-width: 0;
+  overflow: hidden;
   color: var(--av-warning-text);
+  font-size: 0.51rem;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+/* =========================================
+   Recomendación destacada
+   ========================================= */
 
 .priorityCrop aside {
-  margin-top: 4px;
+  position: relative;
+  margin-top: 3px;
+  padding: 9px 9px 9px 31px;
+  overflow: hidden;
+  border: 1px solid rgba(167, 217, 30, 0.12);
+  border-radius: 8px;
+  background: linear-gradient(
+    135deg,
+    rgba(241, 251, 204, 0.72),
+    rgba(250, 253, 232, 0.9)
+  );
+}
 
-  padding: 7px;
-
-  border-radius: 5px;
-
-  background: var(--av-amber-50);
+.priorityCrop aside::before {
+  content: "!";
+  position: absolute;
+  left: 9px;
+  top: 10px;
+  width: 15px;
+  height: 15px;
+  display: grid;
+  place-items: center;
+  color: var(--av-lime-800);
+  font-size: 0.55rem;
+  font-weight: 800;
+  border-radius: 50%;
+  background: var(--av-lime-300);
 }
 
 .priorityCrop aside strong {
+  display: block;
   color: var(--av-text-secondary);
-
-  font-size: 0.49rem;
+  font-size: 0.56rem;
+  font-weight: 750;
 }
 
 .priorityCrop aside p {
-  margin: 2px 0 0;
-
+  display: -webkit-box;
+  margin: 3px 0 0;
+  overflow: hidden;
   color: var(--av-text-muted);
-
-  font-size: 0.45rem;
+  font-size: 0.5rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
+
+/* =========================================
+   Insights
+   ========================================= */
 
 .cropInsightList {
   display: grid;
-
-  gap: 5px;
+  gap: 6px;
+  padding: 4px 14px 0;
 }
 
 .cropInsight {
-  min-height: 48px;
-
+  min-width: 0;
+  min-height: 52px;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-columns:
+    34px minmax(0, 1fr) 13px;
   align-items: center;
-
-  gap: 6px;
-
-  padding: 5px;
-
+  gap: 8px;
+  padding: 6px 8px;
+  overflow: hidden;
   border: 1px solid var(--av-border-soft);
-  border-radius: 5px;
+  border-radius: 8px;
+  background: #ffffff;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
-.cropInsight > span {
-  width: 30px;
-  height: 30px;
-
-  border-radius: 5px;
-
-  background: var(--av-lime-50);
+.cropInsight:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 5px 12px rgba(21, 42, 39, 0.06);
 }
 
-.cropInsight strong {
+.cropInsight--blue {
+  border-color: rgba(46, 158, 200, 0.13);
+  background: rgba(232, 248, 255, 0.58);
+}
+
+.cropInsight--green {
+  border-color: rgba(48, 183, 106, 0.13);
+  background: rgba(239, 250, 239, 0.72);
+}
+
+.cropInsight--amber {
+  border-color: rgba(233, 130, 5, 0.12);
+  background: rgba(254, 248, 236, 0.72);
+}
+
+/* =========================================
+   Insight icon
+   ========================================= */
+
+.cropInsight__icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.cropInsight--blue .cropInsight__icon {
+  background: rgba(46, 158, 200, 0.12);
+}
+
+.cropInsight--green .cropInsight__icon {
+  background: rgba(48, 183, 106, 0.12);
+}
+
+.cropInsight--amber .cropInsight__icon {
+  background: rgba(233, 130, 5, 0.12);
+}
+
+.cropInsight__icon img {
+  width: 18px;
+  height: 18px;
+  display: block;
+  object-fit: contain;
+}
+
+.cropInsight__copy {
+  min-width: 0;
+}
+
+.cropInsight__copy strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
   color: var(--av-text);
-
-  font-size: 0.54rem;
+  font-size: 0.6rem;
+  font-weight: 750;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.cropInsight p {
-  margin: 2px 0 0;
-
+.cropInsight__copy p {
+  min-width: 0;
+  margin: 3px 0 0;
+  overflow: hidden;
   color: var(--av-text-muted);
-
-  font-size: 0.44rem;
+  font-size: 0.48rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@media (max-width: 1000px) {
+.cropInsight__arrow {
+  width: 11px;
+  height: 11px;
+  justify-self: end;
+  object-fit: contain;
+  opacity: 0.52;
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease;
+}
+
+.cropInsight:hover .cropInsight__arrow {
+  opacity: 0.9;
+  transform: translateX(2px);
+}
+
+/* =========================================
+   Actividad reciente
+   ========================================= */
+
+.cropsActivityTableWrap {
+  min-width: 0;
+  margin: 4px 14px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--av-border-soft);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.cropsActivityTable {
+  min-width: 850px;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.56rem;
+}
+
+.cropsActivityTable th {
+  padding: 6px 8px;
+  color: var(--av-text-muted);
+  font-size: 0.52rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: rgba(241, 245, 242, 0.94);
+}
+
+.cropsActivityTable td {
+  max-width: 330px;
+  padding: 6px 8px;
+  overflow: hidden;
+  color: var(--av-text-secondary);
+  font-size: 0.55rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cropsActivityTable tbody tr {
+  background: #ffffff;
+}
+
+.cropsActivityTable tbody tr:nth-child(even) {
+  background: rgba(248, 250, 248, 0.82);
+}
+
+.cropsActivityTable tbody tr:hover {
+  background: rgba(241, 251, 204, 0.25);
+}
+
+/* Indicador visual de actividad */
+.cropsActivityTable tbody td:first-child {
+  position: relative;
+  padding-left: 18px;
+}
+
+.cropsActivityTable tbody td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--av-lime-600);
+  transform: translateY(-50%);
+}
+
+.cropsActivityTable tbody tr:nth-child(2)
+  td:first-child::before {
+  background: var(--av-warning-base);
+}
+
+.cropsActivityTable tbody tr:nth-child(3)
+  td:first-child::before {
+  background: var(--av-lime-600);
+}
+
+.cropsActivityTable tbody tr:nth-child(4)
+  td:first-child::before {
+  background: var(--av-lime-700);
+}
+
+.cropsActivityAction {
+  margin-top: 9px;
+}
+
+/* =========================================
+   Scrollbars internas discretas
+   ========================================= */
+
+.cropRiskMatrix::-webkit-scrollbar,
+.cropsActivityTableWrap::-webkit-scrollbar {
+  height: 5px;
+}
+
+.cropRiskMatrix::-webkit-scrollbar-thumb,
+.cropsActivityTableWrap::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--av-neutral-300);
+}
+
+.cropRiskMatrix::-webkit-scrollbar-track,
+.cropsActivityTableWrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* =========================================
+   Responsive — Laptop
+   ========================================= */
+
+@media (max-width: 1180px) {
   .cropProfileStrip {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
   }
 
   .cropsFigma__middle {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
   }
 
-  .cropsFigma__middle > :first-child {
+  .cropsRiskPanel {
     grid-column: 1 / -1;
   }
 }
 
-@media (max-width: 700px) {
-  .cropProfileStrip,
+/* =========================================
+   Responsive — Tablet
+   ========================================= */
+
+@media (max-width: 820px) {
+  .cropProfileStrip {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
   .cropsFigma__middle {
     grid-template-columns: 1fr;
   }
+
+  .cropsRiskPanel {
+    grid-column: auto;
+  }
+
+  .priorityCrop header {
+    grid-template-columns:
+      64px minmax(0, 1fr) auto;
+  }
+
+  .priorityCrop__image {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+/* =========================================
+   Responsive — Mobile
+   ========================================= */
+
+@media (max-width: 560px) {
+  .cropProfileStrip {
+    grid-template-columns: 1fr;
+    padding-inline: 10px;
+  }
+
+  .figmaCropCard {
+    min-height: 150px;
+  }
+
+  .cropRiskMatrix,
+  .cropsActivityTableWrap {
+    margin-inline: 10px;
+  }
+
+  .cropInsightList {
+    padding-inline: 10px;
+  }
+
+  .priorityCrop {
+    padding-inline: 10px;
+  }
+
+  .priorityCrop header {
+    grid-template-columns:
+      58px minmax(0, 1fr);
+  }
+
+  .priorityCrop header .avStatusBadge {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .priorityCrop__image {
+    width: 58px;
+    height: 58px;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* =========================================
+   Pantallas de poca altura
+   ========================================= */
+
+@media (max-height: 720px) {
+  .cropProfileStrip {
+    gap: 7px;
+  }
+
+  .figmaCropCard {
+    min-height: 146px;
+  }
+
+  .figmaCropRow,
+  .figmaCropSensitivity {
+    min-height: 25px;
+  }
+
+  .cropInsight {
+    min-height: 47px;
+  }
+}
+
+/* =========================================
+   Reduced motion
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .figmaCropCard,
+  .cropInsight,
+  .cropsActionButton,
+  .cropsActionButton img,
+  .cropInsight__arrow {
+    transition: none;
+  }
+}
+
+/* ===========================================================
+   CropProfileCard independiente
+   ===========================================================
+   Estos estilos pertenecen al componente CropProfileCard.tsx.
+   Actualmente CropsPage no lo utiliza directamente.
+   Se dejan preparados para mantener coherencia visual si el
+   componente se reutiliza en otras rutas.
+   =========================================================== */
+
+.cropProfileCard {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--av-border);
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow:
+    0 5px 16px rgba(21, 42, 39, 0.06);
+}
+
+.cropProfileCard__header {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px;
+  border-bottom: 1px solid var(--av-border-soft);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(241, 251, 204, 0.76),
+      rgba(248, 250, 248, 0.96)
+    );
+}
+
+.cropProfileCard__header > div {
+  min-width: 0;
+}
+
+.cropProfileCard__header p {
+  margin: 0 0 3px;
+  color: var(--av-lime-700);
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.cropProfileCard__header h2 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--av-text);
+  font-size: 1rem;
+  font-weight: 750;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cropProfileCard__header span {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--av-text-muted);
+  font-size: 0.68rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cropProfileCard__header > strong {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  color: var(--av-warning-text);
+  font-size: 0.58rem;
+  border-radius: 999px;
+  background: var(--av-amber-50);
+}
+
+.cropProfileCard__section {
+  padding: 11px 15px;
+  border-bottom: 1px solid var(--av-border-soft);
+}
+
+.cropProfileCard__section h3 {
+  margin: 0 0 7px;
+  color: var(--av-text-secondary);
+  font-size: 0.69rem;
+  font-weight: 750;
+}
+
+.cropProfileCard__chips,
+.cropProfileCard__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.cropProfileCard__chips span,
+.cropProfileCard__metrics span {
+  padding: 4px 7px;
+  color: var(--av-green-700);
+  font-size: 0.56rem;
+  font-weight: 650;
+  border: 1px solid rgba(48, 183, 106, 0.1);
+  border-radius: 999px;
+  background: rgba(48, 183, 106, 0.07);
+}
+
+.cropProfileCard__chips--risk span {
+  color: var(--av-warning-text);
+  border-color: rgba(224, 102, 26, 0.1);
+  background: rgba(224, 102, 26, 0.08);
+}
+
+.cropProfileCard__footer {
+  padding: 12px 15px 14px;
+  background: var(--av-neutral-50);
+}
+
+.cropProfileCard__footer small {
+  color: var(--av-text-muted);
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.cropProfileCard__footer p {
+  display: -webkit-box;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--av-text-secondary);
+  font-size: 0.65rem;
+  line-height: 1.4;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }

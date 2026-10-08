@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import infoIcon from '../../../assets/icons/info-icon2.svg'
+
 interface PanelProps {
   readonly title: string | ReactNode;
   readonly children: ReactNode;
@@ -8,19 +8,25 @@ interface PanelProps {
   readonly showInfo?: boolean;
   readonly showCardTag?: boolean;
 }
-                                                       //headerAction
-export function Panel({ title, children, className = "", showInfo = true, showCardTag = false }: PanelProps) {
+
+export function Panel({
+  title,
+  children,
+  className = "",
+  headerAction,
+  
+}: PanelProps) {
   return (
     <section className={`avPanel ${className}`}>
       <header className="avPanel__header">
         <div className="avPanel__title">
           <h2>{title}</h2>
-          
+
+          {/* Presentamos la acción opcional proporcionada por el consumidor. */}
+          {headerAction}
+        
         </div>
-
-        {/* {headerAction ?? (showCardTag && <span className="avCardTag">card</span>)} */}
       </header>
-
       {children}
     </section>
   );

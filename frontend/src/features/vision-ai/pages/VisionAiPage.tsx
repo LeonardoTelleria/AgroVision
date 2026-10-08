@@ -1,24 +1,24 @@
-/**
- * =========================================
- * VisionAiPage
- * =========================================
- *
- * Pantalla reconstruida siguiendo la
- * composición oficial definida en Figma.
- *
- * La refactorización modifica únicamente:
- * - estructura visual;
- * - interacción de carga;
- * - presentación de resultado;
- * - distribución de evidencias.
- *
- * NO modifica:
- * - POST /api/vision/analyze;
- * - backend/fallback;
- * - contrato VisionInspection;
- * - categorías de predicción;
- * - lógica del AI Service.
- */
+// /**
+//  * =========================================
+//  * VisionAiPage
+//  * =========================================
+//  *
+//  * Pantalla reconstruida siguiendo la
+//  * composición oficial definida en Figma.
+//  *
+//  * La refactorización modifica únicamente:
+//  * - estructura visual;
+//  * - interacción de carga;
+//  * - presentación de resultado;
+//  * - distribución de evidencias.
+//  *
+//  * NO modifica:
+//  * - POST /api/vision/analyze;
+//  * - backend/fallback;
+//  * - contrato VisionInspection;
+//  * - categorías de predicción;
+//  * - lógica del AI Service.
+//  */
 
 import { useEffect, useState, type ChangeEvent } from "react";
 import { MetricCard } from "../../../shared/components/ui/MetricCard";
@@ -36,15 +36,11 @@ import "../vision-ai.css";
  */
 const DEFAULT_FIELD_ID = "field-001";
 const DEFAULT_ZONE_ID = "zone-03";
-const DEFAULT_IMAGE_FILE_NAME = "orange-zone-03-reference.jpg";
-
 export function VisionAiPage() {
   const [profiles, setProfiles] = useState<ReadonlyArray<CropProfile>>([]);
   const [selectedCropType, setSelectedCropType] = useState<CropType>("ORANGE");
   const [selectedZoneId, setSelectedZoneId] = useState(DEFAULT_ZONE_ID);
 
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [imageFileName, setImageFileName] = useState(DEFAULT_IMAGE_FILE_NAME);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
   const [analysisResult, setAnalysisResult] = useState<VisionAnalysisResult | null>(null);
@@ -136,8 +132,6 @@ export function VisionAiPage() {
 
     const previewUrl = URL.createObjectURL(file);
 
-    setSelectedImageFile(file);
-    setImageFileName(file.name);
     setImagePreviewUrl(previewUrl);
 
     void runAnalysis(file, file.name);
@@ -168,6 +162,7 @@ export function VisionAiPage() {
 
   return (
     <section className="avScreen visionFigma">
+      <h1 className="avScreenTitle">Vision AI</h1>
       {/* =====================================
           KPI SUPERIORES
           ===================================== */}
@@ -478,3 +473,19 @@ function getSeverityLabel(prediction: string): string {
 function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat("es-NI", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
 }
+
+/**
+ * Vista de respaldo mientras se completa la refactorización de Vision AI.
+ *
+ * AppRouter importa todas las páginas al iniciar la aplicación, por lo que
+ * este contrato debe seguir existiendo aunque la implementación principal
+ * permanezca comentada temporalmente.
+ */
+// export function VisionAiPage() {
+//   return (
+//     <section className="avState">
+//       <strong>Vision AI en refactorización</strong>
+//       <p>El resto de AgroVision continúa disponible.</p>
+//     </section>
+//   );
+// }

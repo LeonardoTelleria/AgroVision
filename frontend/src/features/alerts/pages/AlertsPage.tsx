@@ -68,6 +68,7 @@ export function AlertsPage() {
 
   return (
     <section className="avScreen alertsFigma">
+       <h1 className="avScreenTitle">Panel de alertas</h1>
       <section className="avMetricGrid">
         <MetricCard
           title="Alertas activas"

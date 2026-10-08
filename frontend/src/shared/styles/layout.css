@@ -2,26 +2,17 @@
  * =========================================
  * AgroVision — Global Layout
  * =========================================
- *
- * Basado en la maqueta oficial:
- *
- * - Sidebar fija oscura.
- * - Topbar compacta.
- * - contenido claro.
- * - baja altura visual.
- * - bordes pequeños.
- * - sombras mínimas.
- * - alta densidad de información.
+ * Layout global compartido.
+ * Sidebar persistente + Topbar responsive.
+ * Optimizado para navegador al 100%.
  */
 
 /* =========================================
    Reset
    ========================================= */
-
 * {
   box-sizing: border-box;
 }
-
 html,
 body,
 #root {
@@ -29,11 +20,9 @@ body,
   min-width: 0;
   min-height: 100%;
 }
-
 html {
   background: var(--av-page);
 }
-
 body {
   margin: 0;
   overflow-x: hidden;
@@ -42,18 +31,15 @@ body {
   font-size: 16px;
   background: var(--av-page);
 }
-
 button,
 input,
 select,
 textarea {
   font-family: var(--av-font-body);
 }
-
 button {
   color: inherit;
 }
-
 h1,
 h2,
 h3,
@@ -66,92 +52,75 @@ h6 {
 /* =========================================
    App
    ========================================= */
-
 .agrovisionApp {
-  --sidebar-width: var(--av-sidebar-expanded);
-
+  --sidebar-width: 210px;
   width: 100%;
+  min-width: 0;
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--av-page);
 }
-
 .agrovisionApp.is-sidebar-collapsed {
-  --sidebar-width: var(--av-sidebar-collapsed);
+  --sidebar-width: 58px;
 }
-
 .agrovisionMain {
+  width: auto;
   min-width: 0;
   min-height: 100vh;
-
   margin-left: var(--sidebar-width);
-
   transition: margin-left 190ms ease;
 }
-
 .agrovisionContent {
   width: 100%;
   min-width: 0;
-  padding: 10px 22px 18px;
+  padding: 10px 18px 18px;
 }
 
 /* =========================================
    Sidebar
    ========================================= */
-
 .sidebar {
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 80;
   width: var(--sidebar-width);
-  height: 100vh; /* ocupa todo el alto de la pantalla */
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  align-content: start;
-  gap: 20px;
-  padding: 13px 9px 16px;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 11px 9px 10px;
   overflow: visible;
-  border-right: 1px solid var(--av-teal-700);
-  background: linear-gradient(180deg, #051c14 0%, #041e16 65%, #08241b 100%);
-
+  border-right: 1px solid rgba(15, 111, 106, 0.45);
+  background: #031410;
   transition: width 190ms ease;
 }
 
 /* =========================================
    Sidebar brand
    ========================================= */
-
 .sidebar__brand {
-  min-height: 43px;
-
+  min-height: 44px;
   display: flex;
   align-items: center;
-  padding: 0 8px 9px;
-
+  padding: 5px 9px 5px;
   overflow: hidden;
 }
 
 .sidebar__brand img {
-  width: 112px;
+  width: 90px;
   height: auto;
   max-width: none;
-
   display: block;
-
   object-fit: contain;
   object-position: left center;
 }
-
 .is-sidebar-collapsed .sidebar__brand {
-  align-items: center;
   justify-content: center;
   padding-inline: 0;
 }
-
 .is-sidebar-collapsed .sidebar__brand img {
-  width: 38px;
-  height: 38px;
-
+  width: 37px;
+  height: 37px;
   object-fit: cover;
   object-position: left;
 }
@@ -159,960 +128,971 @@ h6 {
 /* =========================================
    Collapse control
    ========================================= */
-
 .sidebar__toggle {
   position: absolute;
-  top: 62px;
-  right: -11px;
+  top: 63px;
+  right: -10px;
   z-index: 3;
-  width: 26px;
-  height: 26px;
+  width: 23px;
+  height: 23px;
   display: grid;
   place-items: center;
   padding: 0;
   color: var(--av-lime-900);
   font-family: var(--av-font-heading);
-  font-size: 1rem;
+  font-size: 0.78rem;
   font-weight: 800;
-
-  border: 1px solid var(--av-lime-500);
+  line-height: 1;
+  border: 1px solid rgba(163, 230, 53, 0.72);
   border-radius: 999px;
-
   background: var(--av-lime-400);
-
-  box-shadow: var(--av-shadow-sm);
-
+  box-shadow: 0 4px 12px rgba(3, 20, 16, 0.18);
   cursor: pointer;
-
-  transition:
-    transform 140ms ease,
-    background 140ms ease;
+  transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
-
 .sidebar__toggle:hover {
-  transform: scale(1.08);
-
+  transform: scale(1.07);
   background: var(--av-lime-300);
+  box-shadow: 0 6px 16px rgba(3, 20, 16, 0.24);
 }
 
 /* =========================================
-   Sidebar nav - Lista de navegacion
+   Sidebar nav
    ========================================= */
-
 .sidebar__nav {
+  width: 100%;
   min-width: 0;
   display: grid;
   align-content: start;
-  gap: 12px;
-  padding-top: 2px;
+  gap: 7px;
+  padding: 6px 12px 6px 0 ;
+  margin-top: 12px;
 }
-
-.sidebar__icon {
-  text-align: center;
-  justify-content: center;
-  align-items: center;
-}
-
-.sidebar__link,
-.sidebar__secondaryLink {
+.sidebar__link {
   position: relative;
-
-  width: 100%;
+  width: calc(100% - 4px);
   min-width: 0;
-  min-height: 36px;
-
+  min-height: 39px;
+  margin-inline: 2px;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-columns: 21px minmax(0, 1fr);
   align-items: center;
-  justify-content: center;
-  gap: 22px;
-
-  padding: 10px 16px;
-
+  gap: 12px;
+  padding: 9px 11px;
   color: var(--av-neutral-200);
-
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 0.83rem;
+  font-weight: 600;
+  line-height: 1.15;
   text-align: left;
-
   border: 1px solid transparent;
-  border-radius: 6px;
-
+  border-radius: 10px;
   background: transparent;
-
   cursor: pointer;
-
   transition:
     color 130ms ease,
     background 130ms ease,
-    transform 130ms ease;
+    border-color 130ms ease,
+    transform 130ms ease,
+    box-shadow 130ms ease;
 }
-
+.sidebar__link:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.065);
+  border-color: rgba(255, 255, 255, 0.035);
+}
 aside.sidebar nav.sidebar__nav button.sidebar__link.is-active {
-  color: #051c14 !important; /* Texto oscuro idéntico a tu nuevo fondo para que sea legible */
-  background: #a3e635 !important;
-  border-radius: 12px;
+  color: #051c14 !important;
+  background: linear-gradient(135deg, #b3ef36 0%, #9ee62b 100%) !important;
+  border-color: rgba(217, 249, 157, 0.46);
+  border-radius: 10px;
   font-weight: 700;
+  box-shadow:
+    0 5px 16px rgba(118, 159, 17, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
-
-/* Evitamos que el botón activo parpadee o cambie si se le pasa el mouse por encima */
 aside.sidebar nav.sidebar__nav button.sidebar__link.is-active:hover {
   color: #051c14 !important;
-  background: #a3e635 !important;
-  opacity: 0.9;
+  background: linear-gradient(135deg, #b3ef36 0%, #9ee62b 100%) !important;
 }
-
-.is-sidebar-collapsed
-  aside.sidebar
-  nav.sidebar__nav
-  button.sidebar__link.is-active {
-  background: transparent !important;
-  color: #ffffff !important; /* Mantiene el icono brillante/blanco para saber cuál está seleccionado */
-}
-
-/* Cuando el botón esté activo, aplicamos un filtro al icono de su interior */
 aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
-  /* Este filtro transforma cualquier icono blanco/gris claro en el verde oscuro #051c14 */
-  filter: invert(100%) sepia(35%) saturate(1200%) hue-rotate(110deg)
-    brightness(95%) contrast(100%);
+  filter: invert(100%) sepia(35%) saturate(1200%) hue-rotate(110deg) brightness(95%) contrast(100%);
 }
-
-.sidebar__link:hover,
-.sidebar__secondaryLink:hover {
-  color: var(--av-neutral-50);
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-}
-
-.sidebar__link.is-active {
-  color: var(--av-neutral-50);
-
-  background: var(--av-sidebar-active);
-}
-
 .sidebar__iconSlot {
-  width: 20px;
-  height: 20px;
-
+  width: 21px;
+  height: 21px;
   display: inline-flex;
   align-items: center;
-
-  flex: 0 0 auto;
+  justify-content: center;
+  flex: 0 0 21px;
 }
-
-.sidebar__linkLabel,
-.sidebar__secondaryLink > span:last-child {
+.sidebar__icon {
+  width: 21px;
+  height: 21px;
+  display: block;
+  object-fit: contain;
+}
+.sidebar__linkLabel {
   min-width: 0;
-
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 /* =========================================
-   Collapsed nav
+   Sidebar collapsed
    ========================================= */
-
-.is-sidebar-collapsed .sidebar__brand,
-.is-sidebar-collapsed .sidebar__link,
-.is-sidebar-collapsed .sidebar__secondaryLink {
+.is-sidebar-collapsed .sidebar {
+  padding-inline: 6px;
+}
+.is-sidebar-collapsed .sidebar__link {
+  width: 100%;
+  min-height: 38px;
+  margin-inline: 0;
   grid-template-columns: 1fr;
-
   justify-items: center;
-
+  gap: 0;
   padding: 0;
 }
-
-.is-sidebar-collapsed .sidebar__iconSlot,
-.is-sidebar-collapsed .sidebar__linkLabel,
-.is-sidebar-collapsed .sidebar__secondaryLink > span:last-child {
+.is-sidebar-collapsed .sidebar__iconSlot {
+  display: inline-flex;
+}
+.is-sidebar-collapsed .sidebar__linkLabel {
   display: none;
 }
-
-/* Tooltip estilo glass. */
-
+.is-sidebar-collapsed aside.sidebar nav.sidebar__nav button.sidebar__link.is-active {
+  color: #ffffff !important;
+  background: rgba(163, 230, 53, 0.12) !important;
+  border-color: rgba(163, 230, 53, 0.18);
+}
+.is-sidebar-collapsed aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
+  filter: none;
+}
 .is-sidebar-collapsed .sidebar__link:hover::after {
   content: attr(data-label);
-
   position: absolute;
   left: calc(100% + 11px);
   top: 50%;
-
-  transform: translateY(-50%);
-
   z-index: 100;
-
   width: max-content;
-
-  padding: 5px 8px;
-
+  padding: 6px 9px;
   color: var(--av-text);
-
-  font-size: 0.65rem;
-
-  border: 1px solid rgba(212, 222, 216, 0.75);
-  border-radius: 5px;
-
+  font-size: 0.67rem;
+  font-weight: 600;
+  transform: translateY(-50%);
+  border: 1px solid rgba(212, 222, 216, 0.7);
+  border-radius: 7px;
   background: rgba(248, 250, 248, 0.92);
-
-  backdrop-filter: blur(12px);
-
-  box-shadow: var(--av-shadow-float);
-
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 26px rgba(3, 20, 16, 0.16);
   pointer-events: none;
 }
 
 /* =========================================
-   Secondary nav
+   Weather glass card
    ========================================= */
-
-.sidebar__secondary {
+/* =========================================
+   Weather scene
+   ========================================= */
+.sidebar__weatherZone {
+  position: relative;
+  isolation: isolate;
+  width: calc(100% + 18px);
+  height: 255px;
+  margin-top: auto;
+  margin-left: -9px;
+  margin-bottom: -10px;
+  overflow: hidden;
   display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(228, 236, 231, 0.12);
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 13px 18px;
 }
-
-.is-sidebar-collapsed .sidebar__secondary {
-  border-top: none;
+.sidebar__weatherLandscape {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.02);
+}
+.sidebar__weatherOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      #031410 0%,
+      rgba(4, 30, 22, 0.72) 17%,
+      rgba(4, 30, 22, 0.2) 48%,
+      rgba(3, 22, 16, 0.24) 72%,
+      rgba(3, 22, 16, 0.56) 100%
+    );
+}
+.sidebar__weatherZone::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 75%,
+      rgba(163, 230, 53, 0.07),
+      transparent 47%
+    );
 }
 
 /* =========================================
-   Sidebar weather
+   Weather glass card
    ========================================= */
 .sidebar__weather {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  gap: 10px;
-  padding: 12px;
-  margin-bottom: 12px;
-  background: rgba(12, 53, 41, 0.65);
-  border: 1px solid rgba(228, 236, 231, 0.15);
-  border-radius: 12px;
-  color: var(--av-neutral-100, #f8faf8);
-  font-size: 0.8rem;
-  transition: all 190ms ease;
-}
-
-.sidebar__weatherMain {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.sidebar__weatherIcon {
-  font-size: 1.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar__weatherIcon img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
-.sidebar__weatherTemp {
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar__weatherTemp strong {
-  font-size: 1.4rem;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.sidebar__weatherTemp small {
-  color: var(--av-neutral-300, #d4ded8);
-  font-size: 0.75rem;
-}
-
-.sidebar__weatherStats {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.7rem;
-  color: var(--av-neutral-300, #b2c4ba);
-  padding: 2px 0;
-}
-
-.sidebar__weatherDivider {
-  opacity: 0.4;
-}
-
-.sidebar__weatherBtn {
+  position: relative;
   width: 100%;
-  padding: 6px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 130ms ease;
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 10px 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  color: #ffffff;
+  border: 1px solid rgba(151, 216, 184, 0.18);
+  border-radius: 14px;
+  background: rgba(7, 48, 35, 0.42);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  backdrop-filter: blur(20px) saturate(145%);
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
-
+.sidebar__weather::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.055),
+      transparent 45%
+    );
+}
+.sidebar__weatherMain {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.sidebar__weatherIcon {
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
+  display: grid;
+  place-items: center;
+}
+.sidebar__weatherIcon img {
+  width: 31px;
+  height: 31px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 7px rgba(0, 0, 0, 0.2));
+}
+.sidebar__weatherTemp {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.sidebar__weatherTemp strong {
+  color: #ffffff;
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.sidebar__weatherTemp small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.77);
+  font-size: 0.58rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sidebar__weatherStats {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.54rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sidebar__weatherDivider {
+  opacity: 0.35;
+}
+.sidebar__weatherBtn {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0 8px;
+  color: #ffffff;
+  font-size: 0.61rem;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.19);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.035);
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
 .sidebar__weatherBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.09);
 }
 
 /* =========================================
-   Manejo del Estado Colapsado (Sidebar Compacto)
+   Collapsed weather
    ========================================= */
-
+.is-sidebar-collapsed .sidebar__weatherZone {
+  width: calc(100% + 12px);
+  height: 110px;
+  margin-left: -6px;
+  margin-bottom: -10px;
+  padding: 0 7px 10px;
+}
 .is-sidebar-collapsed .sidebar__weather {
-  padding: 8px 4px;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
   align-items: center;
   justify-content: center;
+  border-radius: 11px;
 }
-
+.is-sidebar-collapsed .sidebar__weatherMain {
+  gap: 0;
+}
+.is-sidebar-collapsed .sidebar__weatherIcon {
+  width: 26px;
+  height: 26px;
+  flex-basis: 26px;
+}
+.is-sidebar-collapsed .sidebar__weatherIcon img {
+  width: 26px;
+  height: 26px;
+}
 .is-sidebar-collapsed .sidebar__weatherTemp,
 .is-sidebar-collapsed .sidebar__weatherStats,
 .is-sidebar-collapsed .sidebar__weatherBtn {
-  display: none; /* Oculta los textos largos en modo compacto */
-}
-
-/* Reutiliza el tooltip glass que ya tienes configurado en los links */
-.is-sidebar-collapsed .sidebar__weather:hover::after {
-  content: attr(data-label);
-  position: absolute;
-  left: calc(100% + 11px);
-  z-index: 100;
-  width: max-content;
-  padding: 5px 8px;
-  color: var(--av-text);
-  font-size: 0.65rem;
-  border: 1px solid rgba(212, 222, 216, 0.75);
-  border-radius: 5px;
-  background: rgba(248, 250, 248, 0.92);
-  backdrop-filter: blur(12px);
-  pointer-events: none;
+  display: none;
 }
 
 /* =========================================
    Topbar
    ========================================= */
-
-/* .topbar {
+.topbar {
   position: sticky;
   top: 0;
-
   z-index: 60;
-
   width: 100%;
   min-width: 0;
-  height: var(--av-topbar-height);
-
+  height: 56px;
   display: grid;
-  grid-template-columns:
-    minmax(100px, auto)
-    minmax(220px, 1fr)
-    auto;
-
+  grid-template-columns: minmax(220px, 1fr) auto;
   align-items: center;
-  gap: 14px;
-
-  padding: 7px 12px;
-
+  gap: 12px;
+  padding: 7px 18px;
   border-bottom: 1px solid var(--av-border-soft);
-
-  background: rgba(248, 250, 248, 0.97);
-
-  backdrop-filter: blur(12px);
-} */
-
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 24px;
-  background: var(--av-page);
-  border-bottom: 1px solid var(--av-card);
-  height: 64px;
-  box-sizing: border-box;
-  margin-top: 5px;
+  border-radius: 0 0 20px 20px;
+  background: rgba(248, 250, 248, 0.40);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);;
+  backdrop-filter: blur(20px) saturate(145%);
 }
 
 .topbar h1 {
   margin: 0;
-
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
   font-size: 1.05rem;
   font-weight: 800;
   line-height: 1;
-
   letter-spacing: -0.035em;
+}
+.topbar__searchContainer {
+  width: 100%;
+  min-width: 0;
 }
 
 /* =========================================
    Search
    ========================================= */
-
-/* .topbar__search {
-  width: min(100%, 390px);
-  height: 34px;
-
-  display: flex;
-  align-items: center;
-  gap: 7px;
-
-  justify-self: start;
-
-  padding: 0 9px;
-
-  color: var(--av-text-muted);
-
-  border: 1px solid var(--av-border);
-  border-radius: 6px;
-
-  background: var(--av-neutral-50);
-
-  transition:
-    border-color 130ms ease,
-    box-shadow 130ms ease;
-} */
 .topbar__search {
+  width: 100%;
+  max-width: 470px;
+  min-width: 0;
+  height: 42px;
   display: flex;
   align-items: center;
-  background: #ffffff;
+  padding: 0 12px;
+  color: var(--av-text-muted);
   border: 1px solid var(--av-neutral-400);
-  border-radius: 12px;
-  padding: 0 14px;
-  width: 520px;
-  height: 50px;
+  border-radius: 20px;
+  background: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: border-color 0.2s;
+  transition: border-color 130ms ease, box-shadow 130ms ease, background 130ms ease;
 }
-
 .topbar__search:focus-within {
-  background: var(--av-neutral-50);
-  border-color: var(--av-neutral-400);
+  border-color: var(--av-teal-200);
+  background: #ffffff;
   box-shadow: 0 0 0 2px rgba(21, 183, 169, 0.08);
 }
-
 .topbar__searchIcon {
-  width: 32px;
-  height: 32px;
-  margin-right: 10px;
-  opacity: 0.4;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  margin-right: 8px;
+  opacity: 0.42;
 }
-
 .topbar__search input {
   width: 100%;
+  min-width: 0;
+  padding: 0;
   color: var(--av-text);
-  font-size: 1.1rem;
+  font-size: 0.88rem;
   border: 0;
   outline: 0;
   background: transparent;
 }
-
 .topbar__search input::placeholder {
   color: var(--av-neutral-500);
-}
-
-/* Cabeceras internas de los dropdowns */
-.topbar__popoverHeader {
-  display: block;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #888888;
-  padding: 4px 8px 8px 8px;
-  font-weight: 600;
 }
 
 /* =========================================
    Topbar actions
    ========================================= */
-
 .topbar__actions {
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 14px;
+  justify-content: flex-end;
+  gap: 8px;
 }
-
 .topbar__popoverAnchor {
   position: relative;
+  min-width: 0;
 }
-
 .topbar__selectButton,
 .topbar__iconButton,
 .topbar__profileButton {
-  height: 34px;
-
   cursor: pointer;
-
-  transition:
-    border-color 130ms ease,
-    background 130ms ease,
-    transform 130ms ease,
-    box-shadow 130ms ease;
+  transition: border-color 130ms ease, background 130ms ease, transform 130ms ease, box-shadow 130ms ease;
 }
-
 .topbar__iconButton:hover,
-.topbar__profileButton:hover {
-  transform: translateY(-1px);
+.topbar__profileButton:hover,
+.topbar__selectButton:hover {
   border-color: var(--av-neutral-400);
-  box-shadow: var(--av-shadow-xs);
   background: #f8fafc;
+  box-shadow: var(--av-shadow-xs);
 }
-
-/* Campo / fecha */
-
 .topbar__selectButton {
+  height: 42px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 16px;
-  background: #ffffff;
-  border: 1px solid var(--av-border);
-  border-radius: 12px;
+  flex: 0 1 auto;
+  gap: 7px;
+  padding: 0 11px;
   color: var(--av-green-1000);
-  height: 50px;
-  cursor: pointer;
-  font-size: 1.1rem;
+  font-size: 0.84rem;
   font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  border: 1px solid var(--av-border);
+  border-radius: 20px;
+  background: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: all 0.15s ease;
 }
-
-.topbar__selectButton:hover {
-  background: var(--av-neutral-100);
-  border-color: #cbd5e1;
+.topbar__actions .topbar__popoverAnchor:nth-child(1) .topbar__selectButton {
+  min-width: 174px;
 }
-
+.topbar__actions .topbar__popoverAnchor:nth-child(2) .topbar__selectButton {
+  min-width: 184px;
+}
 .topbar__selectButton strong {
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
-  font-size: 0.59rem;
+  font-size: 0.7rem;
   font-weight: 700;
 }
-
 .topbar__selectButton small {
   margin-left: 2px;
-
   color: var(--av-text-muted);
 }
-
 .topbar__buttonIcon,
 .topbar__inlineIcon {
-  width: 32px;
-  height: 32px;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
   object-fit: contain;
 }
 
-/* Notification */
-
+/* =========================================
+   Notification
+   ========================================= */
 .topbar__iconButton {
   position: relative;
-  background: #ffffff;
-  border: 1px solid var(--av-border);
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   display: flex;
-  place-items: center;
   align-items: center;
-  cursor: pointer;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--av-border);
+  border-radius: 50%;
+  background: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: all 0.15s ease;
-  gap: 2px;
 }
-
-.topbar__iconButton:hover {
-  background: #f8fafc;
-}
-
 .topbar__iconSlot {
-  width: 32px;
-  height: 32px;
+  width: 23px;
+  height: 23px;
+  object-fit: contain;
 }
-
-/*Globo verde de notificaciones*/
 .topbar__notificationBadge {
   position: absolute;
-  top: -1px;
-  right: -1px;
-  background: #65a30d; /* Verde lima exacto */
-  color: #ffffff;
-  font-size: 0.68rem;
-  font-weight: 700;
+  top: -2px;
+  right: -2px;
   min-width: 16px;
   height: 16px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #ffffff; /* Efecto flotante sobre la campana */
+  padding-inline: 3px;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  background: #65a30d;
 }
 
-/* Profile */
-
+/* =========================================
+   Profile
+   ========================================= */
 .topbar__profileButton {
-  min-width: 0;
-  max-width: 220px;
+  width: 154px;
+  min-width: 154px;
+  max-width: 154px;
+  height: 42px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #ffffff;
-  padding: 0px 22px 0 18px; /* Reducido a la izquierda para empotrar el avatar */
+  gap: 8px;
+  padding: 0 10px;
   border: 1px solid var(--av-border);
-  border-radius: 12px;
-  height: 50px;
-  cursor: pointer;
+  border-radius: 20px;
+  background: #ffffff;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
-  transition: all 0.15s ease;
 }
-
 .topbar__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  overflow: hidden;
+  width: 31px;
+  height: 31px;
+  flex: 0 0 31px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
   background: var(--av-neutral-200);
 }
-
 .topbar__avatar img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
   display: block;
+  object-fit: cover;
 }
-
 .topbar__profileData {
   min-width: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
-  text-align: left;
-  line-height: 1.5;
   overflow: hidden;
+  text-align: left;
+  line-height: 1.2;
 }
-
 .topbar__profileButton strong {
   overflow: hidden;
   color: var(--av-text);
   font-family: var(--av-font-heading);
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .topbar__profileButton small {
   overflow: hidden;
   color: var(--av-text-muted);
-  font-size: 0.8rem;
+  font-size: 0.62rem;
   font-weight: 400;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 /* =========================================
-   Glass popovers
+   Popovers — Premium Glass
    ========================================= */
 
 .topbar__dismiss {
   position: fixed;
   inset: 0;
-
   z-index: 61;
-
   padding: 0;
-
   border: 0;
-
   background: transparent;
-
   cursor: default;
 }
 
 .topbar__popover {
   position: absolute;
   right: 0;
-  top: calc(100% + 7px);
-
+  top: calc(100% + 9px);
   z-index: 62;
-
+  isolation: isolate;
   width: 225px;
-
   display: grid;
-  gap: 5px;
-
+  gap: 4px;
   padding: 9px;
-
-  border: 1px solid rgba(212, 222, 216, 0.76);
-  border-radius: 8px;
-
-  background: rgba(248, 250, 248, 0.94);
-
-  backdrop-filter: blur(18px);
-
-  box-shadow: var(--av-shadow-float);
-
-  animation: topbarPopoverEnter 130ms ease;
-}
-
-.topbar__popover > strong {
-  padding: 2px 3px 6px;
-
+  overflow: hidden;
   color: var(--av-text);
-
-  font-family: var(--av-font-heading);
-  font-size: 0.66rem;
-  font-weight: 700;
-
-  border-bottom: 1px solid var(--av-border-soft);
+  border: 1px solid rgba(211, 209, 209, 0.76);
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(218, 217, 217, 0.88) 0%,
+      rgba(212, 214, 213, 0.84) 18%,
+      rgba(202, 209, 204, 0.8) 100%
+    );
+  -webkit-backdrop-filter: blur(40px) saturate(165%) contrast(106%);
+  backdrop-filter: blur(40px) saturate(165%) contrast(110%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14);
+  animation: topbarPopoverEnter 170ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-
+.topbar__popover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(235, 234, 234, 0.95),
+      transparent 36%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.22),
+      transparent 48%
+    );
+}
+.topbar__popover::after {
+  content: "";
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  bottom: -40px;
+  z-index: -1;
+  height: 70px;
+  pointer-events: none;
+  border-radius: 50%;
+  background: rgba(41, 160, 115, 0.08);
+  filter: blur(24px);
+}
+.topbar__popover > * {
+  position: relative;
+  z-index: 1;
+}
+.topbar__popoverHeader {
+  display: block;
+  padding: 6px 9px 8px;
+  color: #66736f;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.topbar__popover > strong {
+  display: block;
+  padding: 4px 7px 8px;
+  color: #152a27;
+  font-family: var(--av-font-heading);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(21, 42, 39, 0.08);
+}
 .topbar__popover button {
+  width: 100%;
+  min-height: 38px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  width: 100%;
-  padding: 8px 12px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: left;
-  font-size: 0.9rem;
-  color: #333333;
-  transition: background 0.15s ease;
-}
-
-.topbar__popover button:hover {
-  background: #f5f5f5;
-  color: #000000;
-}
-
-.topbar__popover button span {
-  /* font-size: 0.75rem; */
+  justify-content: center;
+  padding: 7px 10px;
+  color: #18221f;
+  font-size: 0.8rem;
   font-weight: 500;
-  /* color: var(--av-neutral-500); */
+  font-family: var(--av-font-heading);
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
 }
-
+.topbar__popover button:hover {
+  color: #152a27;
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow:
+    0 5px 14px rgba(4, 30, 22, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+}
+.topbar__popover button:active {
+  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.76);
+}
+.topbar__popover button span {
+  color: inherit;
+  font-weight: 700;
+}
 .topbar__popover button small {
-  color: var(--av-neutral-500);
-  font-size: 0.75rem;
+  margin-top: 2px;
+  color: #313635;
+  font-size: 0.76rem;
+  font-weight: 500;
+  text-decoration: overline;
 }
-
-/* =========================================
-   Chevron (Flecha desplegable minimalista por CSS)
-   ========================================= */
 .topbar__chevron {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  margin-left: 4px;
   border-right: 1.5px solid #64748b;
   border-bottom: 1.5px solid #64748b;
-  transform: rotate(45deg); /* Forma de V perfecta */
-  margin-left: 6px;
+  transform: rotate(45deg);
   transition: transform 0.2s ease;
 }
-
-/* Animación del Chevron cuando el select está abierto */
 .topbar__selectButton.is-open .topbar__chevron {
-  transform: translateY(1px) rotate(-135deg); /* Gira la flecha hacia arriba de manera preciosa */
+  transform: translateY(1px) rotate(-135deg);
 }
-
 .topbar__profileButton.is-open .topbar__chevron {
   transform: translateY(1px) rotate(-135deg);
 }
-/* Detalles del menú de perfil */
 .topbar__profileMenuHeader {
-  padding: 4px 8px 8px 8px;
   display: flex;
   flex-direction: column;
+  padding: 6px 9px 9px;
 }
 .topbar__profileMenuHeader strong {
-  font-size: 0.9rem;
-  color: #111111;
+  color: #152a27;
+  font-size: 0.8rem;
+  font-weight: 800;
 }
 .topbar__profileMenuHeader span {
-  font-size: 0.75rem;
-  color: #777777;
+  margin-top: 2px;
+  color: #75827e;
+  font-size: 0.76rem;
 }
-
 .topbar__popoverDivider {
+  height: 1px;
+  margin: 5px 4px;
   border: 0;
-  border-top: 1px solid #eeeeee;
-  margin: 6px 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(21, 42, 39, 0.13),
+    transparent
+  );
 }
 .topbar__logoutBtn {
   color: var(--av-danger) !important;
 }
 .topbar__logoutBtn:hover {
-  background: #fef2f2 !important;
+  color: var(--av-danger) !important;
+  border-color: rgba(227, 26, 22, 0.08) !important;
+  background: rgba(254, 242, 242, 0.72) !important;
+}
+.topbar__popover--notifications article {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+.topbar__notificationDot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  margin-top: 4px;
+  border-radius: 999px;
+  background: var(--av-warning);
+  box-shadow: 0 0 0 3px rgba(224, 102, 26, 0.10);
+}
+.topbar__popover--notifications article div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.topbar__popover--notifications article b {
+  color: #152a27;
+  font-size: 0.9rem;
+}
+.topbar__popover--notifications article small {
+  color: #5d6d68;
+  font-size: 0.62rem;
 }
 
-/* Date */
+.topbar__popover--profile {
+  width: 190px;
+}
 
+
+/* =========================================
+   Date
+   ========================================= */
 .topbar__dateRow {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-
   padding: 6px;
-
   border-radius: 5px;
-
   background: var(--av-neutral-100);
 }
-
 .topbar__dateRow > span {
   color: var(--av-text-muted);
-
   font-size: 0.59rem;
 }
-
 .topbar__dateRow b {
   color: var(--av-text-secondary);
-
   font-size: 0.59rem;
 }
 
-/* Notifications */
-
+/* =========================================
+   Notifications
+   ========================================= */
 .topbar__popover--notifications article {
   display: flex;
   gap: 7px;
-
   padding: 6px;
-
   border-radius: 5px;
-
   background: var(--av-neutral-100);
 }
-
 .topbar__notificationDot {
   width: 6px;
   height: 6px;
-
   flex: 0 0 auto;
-
   margin-top: 4px;
-
   border-radius: 999px;
-
   background: var(--av-warning);
 }
-
 .topbar__popover--notifications article div {
   min-width: 0;
-
   display: grid;
   gap: 2px;
 }
-
 .topbar__popover--notifications article b {
   color: var(--av-text);
-
-  font-size: 0.61rem;
+  font-size: 0.7rem;
 }
-
 .topbar__popover--notifications article small {
   color: var(--av-text-muted);
-
-  font-size: 0.55rem;
+  font-size: 0.62rem;
 }
-
-/* Profile */
-
 .topbar__popover--profile {
   width: 180px;
 }
-
 .topbar__popover--profile > span {
   color: var(--av-text-muted);
-
   font-size: 0.59rem;
 }
-
-/* Animation */
-
 @keyframes topbarPopoverEnter {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-6px) scale(0.985);
   }
-
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 /* =========================================
    Route placeholder
    ========================================= */
-
 .routePlaceholder {
   min-height: 320px;
-
   display: grid;
   place-content: center;
   justify-items: center;
   gap: 6px;
-
   padding: 20px;
-
   text-align: center;
-
   border: 1px solid var(--av-border);
   border-radius: var(--av-radius-lg);
-
   background: var(--av-panel);
 }
-
 .routePlaceholder__eyebrow {
   margin: 0;
-
   padding: 4px 7px;
-
   color: var(--av-lime-900);
-
   font-family: var(--av-font-heading);
   font-size: 0.58rem;
   font-weight: 800;
-
   border-radius: 5px;
-
   background: var(--av-lime-400);
 }
-
 .routePlaceholder h1 {
   margin: 0;
-
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
   font-size: 1.25rem;
 }
-
 .routePlaceholder span {
   max-width: 500px;
-
   color: var(--av-text-muted);
-
   font-size: 0.7rem;
 }
 
 /* =========================================
-   Global panel conventions
+   Global panels
    ========================================= */
-
 .avPanel {
   min-width: 0;
   border: 1px solid var(--av-border);
@@ -1120,190 +1100,265 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   background: var(--av-panel);
   box-shadow: var(--av-shadow-xs);
 }
-
 .avSectionTitle {
   margin: 0;
-
   color: var(--av-text);
-
   font-family: var(--av-font-heading);
   font-size: 0.78rem;
   font-weight: 700;
 }
 
 /* =========================================
-   Standard tables
+   Global tables
    ========================================= */
-
 .avTable {
   width: 100%;
-
   border-collapse: separate;
   border-spacing: 0;
-
+  overflow: hidden;
   font-size: 0.58rem;
-
   border: 1px solid var(--av-border-soft);
   border-radius: 5px;
-
-  overflow: hidden;
 }
-
 .avTable thead {
   background: var(--av-neutral-100);
 }
-
 .avTable th {
   padding: 5px 6px;
-
   color: var(--av-text-muted);
-
   font-family: var(--av-font-heading);
   font-weight: 700;
-
   text-align: left;
 }
-
 .avTable td {
   padding: 5px 6px;
-
   color: var(--av-text-secondary);
-
   border-top: 1px solid var(--av-border-soft);
 }
-
 .avTable tbody tr {
   background: var(--av-neutral-50);
-
   transition: background 120ms ease;
 }
-
 .avTable tbody tr:nth-child(even) {
   background: var(--av-neutral-100);
 }
-
 .avTable tbody tr:hover {
   background: var(--av-lime-50);
 }
 
 /* =========================================
-   Responsive
+   Responsive desktop
    ========================================= */
-
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .topbar {
-    grid-template-columns:
-      minmax(90px, auto)
-      minmax(180px, 1fr)
-      auto;
+    gap: 9px;
+    padding-inline: 14px;
   }
-
-  .topbar__selectButton:first-child {
-    max-width: 115px;
+  .topbar__search {
+    max-width: 390px;
+  }
+  .topbar__actions {
+    gap: 6px;
+  }
+  .topbar__selectButton {
+    padding-inline: 9px;
+    font-size: 0.79rem;
+  }
+  .topbar__actions .topbar__popoverAnchor:nth-child(1) .topbar__selectButton {
+    min-width: 155px;
+  }
+  .topbar__actions .topbar__popoverAnchor:nth-child(2) .topbar__selectButton {
+    min-width: 166px;
+  }
+  .topbar__profileButton {
+    width: 140px;
+    min-width: 140px;
+    max-width: 140px;
   }
 }
 
+/* =========================================
+   Responsive laptop
+   ========================================= */
+@media (max-width: 1080px) {
+  .topbar {
+    grid-template-columns: minmax(180px, 1fr) auto;
+  }
+  .topbar__search {
+    max-width: 330px;
+  }
+  .topbar__profileButton {
+    width: 42px;
+    min-width: 42px;
+    max-width: 42px;
+    padding: 0;
+    justify-content: center;
+  }
+  .topbar__profileData,
+  .topbar__profileButton > .topbar__chevron {
+    display: none;
+  }
+}
+
+/* =========================================
+   Responsive compact sidebar
+   ========================================= */
 @media (max-width: 900px) {
   .agrovisionApp {
-    --sidebar-width: var(--av-sidebar-collapsed);
+    --sidebar-width: 58px;
   }
-
+  .sidebar {
+    padding-inline: 6px;
+  }
   .sidebar__brand {
     justify-content: center;
     padding-inline: 0;
   }
-
   .sidebar__brand img {
-    width: 38px;
-    height: 38px;
-
+    width: 37px;
+    height: 37px;
     object-fit: cover;
     object-position: left;
   }
-
-  .sidebar__link,
-  .sidebar__secondaryLink {
+  .sidebar__link {
+    width: 100%;
+    margin-inline: 0;
     grid-template-columns: 1fr;
     justify-items: center;
-
-    padding: 0;
-  }
-
-  .sidebar__linkLabel,
-  .sidebar__secondaryLink > span:last-child,
-  .sidebar__profileCopy,
-  .sidebar__profileChevron {
-    display: none;
-  }
-
-  .sidebar__profile {
-    grid-template-columns: 1fr;
-
-    justify-items: center;
-
+    gap: 0;
     padding-inline: 0;
   }
-
-  .topbar {
-    grid-template-columns:
-      auto
-      minmax(170px, 1fr)
-      auto;
+  .sidebar__linkLabel {
+    display: none;
   }
-
+  .sidebar__weather {
+    width: 44px;
+    min-height: 44px;
+  }
+  .sidebar__weatherTemp,
+  .sidebar__weatherStats,
+  .sidebar__weatherBtn {
+    display: none;
+  }
+  .topbar {
+    grid-template-columns: minmax(180px, 1fr) auto;
+  }
   .topbar__selectButton {
     display: none;
   }
+  .agrovisionContent {
+    padding-inline: 14px;
+  }
 }
 
+/* =========================================
+   Responsive mobile
+   ========================================= */
 @media (max-width: 680px) {
   .agrovisionApp {
-    --sidebar-width: 58px;
+    --sidebar-width: 54px;
   }
-
   .sidebar {
-    padding-inline: 6px;
+    padding-inline: 5px;
   }
-
+  .sidebar__toggle {
+    right: -9px;
+    width: 21px;
+    height: 21px;
+  }
   .topbar {
     height: 52px;
-
-    grid-template-columns:
-      minmax(0, 1fr)
-      auto;
-
-    padding: 6px 9px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 5px 8px;
   }
-
   .topbar__search {
-    display: none;
+    height: 38px;
   }
-
-  .topbar__profileButton strong {
-    display: none;
+  .topbar__searchIcon {
+    width: 21px;
+    height: 21px;
+    flex-basis: 21px;
   }
-
+  .topbar__search input {
+    font-size: 0.8rem;
+  }
+  .topbar__iconButton,
+  .topbar__profileButton {
+    width: 38px;
+    min-width: 38px;
+    max-width: 38px;
+    height: 38px;
+  }
+  .topbar__avatar {
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
+  }
   .agrovisionContent {
+    padding: 8px 10px 14px;
+  }
+}
+@media (max-width: 520px) {
+  .topbar {
+    grid-template-columns: 1fr auto;
+  }
+  .topbar__search,
+  .topbar__searchContainer {
+    display: none;
+  }
+  .topbar__actions {
+    grid-column: 2;
+  }
+}
+
+/* =========================================
+   Altura reducida
+   ========================================= */
+@media (max-height: 700px) {
+  .sidebar {
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+  .sidebar__brand {
+    min-height: 38px;
+    padding-bottom: 2px;
+  }
+  .sidebar__nav {
+    gap: 4px;
+    padding-top: 3px;
+  }
+  .sidebar__link {
+    min-height: 34px;
+    padding-block: 7px;
+  }
+  .sidebar__weather {
+    min-height: 105px;
+  }
+  .sidebar__weatherContent {
+    gap: 5px;
     padding: 8px;
+  }
+  .sidebar__weatherBtn {
+    height: 24px;
   }
 }
 
 /* =========================================
    Reduced motion
    ========================================= */
-
 @media (prefers-reduced-motion: reduce) {
   .agrovisionMain,
   .sidebar,
   .sidebar__toggle,
   .sidebar__link,
-  .sidebar__secondaryLink,
+  .sidebar__weatherBtn,
+  .topbar__search,
   .topbar__selectButton,
   .topbar__iconButton,
   .topbar__profileButton {
     transition: none;
   }
-
   .topbar__popover {
     animation: none;
   }

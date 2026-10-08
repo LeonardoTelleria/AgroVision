@@ -3,7 +3,7 @@
  * Base Map Configuration
  * =========================================
  *
- * Configuración central del mapa base 
+ * Configuración central del mapa base
  *
  * Responsabilidad:
  * Definir en un único lugar el proveedor cartográfico,
@@ -53,10 +53,13 @@ export function getBaseMapOptions(): Omit<MapOptions, "container"> {
     // Esto permite agregar o sobrescribir opciones localmente sin modificar BASE_MAP_OPTIONS.
     return {
         ...BASE_MAP_OPTIONS,
+        // Copiamos también los valores anidados para aislar cada instancia.
+        center: [...DEFAULT_MAP_CENTER],
+        attributionControl: { ...BASE_MAP_OPTIONS.attributionControl },
     };
 }
 
-/** 
- * **satisfies** hace que TypeScript compruebe que nuestra configuración 
+/**
+ * **satisfies** hace que TypeScript compruebe que nuestra configuración
  * es válida para MapLibre sin perder la inferencia específica de los valores.
  */
