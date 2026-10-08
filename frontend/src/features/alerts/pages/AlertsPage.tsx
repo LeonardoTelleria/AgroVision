@@ -427,7 +427,7 @@ export function AlertsPage() {
                         ? temperatureIcon
                         : alert.status === "RESOLVED"
                           ? checkIcon
-                          : warningRedIcon
+                          : estreshidricoIcon
                     }
                     alt=""
                   />
@@ -546,7 +546,9 @@ function AlertDetail({ alert }: { readonly alert: AgriculturalAlert }) {
               ))}
             </div>
           ) : (
-            <p className="alertDetailEmpty">No hay métricas para esta alerta.</p>
+            <p className="alertDetailEmpty">
+              No hay métricas para esta alerta.
+            </p>
           )}
         </section>
 
@@ -827,7 +829,9 @@ function formatMetricName(metric: string): string {
   return labels[metric] ?? metric.replaceAll(/([a-z])([A-Z])/g, "$1 $2");
 }
 
-function formatEvidenceStatus(status: AgriculturalAlert["evidence"][number]["status"]): string {
+function formatEvidenceStatus(
+  status: AgriculturalAlert["evidence"][number]["status"],
+): string {
   const labels: Record<typeof status, string> = {
     NORMAL: "Normal",
     WATCH: "En observación",
