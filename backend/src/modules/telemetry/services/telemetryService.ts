@@ -1,2 +1,13 @@
-// Servicio de telemetría; concentrará las consultas de lecturas mediante la instancia compartida de Prisma.
+/**
+ * Telemetry Service
+ *
+ * API prevista:
+ * - createReading(input: CreateTelemetryReadingInput)
+ * - createReadingsBatch(input: CreateTelemetryBatchInput)
+ * - getReadingsBySensorId(sensorId: number)
+ * - getReadingsByFieldId(fieldId: number)
+ * - getLatestReadingsByFieldId(fieldId: number)
+ *
+ * Usará la instancia compartida de Prisma.
+ */
 export {};

@@ -1470,30 +1470,12 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
    ========================================================= */
 
 .weatherModal__weatherArtwork {
-  width:
-    clamp(
-      125px,
-      16vw,
-      175px
-    );
-
-  height:
-    clamp(
-      125px,
-      16vw,
-      175px
-    );
-
-  flex:
-    0
-    0
-    auto;
-
+  width: 240px;
+  height: 240px;
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
-
   overflow: visible;
-
   font-size: 0;
 }
 
@@ -1524,13 +1506,10 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
    ========================================================= */
 
 .weatherModal__hourIcon {
-  width: 46px;
-  height: 46px;
+  width: 70px;
+  height: 70px;
 
-  flex:
-    0
-    0
-    46px;
+  flex: 0 0 46px;
 
   display: grid;
   place-items: center;
@@ -1544,8 +1523,8 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 
 .weatherModal__hourIcon img {
-  width: 46px;
-  height: 46px;
+  width: 70px;
+  height: 70px;
 
   display: block;
 
@@ -1569,8 +1548,8 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
    ========================================================= */
 
 .weatherModal__forecastIcon {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
 
   display: grid;
   place-items: center;
@@ -1582,8 +1561,8 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 
 .weatherModal__forecastIcon img {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
 
   display: block;
 

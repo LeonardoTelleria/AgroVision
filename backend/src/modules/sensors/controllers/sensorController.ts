@@ -1,2 +1,7 @@
-// Controladores HTTP del módulo de sensores; se implementarán al conectar el servicio con Prisma.
+/**
+ * Sensor Controller
+ *
+ * Expondrá getSensors, getSensorById, getSensorsByFieldId,
+ * createSensor y updateSensor cuando se implemente la persistencia.
+ */
 export {};

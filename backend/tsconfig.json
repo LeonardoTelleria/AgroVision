@@ -21,7 +21,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "prisma7.config.ts",
     "prisma",
     //evita conflictos si Prisma genera cliente dentro de src/generated
     "src/generated"
