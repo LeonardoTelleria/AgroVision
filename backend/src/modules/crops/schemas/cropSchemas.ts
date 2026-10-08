@@ -1,7 +1,8 @@
 /** Validación HTTP de Crop, sin alterar las rutas legacy de CropProfile. */
 import { z } from "zod";
 
-const positiveInteger = z.coerce.number().int().positive();
+const positiveInteger = z.number().int().positive().max(2147483647);
+const idParameter = z.string().regex(/^[1-9]\d*$/).transform(Number).pipe(positiveInteger);
 const nonEmptyString = z.string().trim().min(1);
 const cropStatusSchema = z.enum(["ACTIVE", "HARVESTED", "INACTIVE"]);
 
@@ -28,11 +29,11 @@ export const updateCropSchema = z.object({
 );
 
 export const cropIdParamSchema = z.object({
-  id: positiveInteger,
+  id: idParameter,
 }).strict();
 
 export const fieldIdParamSchema = z.object({
-  fieldId: positiveInteger,
+  fieldId: idParameter,
 }).strict();
 
 export const cropTypeParamSchema = z.object({
