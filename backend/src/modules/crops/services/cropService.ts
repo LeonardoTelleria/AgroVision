@@ -26,12 +26,11 @@ export class CropService {
         return crops.map(toResponse);
     }
     
-    public async getCropById(id: number): Promise<CropResponse[]> {
-        const crops = await prisma.crop.findMany({
+    public async getCropById(id: number): Promise<CropResponse | null> {
+        const crops = await prisma.crop.findUnique({
             where: {id},
-            orderBy: {id: "asc"},
         });
-        return crops.map(toResponse);
+        return crops ? toResponse(crops) : null;
     }
     public async createCrop(input: CreateCropInput): Promise<CropResponse> {
         const crop = await prisma.crop.create({
