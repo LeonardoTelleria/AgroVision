@@ -52,6 +52,10 @@ import { agroVisionRoverTrajectory } from "../data/roverTrajectoryData";
 import { DEFAULT_GIS_LAYERS, getAvailableMappingLayers } from "../services/mappingEngine";
 // Tipamos el snapshot que recibirá el coordinador.
 import type { MappingEngineData } from "../services/mappingEngine";
+// Compartimos las métricas del controlador con la página consumidora.
+import type { RoverProgress } from "../layers/roverLayer";
+
+
 
 // Consumimos los contratos comunes de geometrías e identificadores de capas.
 import type {
@@ -71,6 +75,8 @@ import "../mappingGis.css";
 
 // Una lista vacía permite utilizar análisis proporcionados por el consumidor.
 const NO_ZONE_IDS: readonly string[] = [];
+// Colección inicial utilizada cuando el consumidor no controla los borradores.
+const EMPTY_DRAFT: FeatureCollection = { type: "FeatureCollection", features: [] };
 
 /** Configuración pública del componente GIS. */
 export interface MappingGISProps {
@@ -86,13 +92,10 @@ export interface MappingGISProps {
   readonly fields?: FieldFeatureCollection;
   // Permite proporcionar las zonas relacionadas con esos fields.
   readonly zones?: ZoneFeatureCollection;
-
   // null representa una vista sin trayectoria ni rover.
   readonly trajectory?: MapLineFeature | null;
-
   // undefined consulta el backend; un array utiliza el snapshot recibido.
   readonly insights?: readonly ZoneInsight[];
-
   // Configura el servidor para la consulta automática de análisis.
   readonly apiBaseUrl?: string;
   // Controla la presentación del selector y la navegación.
@@ -103,6 +106,11 @@ export interface MappingGISProps {
   readonly enableEditing?: boolean;
   // Controla el movimiento del rover de la vista.
   readonly animateRover?: boolean;
+
+  // Permite que la página conserve y restaure los borradores del editor.
+  readonly draft?: FeatureCollection;
+  // Entrega las métricas de la simulación al inspector de la página.
+  readonly onRoverProgress?: (progress: RoverProgress) => void;
 
   // Entrega al consumidor la selección de una zona.
   readonly onZoneSelect?: (zone: SelectedZoneData) => void;
@@ -118,88 +126,134 @@ export interface MappingGISProps {
 
 /** Configuración de la sesión visual de edición. */
 interface GeometryEditorProps {
-  // Instancia cartográfica disponible para montar la sesión de edición.
+  // Instancia cartográfica donde se monta el editor.
   readonly map: Map | null;
-  // Entrega la colección completa de borradores después de un cambio.
+
+  // Borradores conservados en memoria por la composición o su consumidor.
+  readonly draft: FeatureCollection;
+
+  // Entrega la colección completa después de modificar geometrías.
   readonly onDraftChange?: (draft: FeatureCollection) => void;
-  // Comunica los fallos de inicialización y de las acciones del editor.
+
+  // Comunica errores de las herramientas de edición.
   readonly onError: (error: Error) => void;
 }
 
-/** Sesión de borradores que se monta cuando se habilita la edición. */
-function GeometryEditor({ map, onDraftChange, onError }: GeometryEditorProps) {
-  // Relacionamos la medición con el mapa concreto donde se generó.
-  const [measurement, setMeasurement] = useState<{
-    map: Map | null;
-    meters: number | null;
-  } | null>(null);
+/** Presenta las herramientas y restaura los borradores al abrir el editor. */
+function GeometryEditor({ map, draft, onDraftChange, onError }: GeometryEditorProps) {
+  // Explicamos la interacción de la herramienta seleccionada.
+  const [instruction, setInstruction] = useState("Selecciona una herramienta de dibujo.");
 
-  // Conectamos el editor con esta instancia y sus eventos de borrador.
+  // Conectamos Geoman con el mapa y con la colección conservada.
   const editing = useGeoman(map, {
-    // La presencia de GeometryEditor representa una sesión de edición habilitada.
     enabled: true,
-    // Conectamos el callback de errores recibido por el componente.
+    initialDraft: draft,
     onError,
-    onChange: (draft) => {
-      // Medimos las líneas del borrador vigente en metros.
-      const lines = draft.features.filter((feature) => feature.geometry?.type === "LineString");
-
-      // Sumamos los recorridos del borrador; una colección sin líneas conserva el valor null.
-      const meters = lines.length
-        ? lines.reduce((total, feature) => total + length(feature, { units: "meters" }), 0)
-        : null;
-
-      // Guardamos la distancia y la instancia a la que pertenece.
-      setMeasurement({ map, meters });
-      // Entregamos el snapshot completo para su validación y persistencia externas.
-      onDraftChange?.(draft);
-    },
+    onChange: onDraftChange,
   });
 
-  // Cada medición pertenece a la instancia donde se generó.
-  const meters = editing.isReady && measurement?.map === map ? measurement?.meters : null;
+  // Las rutas del rover utilizan su propia métrica en el inspector.
+  const lines = draft.features.filter(
+    (feature) => feature.geometry.type === "LineString"
+      && feature.properties?.gisPurpose !== "ROVER_ROUTE",
+  );
+
+  // Sumamos las líneas auxiliares de medición disponibles.
+  const meters = lines.length
+    ? lines.reduce((total, feature) => total + length(feature, { units: "meters" }), 0)
+    : null;
+
+  // Mostramos instrucciones después de activar correctamente una herramienta.
+  const activate = (action: () => Promise<void>, message: string): void => {
+    void action().then(() => setInstruction(message)).catch(onError);
+  };
 
   return (
     <div className="mappingGis__editing" role="group" aria-label="Edición de geometría">
-      {/* Las acciones se habilitan cuando Geoman termina de cargar. */}
+      {/* Creamos un polígono de borrador. */}
       <button
         type="button"
         disabled={!editing.isReady}
-        onClick={() => void editing.drawZone().catch(onError)}
+        onClick={() => activate(editing.drawZone, "Marca los vértices y haz doble click para terminar la zona.")}
       >
         Dibujar zona
       </button>
 
+      {/* Creamos un punto de muestreo. */}
       <button
         type="button"
         disabled={!editing.isReady}
-        onClick={() => void editing.drawSamplingPoint().catch(onError)}
+        onClick={() => activate(editing.drawSamplingPoint, "Pulsa sobre el mapa para colocar un punto de muestreo.")}
       >
         Punto de muestreo
       </button>
 
+      {/* Creamos una línea auxiliar de medición. */}
       <button
         type="button"
         disabled={!editing.isReady}
-        onClick={() => void editing.drawMeasurement().catch(onError)}
+        onClick={() => activate(editing.drawMeasurement, "Marca los puntos y haz doble click para terminar la medición.")}
       >
         Medir distancia
       </button>
 
-      <button type="button" disabled={!editing.isReady} onClick={() => void editing.edit().catch(onError)}>
+      {/* Creamos una línea identificada como ruta del rover. */}
+      <button
+        type="button"
+        disabled={!editing.isReady}
+        onClick={() => activate(editing.drawRoverRoute, "Dibuja la ruta y haz doble click para asignarla al rover.")}
+      >
+        Ruta del rover
+      </button>
+
+      {/* Modificamos los vértices de las geometrías existentes. */}
+      <button
+        type="button"
+        disabled={!editing.isReady || !draft.features.length}
+        onClick={() => activate(editing.edit, "Arrastra los vértices de los borradores para modificarlos.")}
+      >
         Editar borradores
       </button>
 
-      <button type="button" disabled={!editing.isReady} onClick={() => void editing.cancel().catch(onError)}>
+      {/* Activamos la eliminación individual mediante interacción sobre el mapa. */}
+      <button
+        type="button"
+        disabled={!editing.isReady || !draft.features.length}
+        onClick={() => activate(editing.remove, "Pulsa el punto, la línea o el polígono que quieres eliminar.")}
+      >
+        Eliminar uno
+      </button>
+
+      {/* Retiramos todos los dibujos de la colección local. */}
+      <button
+        type="button"
+        disabled={!editing.isReady || !draft.features.length}
+        onClick={() => activate(editing.clearAll, "Borradores eliminados. Puedes comenzar otro dibujo.")}
+      >
+        Limpiar dibujos
+      </button>
+
+      {/* Finalizamos la herramienta conservando las geometrías completadas. */}
+      <button
+        type="button"
+        disabled={!editing.isReady}
+        onClick={() => activate(editing.cancel, "Herramienta finalizada; los dibujos completados se conservan.")}
+      >
         Cancelar
       </button>
 
-      {meters !== null && meters !== undefined && <output aria-live="polite">{meters.toFixed(1)} m</output>}
+      {/* Presentamos la longitud total de las mediciones auxiliares. */}
+      {meters !== null && <output aria-live="polite">{meters.toFixed(1)} m</output>}
+
+      {/* Anunciamos las instrucciones correspondientes a la herramienta activa. */}
+      <p className="mappingGis__editingHint" role="status">{instruction}</p>
     </div>
   );
 }
 
 export function MappingGIS({
+  draft: externalDraft,
+  onRoverProgress,
   variant = "workspace",
   sidePanel,
   children,
@@ -215,6 +269,7 @@ export function MappingGIS({
   animateRover = true,
   onZoneSelect,
   onUnmatchedInsights,
+  
   onMapReady,
   onDraftChange,
   // Conectamos el callback de errores recibido por el componente.
@@ -222,6 +277,11 @@ export function MappingGIS({
 }: MappingGISProps) {
   // Identificamos el panel de esta instancia para asociarlo con su botón accesible.
   const panelId = useId();
+  // Conservamos borradores locales para los consumidores que no controlan la colección.
+  const [localDraft, setLocalDraft] = useState<FeatureCollection>(EMPTY_DRAFT);
+  // La colección controlada por la página tiene prioridad sobre la colección local.
+  const draft = externalDraft ?? localDraft;
+
   // Cada vista administra su panel flotante independientemente de otras instancias.
   const [isPanelOpen, setIsPanelOpen] = useState(variant === "workspace");
   // El inspector y el catálogo comparten un panel con navegación explícita.
@@ -267,17 +327,23 @@ export function MappingGIS({
     onError?.(error);
   };
 
-  // Sincronizamos las capas y conectamos sus eventos públicos.
+ // Sincronizamos las capas y comunicamos los eventos de la sesión.
   useMappingLayers(map, data, {
+    // Entregamos el avance del rover sin modificar las geometrías.
+    onRoverProgress,
+
     onZoneSelect: (zone) => {
-      // Mostramos el inspector de la página al seleccionar una geometría.
+      // Abrimos el inspector cuando la página proporciona información contextual.
       if (sidePanel) {
         setPanelTab("details");
         setIsPanelOpen(true);
       }
-      // Entregamos el contrato completo de selección al consumidor.
+
+      // Entregamos la selección al consumidor.
       onZoneSelect?.(zone);
     },
+
+    // Conservamos la comunicación de análisis incompatibles y errores.
     onUnmatchedInsights,
     onError: reportError,
   });
@@ -463,11 +529,21 @@ export function MappingGIS({
         />
       )}
 
-      {/* Los borradores pertenecen a una sesión de edición configurable. */}
+      {/* Los dibujos se conservan en la composición aunque el editor se cierre. */}
       {enableEditing && interactive && (
-        <GeometryEditor map={map} onDraftChange={onDraftChange} onError={reportError} />
-      )}
+        <GeometryEditor
+          map={map}
+          draft={draft}
+          onDraftChange={(nextDraft) => {
+            // Actualizamos la colección local cuando la página no controla los borradores.
+            if (externalDraft === undefined) setLocalDraft(nextDraft);
 
+            // Comunicamos el nuevo snapshot a la página.
+            onDraftChange?.(nextDraft);
+          }}
+          onError={reportError}
+        />
+      )}
       {/* Las notificaciones ocupan una única región y permiten seguir usando el mapa. */}
       <div className="mappingGis__feedback" aria-live="polite">
         {!map && !errorMessage && <p role="status">Preparando mapa…</p>}

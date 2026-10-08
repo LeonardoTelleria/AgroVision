@@ -14,18 +14,15 @@ export function Panel({
   children,
   className = "",
   headerAction,
-  
+  showCardTag = false,
 }: PanelProps) {
   return (
     <section className={`avPanel ${className}`}>
       <header className="avPanel__header">
         <div className="avPanel__title">
           <h2>{title}</h2>
-
-          {/* Presentamos la acción opcional proporcionada por el consumidor. */}
-          {headerAction}
-        
         </div>
+        {headerAction ?? (showCardTag && <span className="avCardTag">card</span>)}
       </header>
       {children}
     </section>

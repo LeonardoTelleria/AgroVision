@@ -56,9 +56,10 @@ export function RecommendationsPage() {
       </section>
     );
 
-  const inProgress = data.recommendations.filter(
+  const inProgressRecommendations = data.recommendations.filter(
     (item) => item.status === "IN_PROGRESS" || item.status === "PENDING",
-  ).length;
+  );
+  const inProgress = inProgressRecommendations.length;
   const completed = data.recommendations.filter(
     (item) => item.status === "APPLIED",
   ).length;
@@ -70,31 +71,35 @@ export function RecommendationsPage() {
         <MetricCard
           title="Recomendaciones"
           value={data.recommendations.length}
-          description="Total de recomendaciones"
-          progress={82}
-          actionLabel="Ver detalles"
+          description="Recomendaciones registradas para el cultivo."
+          progress={data.recommendations.length > 0 ? (data.totalHighPriority / data.recommendations.length) * 100 : 0}
+          showRing
+          showDescriptionWithRing
+          actionLabel="Ver recomendaciones"
         />
 
         <MetricCard
           title="En seguimiento"
           value={inProgress}
-          description="En seguimiento"
-          progress={55}
+          description="Recomendaciones que requieren seguimiento."
+          progress={data.recommendations.length > 0 ? (inProgress / data.recommendations.length) * 100 : 0}
           tone="AMBER"
+          showRing
+          showDescriptionWithRing
           actionLabel="Ver seguimiento"
         />
 
         <MetricCard
           title="Ejecutadas"
           value={completed}
-          description="Ejecutadas esta campaña"
-          progress={Math.min(completed * 10, 100)}
+          description="Recomendaciones aplicadas correctamente."
+          progress={data.recommendations.length > 0 ? (completed / data.recommendations.length) * 100 : 0}
           tone="TEAL"
+          showRing
+          showDescriptionWithRing
           actionLabel="Ver historial"
         />
-      </section>
-
-      <section className="recommendationsFigma__workspace">
+      </section>      <section className="recommendationsFigma__workspace">
         <Panel
           title="Recomendaciones priorizadas"
           headerAction={
@@ -118,11 +123,10 @@ export function RecommendationsPage() {
                 <span
                   className={`priorityRecommendation__icon priorityRecommendation__icon--${priorityTone(recommendation.priority)}`}
                 >
-                  {/* SVG */}
                 </span>
 
                 <div className="priorityRecommendation__risk">
-                  <strong>{formatPriority(recommendation.priority)}</strong>
+                  <strong>{recommendationTitle(recommendation)}</strong>
                   <small>{recommendation.reason}</small>
                 </div>
 
@@ -261,60 +265,54 @@ function RecommendationDetail({
       <div className="recommendationDetail__top">
         <span
           className={`recommendationDetailIcon recommendationDetailIcon--${priorityTone(recommendation.priority)}`}
-        >
-          {/* SVG */}
-        </span>
-
+          aria-hidden="true"
+        />
         <div>
-          <strong>Riesgo</strong>
+          <strong>{recommendationTitle(recommendation)}</strong>
           <p>{recommendation.reason}</p>
         </div>
-
         <span>Prioridad</span>
-
         <StatusBadge
-          tone={
-            recommendation.priority === "HIGH" ||
-            recommendation.priority === "URGENT"
-              ? "DANGER"
-              : "WARNING"
-          }
+          tone={recommendation.priority === "LOW" ? "SUCCESS" : recommendation.priority === "MEDIUM" ? "WARNING" : "DANGER"}
         >
           {formatPriority(recommendation.priority)}
         </StatusBadge>
       </div>
 
-      <DetailSection label="Descripción" value={recommendation.reason} />
+      <DetailSection label="Razón" value={recommendation.reason} />
+      <DetailSection label="Acción sugerida" value={recommendation.suggestedAction} />
+      <DetailSection label="Impacto esperado" value={recommendation.expectedImpact.description} />
       <DetailSection
-        label="Acción sugerida"
-        value={recommendation.suggestedAction}
-      />
-      <DetailSection
-        label="Impacto esperado"
-        value={recommendation.expectedImpact.description}
+        label="Evidencia"
+        value={recommendation.evidence[0]?.explanation ?? "Sin evidencia asociada."}
       />
 
-      <h3>Evidencia</h3>
-
-      <div className="recommendationEvidenceMini">
-        {recommendation.evidence.slice(0, 4).map((evidence) => (
-          <div key={`${evidence.source}-${evidence.metric}`}>
-            <span>{evidence.metric}</span>
-            <strong>
-              {String(evidence.value ?? "—")} {evidence.unit ?? ""}
-            </strong>
-            <small>{evidence.status}</small>
-          </div>
-        ))}
+      <div className="recommendationAffectedField">
+        <strong>Campos afectados</strong>
+        <span>{recommendation.zoneId ?? recommendation.fieldId}</span>
       </div>
 
-      <button type="button" className="recommendationCompleteButton">
-        ✓ Marcar como ejecutada
-      </button>
+      <section className="recommendationIndicators">
+        <h3>Indicadores relevantes</h3>
+        <div className="recommendationEvidenceMini">
+          {recommendation.evidence.slice(0, 3).map((evidence) => (
+            <div key={`${evidence.source}-${evidence.metric}`}>
+              <span>{formatEvidenceMetric(evidence.metric)}</span>
+              <strong>{String(evidence.value ?? "—")} {evidence.unit ?? ""}</strong>
+              <small>{formatEvidenceStatus(evidence.status)}</small>
+            </div>
+          ))}
+        </div>
+        <small className="recommendationIndicatorRecency">
+          Última actualización · {formatDate(recommendation.createdAt)}
+        </small>
+        <button type="button" className="recommendationCompleteButton">
+          ✓ Marcar como ejecutada
+        </button>
+      </section>
     </div>
   );
 }
-
 function DetailSection({
   label,
   value,
@@ -349,12 +347,39 @@ function ImpactMetric({
 }
 
 function priorityTone(value: Recommendation["priority"]): string {
-  if (value === "URGENT" || value === "HIGH") return "danger";
+  if (value === "URGENT") return "danger";
+  if (value === "HIGH") return "high";
   if (value === "MEDIUM") return "warning";
 
   return "success";
 }
 
+function recommendationTitle(recommendation: Recommendation): string {
+  switch (recommendation.expectedImpact.impactArea) {
+    case "WATER_SAVING": return "Riego";
+    case "DISEASE_PREVENTION": return "Manejo de plagas";
+    case "CROP_HEALTH": return "Nutrición";
+    case "YIELD_PROTECTION": return "Protección del cultivo";
+    case "COST_REDUCTION": return "Eficiencia operativa";
+  }
+}
+
+function formatEvidenceMetric(metric: string): string {
+  const labels: Record<string, string> = {
+    soilMoisturePercentage: "Humedad del suelo",
+    relativeHumidityPercentage: "Humedad relativa",
+    ndvi: "NDVI",
+    soilTemperature: "Temp. del suelo",
+  };
+  return labels[metric] ?? metric.replaceAll(/([a-z])([A-Z])/g, "$1 $2");
+}
+
+function formatEvidenceStatus(status: string): string {
+  if (status === "CRITICAL") return "Crítico";
+  if (status === "WARNING") return "Alerta";
+  if (status === "WATCH") return "Vigilar";
+  return "Normal";
+}
 function formatPriority(value: Recommendation["priority"]): string {
   if (value === "URGENT") return "Crítica";
   if (value === "HIGH") return "Alta";
