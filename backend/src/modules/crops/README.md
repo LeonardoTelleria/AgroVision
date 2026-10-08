@@ -35,12 +35,20 @@ Estructura futura: `GET /api/crops/profiles`, `GET /api/crops/profiles/:type`, `
 
 ## Estado actual
 
-`cropProfileService.ts` usa `cropProfilesMock`; `cropService.ts` devuelve `CropCycle[]` hardcodeado. `recommendations/data/recommendationsMock.ts` también consume `cropProfilesMock`, por lo que debe conservarse hasta migrar ese consumidor. El frontend reserva `/api/crops/profiles`, pero todavía usa su propio mock.
+`cropProfileService.ts` consulta Prisma y devuelve `CropProfileResponse`; `cropService.ts` devuelve `CropCycle[]` hardcodeado. `recommendations/data/recommendationsMock.ts` también consume `cropProfilesMock`, por lo que debe conservarse hasta migrar ese consumidor. El frontend reserva `/api/crops/profiles`, pero todavía usa su propio mock.
 
 ## Pendientes para persistencia real
 
-Reemplazar ambos orígenes mock y definir el adapter entre los strings persistidos de CropProfile y el contrato técnico enriquecido.
+Migrar el origen mock de `cropService.ts` y definir el adapter entre los strings persistidos de CropProfile y el contrato técnico enriquecido.
 
 ## Fuera de alcance
 
 Cambiar rutas actuales, dividir el módulo, modificar el schema o implementar análisis agronómico.
+
+## Integración Prisma del catálogo
+
+`cropProfileService.ts` consulta la instancia compartida de Prisma. Los controladores esperan las consultas y devuelven `CropProfileResponse`: `id`, `cropType`, `displayName`, `mainRisks`, `preferredMetrics` y `createdAt` en ISO 8601. Los campos opcionales persistidos conservan sus strings o null; esta respuesta no es el contrato técnico enriquecido `CropProfile`.
+
+`getAllProfiles()` devuelve los registros ordenados por ID; una tabla vacía devuelve `[]`. `getProfileByType()` usa `findFirst` porque `cropType` no es único, seleccionando el menor ID. Si falta el tipo, consulta `GENERAL` en la base de datos; si tampoco existe, el controlador responde 404. Los fallos de base de datos se propagan y producen HTTP 500, sin sustituirse por mocks.
+
+No se modifican rutas ni schema. `cropService.ts`, los mocks de recomendaciones y el servicio frontend conservan sus orígenes actuales. El seed actual no crea perfiles: el catálogo debe estar poblado para devolver registros. La adaptación al contrato técnico enriquecido sigue pendiente.

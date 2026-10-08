@@ -1,27 +1,39 @@
+﻿import prisma from "../../../shared/database/prisma";
+import type { CropProfile as PersistedCropProfile } from "../../../generated/prisma/client";
+import type { CropProfileResponse, CropType } from "../types/cropProfileTypes";
 
-import { cropProfilesMock } from "../data/cropProfileMock";
-import type { CropProfile, CropType } from "../types/cropProfileTypes";
+/** Serializa el catálogo persistido sin inventar los campos técnicos del mock. */
+function toResponse(profile: PersistedCropProfile): CropProfileResponse {
+  return {
+    id: profile.id,
+    cropType: profile.cropType,
+    displayName: profile.displayName,
+    mainRisks: profile.mainRisks,
+    preferredMetrics: profile.preferredMetrics,
+    createdAt: profile.createdAt.toISOString(),
+  };
+}
 
 export class CropProfileService {
-  /**
-   * Obtiene todos los perfiles técnicos de cultivo disponibles.
-   */
-  public static getAllProfiles(): CropProfile[] {
-    return cropProfilesMock;
+  public static async getAllProfiles(): Promise<CropProfileResponse[]> {
+    const profiles = await prisma.cropProfile.findMany({ orderBy: { id: "asc" } });
+    return profiles.map(toResponse);
   }
 
-  /**
-   * Busca un perfil por su tipo de cultivo.
-   * Si no se encuentra, retorna el perfil 'GENERAL' como fallback preventivo.
-   */
-  public static getProfileByType(cropType: CropType): CropProfile {
-    const profile = cropProfilesMock.find((p) => p.cropType === cropType);
-    
-    if (!profile) {
-      // Fallback seguro según el diseño del contrato para evitar excepciones en cascada
-      return cropProfilesMock.find((p) => p.cropType === "GENERAL")!;
-    }
-    
-    return profile;
+  /** Busca el tipo solicitado y, si falta, el perfil GENERAL persistido. */
+  public static async getProfileByType(cropType: CropType): Promise<CropProfileResponse | null> {
+    // cropType no tiene restricción unique; el ID define una elección estable.
+    const profile = await prisma.cropProfile.findFirst({
+      where: { cropType },
+      orderBy: { id: "asc" },
+    });
+    if (profile) return toResponse(profile);
+    if (cropType === "GENERAL") return null;
+
+    const general = await prisma.cropProfile.findFirst({
+      where: { cropType: "GENERAL" },
+      orderBy: { id: "asc" },
+    });
+    return general ? toResponse(general) : null;
   }
 }

@@ -1,5 +1,8 @@
 import { CropCycle } from "../types/cropTypes";
+import prisma from "../../../shared/database/prisma";
+import type { CropProfile as PersistedCropProfile } from "../../../generated/prisma/client";
 
+import type{ CropCycle, CropResponse,  createCropInput, updateCropInput} from "../types/cropProfileTypes";
 export class CropService {
     public async getActiveCropCycles(): Promise<CropCycle[]> {
         const cropCycles: CropCycle[] = [
