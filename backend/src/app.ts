@@ -4,6 +4,7 @@ import { ok } from "./shared/responses/apiResponses";
 import farmRoutes from "./modules/farms/routs/farmRoutes";
 import fieldRoutes from "./modules/fields/routes/fieldRoutes";
 import sensorRoutes from "./modules/sensors/routes/sensorRoutes";
+import telemetryRoutes from "./modules/telemetry/routes/telemetryRoutes";
 //modulo de cultivos
 import cropProfileRoutes from "./modules/crops/routes/cropRoutes";
 //nueva importacion del modulo de vegetacion y analisis satelital
@@ -53,6 +54,7 @@ app.get("/api/health", async (req: Request, res: Response) => {
 app.use("/api/farms", farmRoutes);
 app.use("/api/fields", fieldRoutes);
 app.use("/api/sensors", sensorRoutes);
+app.use("/api/telemetry", telemetryRoutes);
 app.use("/api/crops", cropProfileRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
