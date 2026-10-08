@@ -1,27 +1,34 @@
+import prisma from "../../../shared/database/prisma";
 import { FarmOverview } from "../types/farmTypes";
 
 export class FarmService {
-    public async getFarmOverview(): Promise<FarmOverview> {
-        
-        const overview: FarmOverview = {
-            //simulando datos de una finca
-            id: "finca-01",
-            name: "Finca de los zopotes",
-            location: {
-                country: "Nicaragua",
-                region: "Chinandega",
-                city: "Chinandega",
-                latitude: 12.4567,
-                longitude: -87.1292
-            },
-            totalAreaSquareMeters: 450000, //45 hectareas
-            fieldsCount: 12,
-            activeCropCycles: 8,
-            sensorsCount: 34,
-            roverCount: 2,
-            generalStatus: "STABLE",
-            lastUpdateAt: new Date().toISOString()
-        };
-        return overview
-    } 
+  public async getFarmOverview(): Promise<FarmOverview> {
+    const farm = await prisma.farm.findFirst({
+      include: {
+        fields: true,
+      },
+    });
+    if (!farm) {
+      throw new Error("No farms found");
+    }
+    const fieldsCount = farm.fields.length;
+    return {
+      id: farm.id.toString(),
+      name: farm.name,
+      location: {
+        country: "Nicaragua",
+        region: farm.location,
+        city: null,
+        latitude: null,
+        longitude: null,
+      },
+      totalAreaSquareMeters: Number(farm.totalAreaSquareMeters),
+      fieldsCount,
+      activeCropCycles: 0,
+      sensorsCount: 0,
+      roverCount: 0,
+      generalStatus: "STABLE",
+      lastUpdateAt: farm.createdAt.toISOString(),
+    };
+  }
 }
