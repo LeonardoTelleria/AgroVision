@@ -1,34 +1,23 @@
-import { Field } from "../types/fieldTypes";
+import prisma from "../../../shared/database/prisma";
+import { FieldResponse } from "../types/fieldTypes";
 
 export class FieldService {
+  public async getFields(): Promise<FieldResponse[]> {
+    const fields = await prisma.field.findMany({
+      orderBy: {
+        id: "asc",
+      },
+    });
 
-    public async getFields(): Promise<Field[]> {
-        const fields: Field[] = [
-            {
-                id: "field-01",
-                farmId: "farm-agrovision-01",
-                name: "Lote Norte - Maíz",
-                areaSquareMeters: 120000,
-                cropId: "crop-cycle-99",
-                soilType: "LOAMY",
-                irrigationType: "DRIP",
-                drainageStatus: "GOOD",
-                status: "NORMAL",
-                lastInspectionAt: new Date().toISOString()
-            },
-            {
-                id: "field-02",
-                farmId: "farm-agrovision-01",
-                name: "Lote Sur - Tomate",
-                areaSquareMeters: 85000,
-                cropId: "crop-cycle-102",
-                soilType: "CLAY",
-                irrigationType: "SPRINKLER",
-                drainageStatus: "MODERATE",
-                status: "WATER_STRESS",
-                lastInspectionAt: new Date().toISOString()
-            }
-        ];
-        return fields;
-    }
+    return fields.map((field) => ({
+      id: field.id,
+      farmId: field.farmId,
+      name: field.name,
+      areaSquareMeters: Number(field.areaSquareMeters),
+      soilType: field.soilType,
+      irrigationType: field.irrigationType,
+      status: field.status,
+      createdAt: field.createdAt.toISOString(),
+    }));
+  }
 }
