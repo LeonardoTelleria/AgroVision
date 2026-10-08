@@ -1,3 +1,5 @@
+/** Contratos técnico legacy y persistido del catálogo CropProfile. */
+
 export type CropType = "RED_BEAN" | "CASSAVA" | "QUEQUISQUE" | "ORANGE" | "SORGHUM" | "PEANUT" | "GENERAL";
 
 export interface CropRiskRules {
@@ -23,4 +25,14 @@ export interface CropProfile {
     readonly riskRules: CropRiskRules;
     readonly preferredMetrics: string[];
     readonly recommendationTemplates: RecommendationTemplates;
+}
+
+/** Respuesta persistida del catálogo Prisma CropProfile. */
+export interface CropProfileResponse {
+    readonly id: number;
+    readonly cropType: string;
+    readonly displayName: string;
+    readonly mainRisks: string | null;
+    readonly preferredMetrics: string | null;
+    readonly createdAt: string;
 }
