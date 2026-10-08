@@ -10,10 +10,10 @@ export class CropProfileController {
 */
     public getAllProfiles = async (req: Request, res: Response): Promise<void> => {
         try {
-            const profiles = CropProfileService.getAllProfiles();
+            const profiles = await CropProfileService.getAllProfiles();
             res.status(200).json(ok(profiles,"Crop profiles loaded succesfully"));
         } catch (error: any) {
-            res.status(200).json(fail(error?.message || "Failed to load crop profiles"));
+            res.status(500).json(fail(error?.message || "Failed to load crop profiles"));
         }
     };
     /**
@@ -31,7 +31,7 @@ export class CropProfileController {
             //Convertir el string al tipo CropType (Casting)
             const cropType = type.toUpperCase() as CropType;
             //Llamar al servicio de forma segura
-            const profile = CropProfileService.getProfileByType(cropType);
+            const profile = await CropProfileService.getProfileByType(cropType);
 
             if (!profile) {
                 res.status(404).json(fail(`Crop profile with type ${cropType} not found`));
