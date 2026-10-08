@@ -1,12 +1,13 @@
-/** Router reservado para los endpoints REST de Sensor. */
-import { Router } from "express";
+﻿import { Router } from "express";
+import { SensorController } from "../controllers/sensorController";
 
 const router = Router();
+const controller = new SensorController();
 
-// GET / y GET /:id
-// GET /field/:fieldId
-// POST /
-// PATCH /:id
-// No se registran handlers hasta implementar el controller con Prisma.
+router.get("/", controller.getSensors);
+router.get("/field/:fieldId", controller.getSensorsByFieldId);
+router.get("/:id", controller.getSensorById);
+router.post("/", controller.createSensor);
+router.patch("/:id", controller.updateSensor);
 
 export default router;

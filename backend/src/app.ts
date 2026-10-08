@@ -3,6 +3,7 @@ import { ok } from "./shared/responses/apiResponses";
 // Importaciones de rutas existentes
 import farmRoutes from "./modules/farms/routs/farmRoutes";
 import fieldRoutes from "./modules/fields/routes/fieldRoutes";
+import sensorRoutes from "./modules/sensors/routes/sensorRoutes";
 //modulo de cultivos
 import cropProfileRoutes from "./modules/crops/routes/cropRoutes";
 //nueva importacion del modulo de vegetacion y analisis satelital
@@ -51,6 +52,7 @@ app.get("/api/health", async (req: Request, res: Response) => {
 // Registro de rutas operativas de AgroVision
 app.use("/api/farms", farmRoutes);
 app.use("/api/fields", fieldRoutes);
+app.use("/api/sensors", sensorRoutes);
 app.use("/api/crops", cropProfileRoutes);
 app.use("/api/alerts", alertRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
