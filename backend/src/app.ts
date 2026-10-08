@@ -22,13 +22,30 @@ import recommendationsRoutes from "./modules/recommendations/routes/recommendati
 import dashboardRoutes from "./modules/dashboard/routes/dashboardRoutes";
 //modulo de vision
 import visionRoutes from "./modules/vision/routes/visionRoutes";
+import { checkDatabaseHealth } from "./shared/database/databaseHealth";
 
 // Middlewares globales
 app.use(express.json());
 
 // Endpoint base de verificación de salud del sistema
-app.get("/api/health", (req: Request, res: Response) => {
-  res.status(200).json(ok({ status: "UP" }, "Backend service is healthy"));
+app.get("/api/health", async (req: Request, res: Response) => {
+  const database = await checkDatabaseHealth();
+  const backend = "UP";
+  const status = database === "UP" ? "UP" : "DOWN";
+  res
+    .status(database === "UP" ? 200 : 503)
+    .json(
+      ok(
+        {
+          status,
+          backend,
+          database,
+        },
+        database === "UP"
+          ? "Backend and database are healthy"
+          : "Database connection is down"
+      )
+    );
 });
 
 // Registro de rutas operativas de AgroVision
