@@ -105,6 +105,7 @@
 
   border: 0;
   border-bottom: 1px solid var(--av-border-soft);
+  border-left: 3px solid red;
 
   background: var(--av-neutral-50);
 

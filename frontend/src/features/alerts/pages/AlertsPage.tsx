@@ -63,12 +63,11 @@ export function AlertsPage() {
     alertsData.totalActive > 0
       ? (alertsData.totalCritical / alertsData.totalActive) * 100
       : 0;
-  const resolvedProgress =
-    totalAlerts > 0 ? (resolved / totalAlerts) * 100 : 0;
+  const resolvedProgress = totalAlerts > 0 ? (resolved / totalAlerts) * 100 : 0;
 
   return (
     <section className="avScreen alertsFigma">
-       <h1 className="avScreenTitle">Panel de alertas</h1>
+      <h1 className="avScreenTitle">Panel de alertas</h1>
       <section className="avMetricGrid">
         <MetricCard
           title="Alertas activas"
@@ -148,8 +147,6 @@ export function AlertsPage() {
                 <strong>{alert.title}</strong>
 
                 <span>{alert.zoneId ?? "—"}</span>
-
-                <span>{formatDate(alert.createdAt)}</span>
 
                 <StatusBadge
                   tone={
