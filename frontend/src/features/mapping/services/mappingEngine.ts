@@ -75,6 +75,13 @@ import { enrichZonesWithInsights } from "./zoneInsightMapAdapter";
 // Reutilizamos la construcción del contenido DOM y la apertura de los popups.
 import { createZonePopupElement, openZonePopup } from "../utils/zonePopup";
 
+// Compartimos el progreso simulado del controlador con los consumidores del motor.
+import type { RoverProgress } from "../layers/roverLayer";
+
+
+
+
+
 // Selección inicial compartida por el motor y sus componentes.
 export const DEFAULT_GIS_LAYERS: ReadonlySet<MapLayerId> = new Set([
   "base", "fields", "zones", "riskHeatmap", "trajectory", "rover",
@@ -105,6 +112,9 @@ export interface MappingEngineData {
 export interface MappingEngineCallbacks {
   // Comunica la zona seleccionada con sus propiedades vigentes.
   readonly onZoneSelect?: (zone: SelectedZoneData) => void;
+
+    // Entrega avance, longitud de ruta y estado del rover.
+    readonly onRoverProgress?: (progress: RoverProgress) => void;
 
   // Comunica los análisis que carecen de una geometría compatible.
   readonly onUnmatchedInsights?: (zoneIds: readonly string[]) => void;
@@ -312,8 +322,13 @@ export function createMappingEngine(
         // Registramos la posición inicial mediante una tupla longitud-latitud.
         if (first) addRoverLayer(map, [first[0], first[1]]);
 
-        // Creamos un controlador cuando esta sesión todavía carece de uno.
-        if (!rover) rover = createRoverController(map);
+        // Creamos el controlador y conectamos sus métricas con la sesión GIS.
+        if (!rover) {
+        rover = createRoverController(map, undefined, (progress) => {
+            // Entregamos métricas únicamente mientras esta sesión permanezca activa.
+            if (!disposed) callbacks.onRoverProgress?.(progress);
+        });
+        }
 
         // Iniciamos el recorrido correspondiente a la nueva trayectoria.
         rover.start(data.trajectory);
