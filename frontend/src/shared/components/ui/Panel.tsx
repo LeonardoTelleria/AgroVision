@@ -13,8 +13,7 @@ export function Panel({
   title,
   children,
   className = "",
-  headerAction,
-  showCardTag = false,
+
 }: PanelProps) {
   return (
     <section className={`avPanel ${className}`}>
@@ -22,7 +21,6 @@ export function Panel({
         <div className="avPanel__title">
           <h2>{title}</h2>
         </div>
-        {headerAction ?? (showCardTag && <span className="avCardTag">card</span>)}
       </header>
 
       <div className="avPanel__body">
