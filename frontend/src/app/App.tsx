@@ -17,13 +17,14 @@ import { useEffect, useState } from "react";
 import { ROUTES, DEFAULT_ROUTE, AppRouter, getRouteFromPathname, type AppRoutePath } from "./AppRouter";
 import { Sidebar } from "../shared/components/layout/Sidebar";
 import { Topbar } from "../shared/components/layout/Topbar";
+import { LandingPage } from "../features/landing/LandingPage";
 import "../shared/styles/themes.css";
 import "../shared/styles/layout.css";
 import "../shared/styles/figma-ui.css";
 
 const SIDEBAR_STORAGE_KEY = "agrovision.sidebar.collapsed";
 
-function App() {
+function DashboardApp() {
   const [activePath, setActivePath] = useState<AppRoutePath>(() => getRouteFromPathname(window.location.pathname));
 
   /**
@@ -41,7 +42,6 @@ function App() {
 
     if (window.location.pathname !== initialPath) {
       window.history.replaceState(null, "", DEFAULT_ROUTE);
-      setActivePath(DEFAULT_ROUTE);
     }
 
     function handlePopState() {
@@ -94,4 +94,6 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  return window.location.pathname === "/" ? <LandingPage /> : <DashboardApp />;
+}

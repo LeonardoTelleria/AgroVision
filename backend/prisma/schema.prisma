@@ -389,6 +389,18 @@ model FieldNotebookEntry {
 
 // REPORTS
 
+model DemoRequest {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  email        String   @db.VarChar(254)
+  organization String?  @db.VarChar(150)
+  message      String   @db.VarChar(2000)
+  consentAt    DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@map("demo_requests")
+}
+
 model Report {
   id            Int      @id @default(autoincrement())
   fieldId       Int

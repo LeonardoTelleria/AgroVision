@@ -25,9 +25,11 @@ import dashboardRoutes from "./modules/dashboard/routes/dashboardRoutes";
 //modulo de vision
 import visionRoutes from "./modules/vision/routes/visionRoutes";
 import { checkDatabaseHealth } from "./shared/database/databaseHealth";
+import { demoRequestRoutes } from "./modules/demo-requests/demoRequestRoutes";
 
 // Middlewares globales
 app.use(express.json());
+app.use("/api/demo-requests", demoRequestRoutes);
 
 // Endpoint base de verificación de salud del sistema
 app.get("/api/health", async (req: Request, res: Response) => {
