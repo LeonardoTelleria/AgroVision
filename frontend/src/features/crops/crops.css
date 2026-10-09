@@ -31,6 +31,17 @@
   margin-bottom: 0;
 }
 
+/* La segunda tarjeta no utiliza contenido lateral: liberamos únicamente ese
+   espacio para que su descripción breve permanezca en una sola línea. */
+.cropsFigma .avMetricGrid > .avMetricCard:nth-child(2) .avMetricCard__rightCol {
+  min-width: 0;
+  flex: 0 0 0;
+}
+
+.cropsFigma .avMetricGrid > .avMetricCard:nth-child(2) .avMetricCard__subLabel {
+  white-space: nowrap;
+}
+
 /* =========================================
    Paneles específicos de Cultivos
    ========================================= */
