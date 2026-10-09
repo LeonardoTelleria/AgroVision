@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { VisionController } from "../controllers/visionController";
+import { parseVisionUpload } from "../middleware/visionUpload";
 
 const router = Router();
 /**
@@ -7,6 +8,10 @@ const router = Router();
  * Recibe una solicitud de análisis visual y devuelve
  * una predicción compatible con el AI Service.
  */
-router.post("/analyze", VisionController.analyzeImage);
+router.post(
+  "/analyze",
+  parseVisionUpload,
+  VisionController.analyzeImage,
+);
 
 export default router;
