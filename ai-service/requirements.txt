@@ -1,9 +1,6 @@
-fastapi
-uvicorn
-pydantic
-python-multipart
-torch==2.14.0
-torchvision==0.29.0
-networkx==3.7
-numpy==2.5.3
-optuna==5.0.0
+fastapi==0.143.0
+uvicorn==0.54.0
+pydantic==2.14.0
+python-multipart==0.0.32
+Pillow==12.3.0
+PyYAML==6.0.3

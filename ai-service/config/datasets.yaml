@@ -1,0 +1,86 @@
+schemaVersion: "1.0"
+
+defaults:
+  seed: 42
+  splitRatios:
+    train: 0.70
+    validation: 0.15
+    test: 0.15
+  imageExtensions: [".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff"]
+  maxImageBytes: 52428800
+  maxArchiveMembers: 100000
+  maxArchiveUncompressedBytes: 10737418240
+  maxCompressionRatio: 250
+  perceptualHashDistance: 3
+
+datasets:
+  maize_leaf_disease:
+    cropType: CORN
+    sourceDataset: corn_or_maize_leaf_disease_kaggle
+    sourceName: Corn or Maize Leaf Disease Dataset
+    sourceUrl: https://www.kaggle.com/datasets/smaranjitghose/corn-or-maize-leaf-disease-dataset
+    attribution: Smaranjit Ghose
+    license:
+      name: VERIFY_AT_SOURCE
+      url: https://www.kaggle.com/datasets/smaranjitghose/corn-or-maize-leaf-disease-dataset/metadata
+      verified: false
+      note: La licencia no pudo verificarse de forma inequívoca en los metadatos públicos accesibles; revisarla en Kaggle antes de redistribuir.
+    splitStrategy: stratified_grouped
+    archives:
+      - path: maize/maize.zip
+    includePathSegments: []
+    excludePathSegments: []
+    labels:
+      healthy: [Healthy]
+      gray_leaf_spot: [Gray_Leaf_Spot, Gray Leaf Spot]
+      common_rust: [Common_Rust, Common Rust]
+      blight: [Blight]
+
+  ibean:
+    cropType: RED_BEAN
+    sourceDataset: makerere_ai_lab_ibean
+    sourceName: iBean
+    sourceUrl: https://github.com/AI-Lab-Makerere/ibean
+    attribution: Makerere AI Lab and NaCRRI
+    license:
+      name: MIT
+      url: https://github.com/AI-Lab-Makerere/ibean/blob/master/LICENSE
+      verified: true
+      note: Conservar atribución y aviso de licencia al redistribuir.
+    splitStrategy: official
+    archives:
+      - path: beans/train.zip
+        split: train
+      - path: beans/validation.zip
+        split: validation
+      - path: beans/test.zip
+        split: test
+    includePathSegments: []
+    excludePathSegments: []
+    labels:
+      healthy: [healthy, Healthy]
+      angular_leaf_spot: [angular_leaf_spot, angular leaf spot, Angular Leaf Spot]
+      bean_rust: [bean_rust, bean rust, Bean Rust]
+
+  citrus_fruits_and_leaves:
+    cropType: ORANGE
+    sourceDataset: mendeley_citrus_fruits_and_leaves_v2
+    sourceName: A Citrus Fruits and Leaves Dataset for Detection and Classification of Citrus Diseases through Machine Learning
+    sourceUrl: https://data.mendeley.com/datasets/3f83gxmv57/2
+    attribution: Hafiz Tayyab Rauf, Basharat Ali Saleem, M. Ikram Ullah Lali, Muhammad Attique Khan, Muhammad Sharif and Syed Ahmad Chan Bukhari
+    license:
+      name: CC BY 4.0
+      url: https://creativecommons.org/licenses/by/4.0/
+      verified: true
+      note: Citar DOI 10.17632/3f83gxmv57.2. El dataset se describe como Citrus; no se presupone Citrus sinensis.
+    splitStrategy: stratified_grouped
+    archives:
+      - path: citrus/citrus.zip
+    includePathSegments: [Leaves]
+    excludePathSegments: [Fruits]
+    labels:
+      healthy: [healthy, Healthy]
+      black_spot: [Black spot, Black Spot, black_spot]
+      canker: [canker, Canker]
+      greening: [greening, Greening]
+      melanose: [Melanose, melanose]

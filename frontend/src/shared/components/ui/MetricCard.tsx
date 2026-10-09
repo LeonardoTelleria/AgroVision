@@ -124,8 +124,8 @@ export function MetricCard({
       {/* FOOTER: Enlace de acción inferior acotado con línea divisoria fina */}
       {actionLabel && (
         <footer className="avMetricCard__footer">
-          <button type="button" className="avMetricCard__action">
-            {actionLabel} <span>→</span>
+          <button type="button" className="avMetricCard__action avActionButton">
+            {actionLabel}
           </button>
         </footer>
       )}

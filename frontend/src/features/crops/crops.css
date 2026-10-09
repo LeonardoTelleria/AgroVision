@@ -31,6 +31,17 @@
   margin-bottom: 0;
 }
 
+/* La segunda tarjeta no utiliza contenido lateral: liberamos únicamente ese
+   espacio para que su descripción breve permanezca en una sola línea. */
+.cropsFigma .avMetricGrid > .avMetricCard:nth-child(2) .avMetricCard__rightCol {
+  min-width: 0;
+  flex: 0 0 0;
+}
+
+.cropsFigma .avMetricGrid > .avMetricCard:nth-child(2) .avMetricCard__subLabel {
+  white-space: nowrap;
+}
+
 /* =========================================
    Paneles específicos de Cultivos
    ========================================= */
@@ -46,22 +57,8 @@
     0 1px 3px rgba(21, 42, 39, 0.035);
 }
 
-.cropsFigma .cropsPanel .avPanel__header {
-  min-height: 44px;
-  padding: 11px 14px 6px;
-}
-
 .cropsFigma .cropsPanel .avPanel__title {
   min-width: 0;
-}
-
-.cropsFigma .cropsPanel .avPanel__title h2 {
-  margin: 0;
-  color: var(--av-text);
-  font-size: 1rem;
-  font-weight: 750;
-  line-height: 1.2;
-  letter-spacing: -0.015em;
 }
 
 /* =========================================
@@ -416,15 +413,17 @@
   min-width: 0;
   display: grid;
   grid-template-columns:
-    minmax(0, 1.27fr)
-    minmax(0, 0.95fr)
-    minmax(0, 1fr);
+    repeat(2, minmax(0, 1fr));
   align-items: stretch;
   gap: 10px;
 }
 
 .cropsFigma__middle > .avPanel {
   height: 100%;
+}
+
+.cropsRiskPanel {
+  grid-column: 1 / -1;
 }
 
 /* =========================================
@@ -537,11 +536,30 @@
   grid-template-columns:
     70px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   margin-bottom: 1px;
 }
 
-.priorityCrop__image {
+.priorityCrop__container_img {
+  width: 80px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--av-border-soft);
+  border-radius: 10px;
+  background: var(--av-neutral-100);
+}
+
+.priorityCrop__container_img img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* .priorityCrop__image {
   width: 70px;
   height: 70px;
   display: block;
@@ -566,7 +584,7 @@
     );
   box-shadow:
     0 4px 10px rgba(21, 42, 39, 0.11);
-}
+} */
 
 .priorityCrop__identity {
   min-width: 0;
@@ -578,7 +596,7 @@
   overflow: hidden;
   color: var(--av-text);
   font-family: var(--av-font-heading);
-  font-size: 0.78rem;
+  font-size:1rem;
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -912,15 +930,6 @@
     grid-template-columns:
       repeat(3, minmax(0, 1fr));
   }
-
-  .cropsFigma__middle {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .cropsRiskPanel {
-    grid-column: 1 / -1;
-  }
 }
 
 /* =========================================
@@ -946,9 +955,8 @@
       64px minmax(0, 1fr) auto;
   }
 
-  .priorityCrop__image {
+  .priorityCrop__container_img {
     width: 64px;
-    height: 64px;
   }
 }
 
@@ -989,9 +997,8 @@
     justify-self: start;
   }
 
-  .priorityCrop__image {
+  .priorityCrop__container_img {
     width: 58px;
-    height: 58px;
     grid-row: 1 / span 2;
   }
 }

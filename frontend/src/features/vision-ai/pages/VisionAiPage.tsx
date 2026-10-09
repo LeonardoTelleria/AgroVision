@@ -27,7 +27,7 @@ import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
 import { getCropProfiles } from "../../crops/services/cropProfilesService";
 import type { CropProfile, CropType } from "../../crops/types/cropProfile.types";
 import { VisionResultCard } from "../components/VisionResultCard";
-import { analyzeVisionImage } from "../services/visionAIService";
+import { analyzeVisionImage, VisionRequestError } from "../services/visionAIService";
 import type { VisionAnalysisResult, VisionAnalysisStatus, VisionInspection } from "../types/visionAI.types";
 import "../vision-ai.css";
 
@@ -36,6 +36,8 @@ import "../vision-ai.css";
  */
 const DEFAULT_FIELD_ID = "field-001";
 const DEFAULT_ZONE_ID = "zone-03";
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 export function VisionAiPage() {
   const [profiles, setProfiles] = useState<ReadonlyArray<CropProfile>>([]);
   const [selectedCropType, setSelectedCropType] = useState<CropType>("ORANGE");
@@ -83,7 +85,7 @@ export function VisionAiPage() {
    * → backend
    * → fallback si backend falla.
    */
-  async function runAnalysis(file: File | null, fileName: string) {
+  async function runAnalysis(file: File, fileName: string) {
     setAnalysisStatus("ANALYZING");
     setFeedbackMessage(null);
 
@@ -105,9 +107,13 @@ export function VisionAiPage() {
       }
 
       setAnalysisStatus("RESULT");
-    } catch {
+    } catch (error: unknown) {
       setAnalysisStatus("ERROR");
-      setFeedbackMessage("No fue posible completar el análisis visual.");
+      setFeedbackMessage(
+        error instanceof VisionRequestError
+          ? error.message
+          : "No fue posible completar el análisis visual.",
+      );
     }
   }
 
@@ -127,6 +133,22 @@ export function VisionAiPage() {
     const file = event.target.files?.[0];
 
     if (!file) return;
+
+    if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
+      setAnalysisResult(null);
+      setAnalysisStatus("ERROR");
+      setFeedbackMessage("Selecciona una imagen JPEG, PNG o WebP.");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_BYTES) {
+      setAnalysisResult(null);
+      setAnalysisStatus("ERROR");
+      setFeedbackMessage("La imagen supera el límite permitido de 10 MB.");
+      event.target.value = "";
+      return;
+    }
 
     if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
 
@@ -210,7 +232,7 @@ export function VisionAiPage() {
               <label className="visionUploadButton">
                 <span className="visionUploadButton__icon">{/* SVG upload */}</span>
                 <strong>{analysisStatus === "ANALYZING" ? "Analizando..." : "Subir imagen"}</strong>
-                <input type="file" accept="image/*" disabled={analysisStatus === "ANALYZING"} onChange={handleImageChange} />
+                <input type="file" accept="image/jpeg,image/png,image/webp" disabled={analysisStatus === "ANALYZING"} onChange={handleImageChange} />
               </label>
             </div>
 
@@ -321,7 +343,7 @@ export function VisionAiPage() {
           </div>
         )}
 
-        <button type="button" className="avTextAction visionCenteredAction">Ver todo el historial →</button>
+        <button type="button" className="avTextAction visionCenteredAction avActionButton">Ver todo el historial</button>
       </Panel>
     </section>
   );
@@ -421,6 +443,7 @@ function formatPrediction(value: string): string {
 }
 
 function formatCrop(value: string): string {
+  if (value === "CORN") return "Maíz";
   if (value === "ORANGE") return "Naranjo";
   if (value === "RED_BEAN") return "Frijol rojo";
   if (value === "CASSAVA") return "Yuca";

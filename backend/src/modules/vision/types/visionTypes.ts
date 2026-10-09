@@ -11,6 +11,7 @@ export type VisionPrediction =
   | "UNKNOWN";
 
 export type VisionCropType =
+  | "CORN"
   | "RED_BEAN"
   | "CASSAVA"
   | "QUEQUISQUE"

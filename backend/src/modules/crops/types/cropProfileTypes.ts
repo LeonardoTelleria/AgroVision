@@ -1,6 +1,6 @@
 /** Contratos técnico legacy y persistido del catálogo CropProfile. */
 
-export type CropType = "RED_BEAN" | "CASSAVA" | "QUEQUISQUE" | "ORANGE" | "SORGHUM" | "PEANUT" | "GENERAL";
+export type CropType = "CORN" | "RED_BEAN" | "CASSAVA" | "QUEQUISQUE" | "ORANGE" | "SORGHUM" | "PEANUT" | "GENERAL";
 
 export interface CropRiskRules {
     readonly waterStressSensitive: boolean;

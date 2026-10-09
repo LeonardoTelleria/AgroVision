@@ -10,13 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "agrovision-monorepo": "file:..",
+    "@geoman-io/maplibre-geoman-free": "^0.10.0",
+    "@turf/turf": "^7.4.0",
+    "maplibre-gl": "^6.12.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/geojson": "^7946.0.16",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

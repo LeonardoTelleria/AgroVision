@@ -24,7 +24,10 @@ export function Panel({
         </div>
         {headerAction ?? (showCardTag && <span className="avCardTag">card</span>)}
       </header>
-      {children}
+
+      <div className="avPanel__body">
+        {children}
+      </div>
     </section>
   );
 }

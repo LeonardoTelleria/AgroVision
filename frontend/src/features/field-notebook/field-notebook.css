@@ -297,8 +297,8 @@
 
 .fieldNotebookShortcut img {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
   filter: brightness(0) saturate(100%) invert(10%) sepia(25%) saturate(1087%)
     hue-rotate(117deg) brightness(94%) contrast(96%);

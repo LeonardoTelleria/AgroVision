@@ -52,6 +52,37 @@ export const cropProfilesMock: ReadonlyArray<CropProfile> = [
         },
     },
     {
+        cropType: "CORN",
+        displayName: "Maíz",
+        scientificName: "Zea mays",
+        analysisFocus: [
+            "Vigor foliar",
+            "Roya común",
+            "Tizón foliar",
+            "Mancha gris foliar",
+        ],
+        mainRisks: ["FUNGAL_RISK", "LOW_VIGOR", "WATER_STRESS"],
+        riskRules: {
+            waterStressSensitive: true,
+            fungalRiskSensitive: true,
+            heatStressSensitive: true,
+            nutrientStressSensitive: true,
+        },
+        preferredMetrics: [
+            "ndvi",
+            "soilMoisturePercentage",
+            "temperatureCelsius",
+            "greenCoveragePercentage",
+            "leafSpotSuspected",
+        ],
+        recommendationTemplates: {
+            waterStress: "Verificar humedad de suelo antes de ajustar el riego del maíz.",
+            fungalRisk: "Inspeccionar el follaje y confirmar en campo cualquier señal compatible con enfermedad.",
+            lowVigor: "Contrastar el vigor foliar con humedad, nutrición e historial de la parcela.",
+            inspection: "Registrar una inspección foliar por zona antes de recomendar tratamiento.",
+        },
+    },
+    {
         cropType: "CASSAVA",
         displayName: "Yuca",
         scientificName: "Manihot esculenta",

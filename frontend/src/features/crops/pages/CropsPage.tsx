@@ -38,7 +38,7 @@ import sojaImage from '../../../assets/images/soja-images.jpg'
 import naranjoImage from '../../../assets/images/naranjo-image.jfif'
 import yucaImage from '../../../assets/images/yuca-image.jpg'
 import quequisqueImage from '../../../assets/images/quequisque-image.jpg'
-
+import beans2Image from '../../../assets/images/frijoles-rojos2.png'
 
 /* =========================================
    Recursos visuales compartidos
@@ -116,7 +116,8 @@ export function CropsPage() {
     sojaImage,
     naranjoImage,
     cornImage,
-    quequisqueImage
+    quequisqueImage,
+    beans2Image
   ];
 
   return (
@@ -164,7 +165,7 @@ export function CropsPage() {
         headerAction={
           <button
             type="button"
-            className="cropsHeaderAction"
+            className="cropsHeaderAction avActionButton"
           >
             <span>Ver todos</span>
 
@@ -240,7 +241,7 @@ export function CropsPage() {
 
               <button
                 type="button"
-                className="cropsActionButton cropsActionButton--card"
+                className="cropsActionButton cropsActionButton--card avActionButton"
               >
                 <span>Ver perfil</span>
 
@@ -323,7 +324,7 @@ export function CropsPage() {
 
           <button
             type="button"
-            className="cropsActionButton cropsActionButton--center"
+            className="cropsActionButton cropsActionButton--center avActionButton"
           >
             <span>Ver matriz completa</span>
 
@@ -348,10 +349,15 @@ export function CropsPage() {
               data-crop={priorityCrop.cropType}
             >
               <header>
-                <span
-                  className="priorityCrop__image"
+                <div className="priorityCrop__container_img">
+                  <img
+                  src={beans2Image}
+                  alt=""
                   aria-hidden="true"
+                  loading="lazy"
                 />
+                </div>
+
 
                 <div className="priorityCrop__identity">
                   <strong title={priorityCrop.displayName}>
@@ -394,7 +400,7 @@ export function CropsPage() {
 
               <button
                 type="button"
-                className="cropsActionButton cropsActionButton--center"
+                className="cropsActionButton cropsActionButton--center avActionButton"
               >
                 <span>Ver perfil completo</span>
 
@@ -440,7 +446,7 @@ export function CropsPage() {
 
           <button
             type="button"
-            className="cropsActionButton cropsActionButton--center"
+            className="cropsActionButton cropsActionButton--center avActionButton"
           >
             <span>Ver todos los insights</span>
 
@@ -533,7 +539,7 @@ export function CropsPage() {
 
         <button
           type="button"
-          className="cropsActionButton cropsActionButton--center cropsActivityAction"
+          className="cropsActionButton cropsActionButton--center cropsActivityAction avActionButton"
         >
           <span>Ver toda la actividad</span>
 

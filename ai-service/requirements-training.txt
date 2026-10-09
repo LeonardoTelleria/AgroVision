@@ -1,0 +1,4 @@
+# Install these versions from the official PyTorch CPU/CUDA index documented in
+# docs/ai/TRAINING_GUIDE.md. Keeping them separate avoids loading PyTorch in the API runtime.
+torch==2.13.0
+torchvision==0.28.0

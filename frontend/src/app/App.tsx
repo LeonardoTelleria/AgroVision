@@ -14,7 +14,13 @@
  */
 
 import { useEffect, useState } from "react";
-import { ROUTES, DEFAULT_ROUTE, AppRouter, getRouteFromPathname, type AppRoutePath } from "./AppRouter";
+import { AppRouter } from "./AppRouter";
+import {
+  DEFAULT_ROUTE,
+  ROUTES,
+  getRouteFromPathname,
+  type AppRoutePath,
+} from "./routeDefinitions";
 import { Sidebar } from "../shared/components/layout/Sidebar";
 import { Topbar } from "../shared/components/layout/Topbar";
 import { LandingPage } from "../features/landing/LandingPage";
