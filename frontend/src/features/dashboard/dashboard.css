@@ -43,6 +43,38 @@
 }
 
 /* =========================================
+   Marco oscuro del mapa principal
+   ========================================= */
+
+:root .dashboardFigma .dashboardGisPanel.avPanel {
+  border-color: rgba(118, 159, 17, 0.52);
+  background:
+    linear-gradient(
+      145deg,
+      #031410 0%,
+      var(--av-green-800) 100%
+    );
+  box-shadow:
+    0 7px 21px rgba(3, 20, 16, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+:root
+  .dashboardFigma
+  .dashboardGisPanel
+  > .avPanel__body {
+  background: transparent;
+}
+
+:root .dashboardFigma .dashboardGisPanel__footer strong {
+  color: var(--av-neutral-100);
+}
+
+:root .dashboardFigma .dashboardGisPanel__footer small {
+  color: var(--av-neutral-400);
+}
+
+/* =========================================
    Alertas
    ========================================= */
 .dashboardFigma__right .avCompactRow {
@@ -396,6 +428,7 @@
   font-family: var(--av-font-body);
   font-size: 0.67rem;
   font-weight: 600;
+  flex-wrap: wrap;
 }
 
 /* =========================================

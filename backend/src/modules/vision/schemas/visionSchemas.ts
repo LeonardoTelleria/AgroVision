@@ -4,6 +4,7 @@ import { z } from "zod";
 
 export const visionAnalyzeFieldsSchema = z.object({
   cropType: z.enum([
+    "CORN",
     "RED_BEAN",
     "CASSAVA",
     "QUEQUISQUE",

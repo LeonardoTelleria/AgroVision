@@ -17,7 +17,7 @@
 
 import { useCallback, useEffect, useState, type KeyboardEvent } from 'react';
 
-import { ROUTES, type AppRoutePath } from '../../../app/AppRouter';
+import { ROUTES, type AppRoutePath } from '../../../app/routeDefinitions';
 import agroVisionLogo from '../../../assets/logos/imagotipo-V-clara.svg';
 import weatherImage from '../../../assets/images/weather-images.webp';
 import fieldImage from '../../../assets/images/parcelasCampoConcept.png';

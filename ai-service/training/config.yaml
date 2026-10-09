@@ -1,0 +1,49 @@
+schemaVersion: "1.0"
+
+dataset:
+  root: ../data/processed/v1
+  manifest: manifest.jsonl
+  datasetConfig: ../config/datasets.yaml
+  version: v1
+
+model:
+  architecture: efficientnet_b0
+  pretrainedWeights: IMAGENET1K_V1
+  inputSize: 224
+  resizeSize: 256
+  normalization:
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+
+crops:
+  CORN:
+    classNames: [blight, common_rust, gray_leaf_spot, healthy]
+  RED_BEAN:
+    classNames: [angular_leaf_spot, bean_rust, healthy]
+  ORANGE:
+    classNames: [black_spot, canker, greening, healthy, melanose]
+
+training:
+  seed: 42
+  batchSize: 32
+  numWorkers: 4
+  stage1Epochs: 8
+  stage2Epochs: 20
+  stage1LearningRate: 0.001
+  stage2LearningRate: 0.0001
+  weightDecay: 0.0001
+  labelSmoothing: 0.05
+  progressiveUnfreezeBlocks: 2
+  earlyStoppingPatience: 5
+  classWeighting: auto
+  mixedPrecision: auto
+  scheduler:
+    factor: 0.5
+    patience: 2
+    minLearningRate: 0.000001
+
+outputs:
+  checkpoints: ../checkpoints
+  reports: ../data/reports/training
+  registry: ../model_registry/registry.json
+  exports: ../exports

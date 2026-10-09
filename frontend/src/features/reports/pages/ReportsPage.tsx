@@ -59,9 +59,9 @@ export function ReportsPage() {
         <div className="reportsFigma__side">
           <Panel title="Exportar">
             <div className="reportExportButtons">
-              <button type="button">{/* SVG PDF */} Doc PDF</button>
-              <button type="button">{/* SVG chart */} Resumen</button>
-              <button type="button">{/* SVG share */} Compartir</button>
+              <button type="button" className="avActionButton">{/* SVG PDF */} Doc PDF</button>
+              <button type="button" className="avActionButton">{/* SVG chart */} Resumen</button>
+              <button type="button" className="avActionButton">{/* SVG share */} Compartir</button>
             </div>
           </Panel>
 
@@ -109,7 +109,7 @@ export function ReportsPage() {
           </table>
         </div>
 
-        <button type="button" className="avTextAction reportsCenteredAction">Ver todos los reportes →</button>
+        <button type="button" className="avTextAction reportsCenteredAction avActionButton">Ver todos los reportes</button>
       </Panel>
 
       <Panel title="Línea de tiempo de eventos">

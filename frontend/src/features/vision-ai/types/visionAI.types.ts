@@ -89,7 +89,7 @@ export interface VisionInspection {
 * Request usada por el frontend para pedir análisis.
 *
 * imageFile:
-* Se usa si el usuario selecciona una imagen real.
+* Archivo requerido por el contrato multipart.
 *
 * imageFileName:
 * Permite mantener flujo simulado aunque no se suba archivo.
@@ -99,7 +99,7 @@ export interface VisionAnalyzeRequest {
     readonly fieldId: string;
     readonly zoneId?: string | null;
     readonly imageFileName: string;
-    readonly imageFile: File | null;
+    readonly imageFile: File;
 }
 
 
@@ -115,7 +115,7 @@ export interface VisionAnalysisResult {
 export interface ApiResponse<T> {
     readonly success: boolean;
     readonly data: T | null;
-    readonly message?: string;
-    readonly error?: string;
+    readonly message: string;
+    readonly error: string | null;
     readonly timestamp: string;
 }

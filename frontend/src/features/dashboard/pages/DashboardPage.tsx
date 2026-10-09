@@ -1,49 +1,51 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { MetricCard } from "../../../shared/components/ui/MetricCard";
-import { Panel } from "../../../shared/components/ui/Panel";
-import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
+import { MetricCard } from '../../../shared/components/ui/MetricCard';
+import { Panel } from '../../../shared/components/ui/Panel';
+import { StatusBadge } from '../../../shared/components/ui/StatusBadge';
 
-import { getDashboardData } from "../services/dashboardService";
-import type { DashboardData } from "../types/dashboard.types";
+import { getDashboardData } from '../services/dashboardService';
+import type { DashboardData } from '../types/dashboard.types';
 
-import "../dashboard.css";
+import '../dashboard.css';
 
-import warningAlertIcon from "../../../assets/icons/warning-icon.svg";
-import bugIcon from "../../../assets/icons/bug-icon.svg";
-import hidricStressIcon from "../../../assets/icons/hidric-stress-icon.svg";
-import nitrogenIcon from "../../../assets/icons/nitrogen-icon.svg";
-import irrigationIcon from "../../../assets/icons/water-icon.svg";
-import protectionIcon from "../../../assets/icons/protection-icon.svg";
-import infoIcon from '../../../assets/icons/info-icon2.svg'
-import arrowRightIcon from '../../../assets/icons/arrow-icon.png'
-import arrow2RightIcon from '../../../assets/icons/arrow2-icon.png'
-import img1 from '../../../assets/images/image-mock-plant1.jfif'
-import img2 from '../../../assets/images/image-mock-plant2.jpg'
-import img3 from '../../../assets/images/image-mock-plant3.png'
-import img4 from '../../../assets/images/image-mock-plant4.png'
-import aiRecomIcon from '../../../assets/icons/ai-recommendation-icon.svg'
-import newEvidenceIcon from '../../../assets/icons/new-evidence-icon.svg'
-import alertDiamIcon from '../../../assets/icons/alert-diamond-icon.svg'
-import newSourceIcon from '../../../assets/icons/new-source-icon.svg'
-import waterIcon from '../../../assets/icons/water-icon.svg'
+import warningAlertIcon from '../../../assets/icons/warning-icon.svg';
+import bugIcon from '../../../assets/icons/bug-icon.svg';
+import hidricStressIcon from '../../../assets/icons/hidric-stress-icon.svg';
+import nitrogenIcon from '../../../assets/icons/nitrogen-icon.svg';
+import irrigationIcon from '../../../assets/icons/water-icon.svg';
+import protectionIcon from '../../../assets/icons/protection-icon.svg';
+import infoIcon from '../../../assets/icons/info-icon2.svg';
+import arrowRightIcon from '../../../assets/icons/arrow-icon.png';
+import arrow2RightIcon from '../../../assets/icons/arrow2-icon.png';
+import img1 from '../../../assets/images/image-mock-plant1.jfif';
+import img2 from '../../../assets/images/image-mock-plant2.jpg';
+import img3 from '../../../assets/images/image-mock-plant3.png';
+import img4 from '../../../assets/images/image-mock-plant4.png';
+import aiRecomIcon from '../../../assets/icons/ai-recommendation-icon.svg';
+import newEvidenceIcon from '../../../assets/icons/new-evidence-icon.svg';
+import alertDiamIcon from '../../../assets/icons/alert-diamond-icon.svg';
+import newSourceIcon from '../../../assets/icons/new-source-icon.svg';
+import waterIcon from '../../../assets/icons/water-icon.svg';
 
 // librerias de recharts
-import { Area, AreaChart, Pie, PieChart, ResponsiveContainer} from "recharts";
+import { Area, AreaChart, Pie, PieChart, ResponsiveContainer } from 'recharts';
 // Compartimos el mapa GIS utilizado por MappingPage.
-import { MappingGIS } from "../../mapping/components/MappingGIS";
+import { MappingGIS } from '../../mapping/components/MappingGIS';
 // Utilizamos la iconografía compartida del mapa.
-import { GisIcon } from "../../mapping/components/GisIcon";
+import { GisIcon } from '../../mapping/components/GisIcon';
 // Tipamos la información recibida al seleccionar una zona.
-import type { SelectedZoneData } from "../../mapping/layers/interactionLayer";
-
+import type { SelectedZoneData } from '../../mapping/layers/interactionLayer';
 
 export function DashboardPage() {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   // Conservamos la zona seleccionada para resaltarla y abrir su detalle en Mapping.
-  const [selectedMapZone, setSelectedMapZone] = useState<SelectedZoneData | null>(null);
+  const [selectedMapZone, setSelectedMapZone] =
+    useState<SelectedZoneData | null>(null);
 
   useEffect(() => {
     async function loadDashboard() {
@@ -52,7 +54,7 @@ export function DashboardPage() {
         setDashboardData(data);
         setErrorMessage(null);
       } catch {
-        setErrorMessage("No fue posible cargar Dashboard.");
+        setErrorMessage('No fue posible cargar Dashboard.');
       } finally {
         setIsLoading(false);
       }
@@ -82,21 +84,21 @@ export function DashboardPage() {
   const { summary } = dashboardData;
   const mainAlert = summary.alerts.criticalAlerts; // [0] si solo quiero mostrar una sola alerta
   const recommendation = summary.recommendations.mainRecommendation;
-  const zoneId = summary.intelligence.mostAffectedZoneId ?? "zone-03";
+  const zoneId = summary.intelligence.mostAffectedZoneId ?? 'zone-03';
 
   /* Datos de prueba para Salud general. */
   const saludDetails = [
-    { label: "Excelente", value: "18%", color: "#22c55e" },
-    { label: "Buena", value: "60%", color: "#a3e635" },
-    { label: "Regular", value: "16%", color: "#eab308" },
-    { label: "Mala", value: "6%", color: "#ef4444" },
+    { label: 'Excelente', value: '18%', color: '#22c55e' },
+    { label: 'Buena', value: '60%', color: '#a3e635' },
+    { label: 'Regular', value: '16%', color: '#eab308' },
+    { label: 'Mala', value: '6%', color: '#ef4444' },
   ];
 
   /* Datos de prueba para Alertas activas. */
   const alertasDetails = [
-    { label: "Críticas", value: 2, color: "#ef4444" },
-    { label: "Altas", value: 3, color: "#f97316" },
-    { label: "Medias", value: 2, color: "#eab308" },
+    { label: 'Críticas', value: 2, color: '#ef4444' },
+    { label: 'Altas', value: 3, color: '#f97316' },
+    { label: 'Medias', value: 2, color: '#eab308' },
   ];
 
   /*
@@ -111,21 +113,21 @@ export function DashboardPage() {
   }> = [
     {
       icon: bugIcon, // Alta presión de plaga
-      circleClass: "alertIconCircle alertIconCircle--bug",
-      subtitle: "Lote 12A • Maíz",
-      timeLabel: "Hoy, 08:15"
+      circleClass: 'alertIconCircle alertIconCircle--bug',
+      subtitle: 'Lote 12A • Maíz',
+      timeLabel: 'Hoy, 08:15',
     },
     {
       icon: hidricStressIcon, // Estrés hídrico severo
-      circleClass: "alertIconCircle alertIconCircle--water",
-      subtitle: "Lote 7B • Soja",
-      timeLabel: "Hoy, 07:40"
+      circleClass: 'alertIconCircle alertIconCircle--water',
+      subtitle: 'Lote 7B • Soja',
+      timeLabel: 'Hoy, 07:40',
     },
     {
       icon: warningAlertIcon, // Riesgo de enfermedad
-      circleClass: "alertIconCircle alertIconCircle--warning",
-      subtitle: "Lote 3C • Trigo",
-      timeLabel: "Ayer, 18:30"
+      circleClass: 'alertIconCircle alertIconCircle--warning',
+      subtitle: 'Lote 3C • Trigo',
+      timeLabel: 'Ayer, 18:30',
     },
   ];
 
@@ -145,7 +147,11 @@ export function DashboardPage() {
           progress={summary.healthScore}
           tone="LIME"
           details={saludDetails}
-          subBadge={<span>vs. semana anterior <b style={{ color: "#22c55e" }}>↑ 6%</b></span>}
+          subBadge={
+            <span>
+              vs. semana anterior <b style={{ color: '#22c55e' }}>↑ 6%</b>
+            </span>
+          }
         />
 
         <MetricCard
@@ -163,7 +169,7 @@ export function DashboardPage() {
           description="pendientes"
           tone="TEAL"
           progress={90}
-          icon={<span style={{ fontSize: "4.3rem" }}>🌱</span>}
+          icon={<span style={{ fontSize: '4.3rem' }}>🌱</span>}
           actionLabel="Ver recomendaciones"
         />
       </section>
@@ -171,7 +177,11 @@ export function DashboardPage() {
       <section className="dashboardFigma__main">
         <div className="dashboardFigma__left">
           {/* Presentamos una instancia compacta del mismo GIS utilizado por MappingPage. */}
-          <Panel title="Mapa / Zonas" showInfo={false} className="dashboardGisPanel">
+          <Panel
+            title="Mapa / Zonas"
+            showInfo={false}
+            className="dashboardGisPanel"
+          >
             {/* El contenedor proporciona la altura del mapa dentro del Dashboard. */}
             <div className="dashboardGisPanel__map">
               <MappingGIS
@@ -196,19 +206,21 @@ export function DashboardPage() {
             {/* La información inferior refleja la selección realizada sobre el mapa. */}
             <footer className="dashboardGisPanel__footer">
               <span>
-                <strong>{selectedMapZone?.properties.name ?? "Explora tus zonas"}</strong>
+                <strong>
+                  {selectedMapZone?.properties.name ?? 'Explora tus zonas'}
+                </strong>
 
                 <small>
                   {selectedMapZone
-                    ? "Zona seleccionada en el mapa"
-                    : "Selecciona una zona para ver su análisis"}
+                    ? 'Zona seleccionada en el mapa'
+                    : 'Selecciona una zona para ver su análisis'}
                 </small>
               </span>
 
               {/* Conservamos la zona seleccionada al abrir el explorador completo. */}
               <a
                 href={`/mapping?zone=${encodeURIComponent(selectedMapZone?.zoneId ?? zoneId)}`}
-                className="dashboardActionButton"
+                className="dashboardActionButton avActionButton"
               >
                 <span>Abrir GIS</span>
 
@@ -227,7 +239,11 @@ export function DashboardPage() {
             <Panel title="Capa satelital simulada" showCardTag>
               <div className="satelliteMiniGrid">
                 {/* <SatelliteMetric label="NDVI" value={summary.vegetation.ndvi?.toFixed(2) ?? "—"} status={summary.vegetation.vigorLevel} /> */}
-                <SatelliteMetric label="NDVI" value="0.72" status={summary.vegetation.vigorLevel} />
+                <SatelliteMetric
+                  label="NDVI"
+                  value="0.72"
+                  status={summary.vegetation.vigorLevel}
+                />
                 <SatelliteMetric label="NDWI" value="0.45" status="↑ 0.03" />
                 <SatelliteMetric label="GNDVI" value="0.38" status="↑ 0.04" />
                 {/* <SatelliteMetric label="SAVI" value="0.61" status="↑ 0.02" /> */}
@@ -235,16 +251,18 @@ export function DashboardPage() {
 
               <footer className="dashboardPanelFooter">
                 {/* <span className="avFooterMetaText">Última actualización: {formatTime(summary.lastUpdatedAt)}</span> */}
-                <span className="avFooterMetaText">Sentinel-2 • 18 May 2025</span>
-                <button className="dashboardActionButton" type="button">
-                 <span>Ver detalles</span>
+                <span className="avFooterMetaText">
+                  Sentinel-2 • 18 May 2025
+                </span>
+                <button className="dashboardActionButton avActionButton" type="button">
+                  <span>Ver detalles</span>
                   <img
                     src={arrow2RightIcon}
                     alt=""
                     aria-hidden="true"
                     className="dashboardActionButton__arrow"
                   />
-                  </button>
+                </button>
               </footer>
             </Panel>
 
@@ -260,20 +278,20 @@ export function DashboardPage() {
 
             <Panel title="Zone Insight" showCardTag>
               <div className="zoneInsightRows">
-                <ZoneInsightDonut
-                    criticalZones={3}
-                    totalZones={18}
-                />
+                <ZoneInsightDonut criticalZones={3} totalZones={18} />
                 <div className="zoneInsightRows avZoneInsightRowsExtended">
                   <InfoRow label="Total Zonas" value="18" />
-                  <InfoRow label="Score de riesgo" value="5"/> {/* highlight activa el color de riesgo */}
+                  <InfoRow label="Score de riesgo" value="5" />{' '}
+                  {/* highlight activa el color de riesgo */}
                   <InfoRow label="Evidencia principal" value="10" />
                   <InfoRow label="Acción sugerida" value="3" />
                 </div>
-
               </div>
-              <footer className="dashboardPanelFooter justify-end" style={{ marginTop: '12px' }}>
-                <button className="dashboardActionButton" type="button">
+              <footer
+                className="dashboardPanelFooter justify-end"
+                style={{ marginTop: '12px' }}
+              >
+                <button className="dashboardActionButton avActionButton" type="button">
                   <span>Ver insights</span>
                   <img
                     src={arrow2RightIcon}
@@ -283,7 +301,6 @@ export function DashboardPage() {
                   />
                 </button>
               </footer>
-
             </Panel>
 
             {/* <Panel title="Evidencias show" showCardTag>
@@ -307,7 +324,7 @@ export function DashboardPage() {
                 <button className="avTextAction" type="button">Ver todas</button>
               </footer>
             </Panel> */}
-                        <Panel title="Evidencias" showCardTag>
+            <Panel title="Evidencias" showCardTag>
               <div className="avEvidenceGrid">
                 {/* 
                   Creamos un arreglo estático con tus 4 referencias locales.
@@ -316,25 +333,36 @@ export function DashboardPage() {
                 {[img1, img2, img3, img4].map((currentImage, index) => {
                   // Extraemos datos de soporte del servidor si existen en esa posición
                   const evidenceData = recommendation.evidence[index];
-                  
+
                   return (
-                    <div 
-                      key={evidenceData ? `${evidenceData.source}-${index}` : `fallback-pic-${index}`}
+                    <div
+                      key={
+                        evidenceData
+                          ? `${evidenceData.source}-${index}`
+                          : `fallback-pic-${index}`
+                      }
                       className="avEvidenceItem"
-                      style={{ 
+                      style={{
                         // Forzamos el uso de tu imagen local importada. Si no existe, aplica el gradiente.
-                        backgroundImage: currentImage 
-                          ? `url(${currentImage})` 
-                          : "linear-gradient(135deg, #15803d 0%, #166534 100%)"
+                        backgroundImage: currentImage
+                          ? `url(${currentImage})`
+                          : 'linear-gradient(135deg, #15803d 0%, #166534 100%)',
                       }}
-                      title={evidenceData ? `${evidenceData.source}: ${evidenceData.metric}` : "Evidencia de campo"}
+                      title={
+                        evidenceData
+                          ? `${evidenceData.source}: ${evidenceData.metric}`
+                          : 'Evidencia de campo'
+                      }
                     />
                   );
                 })}
               </div>
 
-              <footer className="dashboardPanelFooter justify-end" style={{ marginTop: '12px' }}>
-                <button className="dashboardActionButton" type="button">
+              <footer
+                className="dashboardPanelFooter justify-end"
+                style={{ marginTop: '12px' }}
+              >
+                <button className="dashboardActionButton avActionButton" type="button">
                   <span>Ver todas</span>
                   <img
                     src={arrow2RightIcon}
@@ -345,8 +373,6 @@ export function DashboardPage() {
                 </button>
               </footer>
             </Panel>
-
-
           </div>
         </div>
 
@@ -389,15 +415,22 @@ export function DashboardPage() {
           </Panel>
         </div> */}
         <div className="dashboardFigma__right">
-          
           {/* NUEVO DISEÑO DEL RESUMEN PRESCRIPTIVO */}
-          <Panel 
+          <Panel
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '12px', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  gap: '12px',
+                  alignItems: 'center',
+                }}
+              >
                 <span>Resumen prescriptivo</span>
-                <img src={infoIcon} alt="" className="avPanel__infoIcon" /> 
+                <img src={infoIcon} alt="" className="avPanel__infoIcon" />
 
-                <button className="dashboardActionButton" type="button">
+                {/* <button className="dashboardActionButton avActionButton" type="button">
                   <span>Ver detalles</span>
                   <img
                     src={arrow2RightIcon}
@@ -405,13 +438,12 @@ export function DashboardPage() {
                     aria-hidden="true"
                     className="dashboardActionButton__arrow"
                   />
-                </button>  
+                </button> */}
               </div>
-            } 
+            }
             showCardTag
           >
             <div className="avPrescriptiveModule">
-              
               {/* FILA 1: NITRÓGENO */}
               <div className="avPrescriptiveRow">
                 <div className="avPrescriptiveRow__left">
@@ -424,8 +456,12 @@ export function DashboardPage() {
                   </div>
                 </div>
                 <div className="avPrescriptiveRow__right">
-                  <span className="primary-value">32 <small>kg/ha</small></span>
-                  <span className="secondary-value percent-up">+12% vs. rec. base</span>
+                  <span className="primary-value">
+                    32 <small>kg/ha</small>
+                  </span>
+                  <span className="secondary-value percent-up">
+                    +12% vs. rec. base
+                  </span>
                 </div>
               </div>
 
@@ -441,7 +477,9 @@ export function DashboardPage() {
                   </div>
                 </div>
                 <div className="avPrescriptiveRow__right">
-                  <span className="primary-value">18 <small>mm</small></span>
+                  <span className="primary-value">
+                    18 <small>mm</small>
+                  </span>
                   <span className="secondary-value">Próx. 48 h</span>
                 </div>
               </div>
@@ -458,22 +496,31 @@ export function DashboardPage() {
                   </div>
                 </div>
                 <div className="avPrescriptiveRow__right">
-                  <span className="primary-value">2 <small>áreas</small></span>
+                  <span className="primary-value">
+                    2 <small>áreas</small>
+                  </span>
                   <span className="secondary-value risk-high">Riesgo alto</span>
                 </div>
               </div>
-
             </div>
           </Panel>
 
           {/* NUEVO DISEÑO OPERATIVO DE ALERTAS CRÍTICAS */}
-          <Panel 
+          <Panel
             title={
-              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: '12px', alignItems: 'center' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  width: '100%',
+                  gap: '12px',
+                  alignItems: 'center',
+                }}
+              >
                 <span>Alertas críticas</span>
-                <img src={infoIcon} alt="" className="avPanel__infoIcon" />   
+          
                 {/* <button type="button" className="avPanelHeaderAction">Ver todas</button> */}
-                <button className="dashboardActionButton" type="button">
+                <button className="dashboardActionButton avActionButton" type="button">
                   <span>Ver todas</span>
                   <img
                     src={arrow2RightIcon}
@@ -481,9 +528,9 @@ export function DashboardPage() {
                     aria-hidden="true"
                     className="dashboardActionButton__arrow"
                   />
-                </button>  
+                </button>
               </div>
-            } 
+            }
             showCardTag
           >
             <div className="avCompactList">
@@ -499,12 +546,16 @@ export function DashboardPage() {
 
                       <div className="avCompactRow__copy">
                         <strong>{alert.title}</strong>
-                        <span className="avCompactRow__subtitle">{visual.subtitle}</span>
+                        <span className="avCompactRow__subtitle">
+                          {visual.subtitle}
+                        </span>
                       </div>
                     </div>
 
                     <div className="avCompactRow__rightSide">
-                      <time className="avCompactRow__time">{visual.timeLabel}</time>
+                      <time className="avCompactRow__time">
+                        {visual.timeLabel}
+                      </time>
                       <span className="avCompactRow__arrow">
                         <img src={arrowRightIcon} alt="flecha de dirección" />
                       </span>
@@ -514,24 +565,27 @@ export function DashboardPage() {
               })}
             </div>
           </Panel>
-
         </div>
       </section>
 
       <section className="dashboardFigma__bottom">
         <Panel title="Actividad reciente">
           <div className="dashboardTimeline">
-            {mainAlert && mainAlert.slice(0, 3).map((alert) => (
-              <TimelineItem
-                key={alert.id}
-                time={formatTime(alert.createdAt)}
-                text={`Alerta crítica: ${alert.title}`}
-                status="Máxima"
-                tone="DANGER"
-                icon={alertDiamIcon}
-                iconTone="DANGER"
-              />
-            ))}
+            
+            {mainAlert &&
+              mainAlert
+                .slice(0, 3)
+                .map((alert) => (
+                  <TimelineItem
+                    key={alert.id}
+                    time={formatTime(alert.createdAt)}
+                    text={`Alerta crítica: ${alert.title}`}
+                    status="Máxima"
+                    tone="DANGER"
+                    icon={alertDiamIcon}
+                    iconTone="DANGER"
+                  />
+                ))}
 
             <TimelineItem
               time="Hoy"
@@ -561,7 +615,10 @@ export function DashboardPage() {
             />
           </div>
 
-          <button type="button" className="dashboardActionButton dashboardActionButton--center">
+          <button
+            type="button"
+            className="dashboardActionButton dashboardActionButton--center avActionButton"
+          >
             <span>Ver toda la actividad</span>
             <img
               src={arrow2RightIcon}
@@ -607,7 +664,10 @@ export function DashboardPage() {
             />
           </div>
 
-          <button type="button" className="dashboardActionButton dashboardActionButton--center">
+          <button
+            type="button"
+            className="dashboardActionButton dashboardActionButton--center avActionButton"
+          >
             <span>Ver todas las acciones</span>
             <img
               src={arrow2RightIcon}
@@ -621,7 +681,6 @@ export function DashboardPage() {
     </section>
   );
 }
-
 
 /* ===========================================================
    COMPONENTE — MÉTRICA SATELITAL
@@ -642,7 +701,7 @@ export function DashboardPage() {
 //       <b>{value}</b>
 //       <span>{status}</span>
 //       <div className="satelliteSparkline" />
-    
+
 //     </article>
 //   );
 // }
@@ -662,28 +721,28 @@ function SatelliteMetric({
       { value: 0.57 },
       { value: 0.55 },
       { value: 0.62 },
-      { value: 0.60 },
+      { value: 0.6 },
       { value: 0.67 },
       { value: 0.72 },
     ],
 
     NDWI: [
       { value: 0.31 },
-      { value: 0.30 },
+      { value: 0.3 },
       { value: 0.35 },
       { value: 0.33 },
-      { value: 0.40 },
+      { value: 0.4 },
       { value: 0.42 },
       { value: 0.45 },
     ],
     GNDVI: [
       { value: 0.13 },
-      { value: 0.40 },
+      { value: 0.4 },
       { value: 0.32 },
       { value: 0.21 },
-      { value: 0.60 },
+      { value: 0.6 },
       { value: 0.22 },
-      { value: 0.10 },
+      { value: 0.1 },
     ],
     SAVI: [
       { value: 0.4 },
@@ -698,7 +757,11 @@ function SatelliteMetric({
 
   const chartData = metricHistory[label];
 
-  const hasRealChart = label === "NDVI" || label === "NDWI" || label === "GNDVI"|| label === "SAVI";
+  const hasRealChart =
+    label === 'NDVI' ||
+    label === 'NDWI' ||
+    label === 'GNDVI' ||
+    label === 'SAVI';
 
   return (
     <article className="satelliteMetric">
@@ -728,17 +791,9 @@ function SatelliteMetric({
                   x2="0"
                   y2="1"
                 >
-                  <stop
-                    offset="0%"
-                    stopColor="#30b76a"
-                    stopOpacity={0.42}
-                  />
+                  <stop offset="0%" stopColor="#30b76a" stopOpacity={0.42} />
 
-                  <stop
-                    offset="100%"
-                    stopColor="#30b76a"
-                    stopOpacity={0.05}
-                  />
+                  <stop offset="100%" stopColor="#30b76a" stopOpacity={0.05} />
                 </linearGradient>
               </defs>
 
@@ -775,23 +830,20 @@ function ZoneInsightDonut({
   readonly totalZones: number;
 }) {
   const safeTotal = Math.max(totalZones, 1);
-  const safeCritical = Math.min(
-    Math.max(criticalZones, 0),
-    safeTotal
-  );
+  const safeCritical = Math.min(Math.max(criticalZones, 0), safeTotal);
 
   const stableZones = safeTotal - safeCritical;
 
   const donutData = [
     {
-      name: "Zonas críticas",
+      name: 'Zonas críticas',
       value: safeCritical,
-      fill: "#a7d91e",
+      fill: '#a7d91e',
     },
     {
-      name: "Otras zonas",
+      name: 'Otras zonas',
       value: stableZones,
-      fill: "#d4ded8",
+      fill: '#d4ded8',
     },
   ];
 
@@ -840,19 +892,21 @@ function InfoRow({
   readonly highlight?: boolean;
 }) {
   return (
-    <div className="figmaInfoRow" style={{display: "flex", justifyContent: "flex-start"}}> 
+    <div
+      className="figmaInfoRow"
+      style={{ display: 'flex', justifyContent: 'flex-start' }}
+    >
       <span>{label}</span>
-      <strong className={highlight ? "is-highlighted" : ""}>{value}</strong>
+      <strong className={highlight ? 'is-highlighted' : ''}>{value}</strong>
     </div>
   );
 }
-
 
 /* ===========================================================
    COMPONENTE — TIMELINE
    =========================================================== */
 
-type TimelineIconTone = "DANGER" | "INFO" | "LIME" | "SUCCESS";
+type TimelineIconTone = 'DANGER' | 'INFO' | 'LIME' | 'SUCCESS';
 
 function TimelineItem({
   time,
@@ -865,7 +919,7 @@ function TimelineItem({
   readonly time: string;
   readonly text: string;
   readonly status: string;
-  readonly tone: "DANGER" | "LIME" | "INFO" | "SUCCESS";
+  readonly tone: 'DANGER' | 'LIME' | 'INFO' | 'SUCCESS';
   readonly icon: string;
   readonly iconTone: TimelineIconTone;
 }) {
@@ -883,9 +937,7 @@ function TimelineItem({
         <time>{time}</time>
       </div>
 
-      <StatusBadge tone={tone}>
-        {status}
-      </StatusBadge>
+      <StatusBadge tone={tone}>{status}</StatusBadge>
     </div>
   );
 }
@@ -894,7 +946,7 @@ function TimelineItem({
    COMPONENTE — PRÓXIMA ACCIÓN
    =========================================================== */
 
-type NextActionIconTone = "GREEN" | "BLUE" | "AMBER" | "TEAL";
+type NextActionIconTone = 'GREEN' | 'BLUE' | 'AMBER' | 'TEAL';
 
 function NextAction({
   text,
@@ -905,7 +957,7 @@ function NextAction({
 }: {
   readonly text: string;
   readonly date: string;
-  readonly priority: "Alta" | "Media" | "Baja";
+  readonly priority: 'Alta' | 'Media' | 'Baja';
   readonly icon: string;
   readonly iconTone: NextActionIconTone;
 }) {
@@ -925,30 +977,28 @@ function NextAction({
 
       <StatusBadge
         tone={
-          priority === "Alta" ? "DANGER" : priority === "Media" ? "WARNING" : "SUCCESS"
+          priority === 'Alta'
+            ? 'DANGER'
+            : priority === 'Media'
+              ? 'WARNING'
+              : 'SUCCESS'
         }
       >
         {priority}
       </StatusBadge>
 
-      <input
-        type="checkbox"
-        aria-label={text}
-        className="nextAction__check"
-      />
+      <input type="checkbox" aria-label={text} className="nextAction__check" />
     </div>
   );
 }
-
 
 /* ===========================================================
    HELPERS
    =========================================================== */
 
 function formatTime(value: string): string {
-  return new Intl.DateTimeFormat("es-NI", {
-    hour: "2-digit",
-    minute: "2-digit",
+  return new Intl.DateTimeFormat('es-NI', {
+    hour: '2-digit',
+    minute: '2-digit',
   }).format(new Date(value));
 }
-

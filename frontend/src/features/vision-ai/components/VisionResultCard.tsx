@@ -124,6 +124,7 @@ function formatPrediction(value: string): string {
 }
 
 function formatCrop(value: string): string {
+  if (value === "CORN") return "Maíz";
   if (value === "ORANGE") return "Naranjo";
 
   return value.replaceAll("_", " ");

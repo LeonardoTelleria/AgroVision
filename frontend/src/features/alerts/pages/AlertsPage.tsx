@@ -476,6 +476,9 @@ export function AlertsPage() {
               </div>
             ))}
         </div>
+        <button type="button" className="avTextAction alertsCenteredAction avActionButton">
+          Ver todo el historial
+        </button>
       </Panel>
     </section>
   );

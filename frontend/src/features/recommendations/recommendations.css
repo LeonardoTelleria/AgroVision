@@ -1,429 +1,2578 @@
+/**
+ * =========================================
+ * AgroVision — Recomendaciones
+ * =========================================
+ *
+ * Hoja visual definitiva del módulo.
+ *
+ * Objetivos:
+ * - mantener coherencia con Dashboard, Cultivos y Alertas;
+ * - preservar las tres MetricCard superiores;
+ * - eliminar desbordes y espacios vacíos artificiales;
+ * - mantener tamaños tipográficos coherentes;
+ * - garantizar una jerarquía UI/UX clara;
+ * - soportar Recharts correctamente;
+ * - adaptar la interfaz a laptop, tablet y móvil;
+ * - evitar que contenido dinámico rompa las cards.
+ *
+ * IMPORTANTE:
+ * - no contiene lógica de negocio;
+ * - no modifica servicios;
+ * - no modifica tipos;
+ * - no simula las gráficas mediante CSS.
+ * =========================================
+ */
+
+
+/* ===========================================================
+   1. PANTALLA
+   =========================================================== */
+
 .recommendationsFigma {
-  gap: 10px;
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+  align-content: start;
+
+  gap: 12px;
 }
-.recommendationsFigma .avMetricRing {
-  background: conic-gradient(
-    var(--av-ring-color) 0deg,
-    var(--av-ring-color) var(--av-ring-progress),
-    rgba(255, 255, 255, 0.35) var(--av-ring-progress),
-    rgba(255, 255, 255, 0.35) 360deg
-  );
+
+.recommendationsFigma,
+.recommendationsFigma * {
+  box-sizing: border-box;
+}
+
+.recommendationsFigma .avScreenTitle {
+  margin: 0;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+}
+
+
+/* ===========================================================
+   2. METRIC CARDS
+   ===========================================================
+   Las tres tarjetas superiores continúan utilizando
+   MetricCard compartido.
+   Solo ajustamos elementos internos específicos de esta
+   pantalla sin alterar su arquitectura.
+   =========================================================== */
+
+.recommendationsFigma .avMetricGrid {
+  width: 100%;
+  min-width: 0;
+}
+
+.recommendationsFigma .avMetricCard {
+  min-width: 0;
 }
 
 .recommendationsFigma .avMetricCard__ringDescription {
   max-width: 150px;
+
   margin: 0;
+
   color: var(--av-neutral-200);
-  font-size: 13px;
-  line-height: 1.4;
+
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.35;
+
   text-align: left;
 }
+
+
+/* ===========================================================
+   3. PANELES DEL MÓDULO
+   ===========================================================
+   Panel ya posee padding global en figma-ui.css.
+   NO volvemos a introducir padding artificial aquí.
+   =========================================================== */
+
+.recommendationsFigma .recommendationsPanel {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+
+  align-self: start;
+
+  overflow: hidden;
+
+  border: 1px solid rgba(212, 222, 216, 0.95);
+  border-radius: 14px;
+
+  background: rgba(255, 255, 255, 0.97);
+
+  box-shadow:
+    0 5px 15px rgba(21, 42, 39, 0.055),
+    0 1px 3px rgba(21, 42, 39, 0.035);
+}
+
+
+/* ===========================================================
+   Header de Panel
+   =========================================================== */
+
+.recommendationsFigma
+.recommendationsPanel
+.avPanel__title {
+  min-width: 0;
+
+  white-space: normal;
+}
+
+/* ===========================================================
+   Texto descriptivo inmediatamente debajo del título
+   =========================================================== */
+
+.recommendationsPanelLead {
+  width: 100%;
+  min-width: 0;
+
+  margin:
+    0
+    0
+    12px;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* ===========================================================
+   4. WORKSPACE PRINCIPAL
+   =========================================================== */
 
 .recommendationsFigma__workspace {
+  width: 100%;
   min-width: 0;
 
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(330px, 1fr);
 
-  gap: 9px;
+  grid-template-columns:
+    minmax(0, 1.12fr)
+    minmax(360px, 0.88fr);
+
+  align-items: start;
+
+  gap: 10px;
 }
+
+.recommendationsFigma__workspace > .avPanel {
+  width: 100%;
+  min-width: 0;
+  height: auto;
+
+  align-self: start;
+}
+
+
+/* ===========================================================
+   5. FILTRO
+   =========================================================== */
 
 .recommendationFilter {
-  height: 25px;
+  min-width: 74px;
+  min-height: 29px;
 
-  padding: 0 8px;
+  flex: 0 0 auto;
 
-  color: var(--av-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  font-size: 0.51rem;
+  padding: 0 14px;
+
+  color: var(--av-green-600);
+
+  font-family: var(--av-font-body);
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 1;
 
   border: 1px solid var(--av-border);
-  border-radius: 5px;
-
-  background: var(--av-neutral-50);
-}
-
-.recommendationPriorityList {
-  display: grid;
-
-  overflow: hidden;
-
-  border: 1px solid var(--av-border-soft);
-  border-radius: 5px;
-}
-
-.priorityRecommendation {
-  min-width: 0;
-  min-height: 62px;
-
-  display: grid;
-  grid-template-columns:
-    34px minmax(90px, 0.8fr) minmax(120px, 1fr) minmax(120px, 1fr)
-    auto 10px;
-  align-items: center;
-
-  gap: 7px;
-
-  padding: 6px 8px;
-
-  text-align: left;
-
-  border: 0;
-  border-bottom: 1px solid var(--av-border-soft);
-
-  background: var(--av-neutral-50);
-
-  cursor: pointer;
-
-  transition: background 120ms ease;
-}
-
-.priorityRecommendation:hover,
-.priorityRecommendation.is-selected {
-  background: var(--av-lime-50);
-}
-
-.priorityRecommendation__icon {
-  width: 32px;
-  height: 32px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 5px;
-}
-
-.priorityRecommendation__icon--danger {
-  background-color: var(--av-danger);
-  background-image: url("../../assets/icons/water-icon.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 20px;
-}
-
-.priorityRecommendation__icon--high {
-  background-color: var(--av-danger);
-  background-image: url("../../assets/icons/bug-icon.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 22px;
-}
-
-.priorityRecommendation__icon--warning {
-  background-color: yellow;
-  background-image: url("../../assets/icons/plant-01-icon.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 22px;
-}
-
-.priorityRecommendation__icon--success {
-  background-color: var(--av-lime-500);
-  background-image: url("../../assets/icons/warning-green-icon.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 22px;
-}
-
-.priorityRecommendation > div {
-  min-width: 0;
-
-  display: grid;
-}
-
-.priorityRecommendation > div > span {
-  color: var(--av-text-muted);
-
-  font-size: 0.44rem;
-}
-
-.priorityRecommendation > div > strong {
-  color: var(--av-text-secondary);
-
-  font-size: 0.49rem;
-  font-weight: 600;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.priorityRecommendation__risk > strong {
-  color: var(--av-text);
-
-  font-size: 0.56rem;
-}
-
-.priorityRecommendation__risk > small {
-  color: var(--av-text-muted);
-
-  font-size: 0.44rem;
-}
-
-.recommendationCenteredAction {
-  display: block;
-
-  margin: 8px auto 0;
-}
-
-/* Detail */
-
-.recommendationDetail {
-  display: grid;
-  gap: 7px;
-}
-
-.recommendationDetail__top {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto auto;
-  align-items: center;
-
-  gap: 7px;
-
-  padding-bottom: 8px;
-
-  border-bottom: 1px solid var(--av-border-soft);
-}
-
-.recommendationDetailIcon {
-  width: 36px;
-  height: 36px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 5px;
-}
-
-.recommendationDetailIcon--danger {
-  background-color: var(--av-danger);
-  background-image: url("../../assets/icons/hongo-icon.png");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 24px;
-}
-
-.recommendationDetailIcon--high {
-  background-color: var(--av-danger);
-  background-image: url("../../assets/icons/hongo-icon.png");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 26px;
-}
-
-.recommendationDetailIcon--warning {
-  background-color: var(--av-warning);
-  background-image: url("../../assets/icons/warning-orange-icon.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 24px;
-}
-
-.recommendationDetailIcon--success {
-  background-color: var(--av-lime-500);
-  background-image: url("../../assets/icons/warning-green-icon.svg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 24px;
-}
-
-.recommendationDetail__top strong {
-  color: var(--av-text);
-
-  font-size: 0.56rem;
-}
-
-.recommendationDetail__top p {
-  margin: 2px 0 0;
-
-  color: var(--av-text-secondary);
-
-  font-size: 0.47rem;
-}
-
-.recommendationDetail__top > span {
-  color: var(--av-text-muted);
-
-  font-size: 0.46rem;
-}
-
-.recommendationDetailSection strong,
-.recommendationDetail h3 {
-  color: var(--av-text);
-
-  font-family: var(--av-font-heading);
-  font-size: 0.53rem;
-}
-
-.recommendationDetailSection p {
-  margin: 2px 0 0;
-
-  color: var(--av-text-secondary);
-
-  font-size: 0.48rem;
-  line-height: 1.35;
-}
-
-.recommendationAffectedField {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 2px 0 5px;
-  border-bottom: 1px solid var(--av-border-soft);
-  font-size: 0.48rem;
-}
-
-.recommendationAffectedField strong {
-  color: var(--av-text-secondary);
-}
-
-.recommendationAffectedField span {
-  padding: 3px 8px;
-  color: var(--av-teal-700);
-  border: 1px solid var(--av-teal-400);
-  border-radius: 999px;
-  background: var(--av-lime-50);
-}
-
-.recommendationIndicators {
-  display: grid;
-  gap: 6px;
-  padding: 9px;
-  border-radius: 7px;
-  background: #062d29;
-}
-
-.recommendationIndicators h3 {
-  margin: 0;
-  color: #a3e635;
-  font-size: 0.55rem;
-}
-
-.recommendationIndicatorRecency {
-  justify-self: end;
-  color: #cbd5d1;
-  font-size: 0.42rem;
-}
-
-.recommendationDetail h3 {
-  margin: 0;
-}
-
-.recommendationEvidenceMini {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-
-  gap: 5px;
-}
-
-.recommendationEvidenceMini div {
-  display: grid;
-  gap: 2px;
-
-  padding: 4px 5px;
-  border: 0;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.recommendationEvidenceMini span {
-  color: #cbd5d1;
-
-  font-size: 0.42rem;
-}
-
-.recommendationEvidenceMini strong {
-  color: #ffffff;
-
-  font-family: var(--av-font-heading);
-  font-size: 0.62rem;
-}
-
-.recommendationEvidenceMini small {
-  color: #a3e635;
-
-  font-size: 0.4rem;
-}
-
-.recommendationCompleteButton {
-  width: 100%;
-
-  height: 30px;
-
-  justify-self: center;
-
-  color: #ffffff;
-
-  font-size: 0.53rem;
-  font-weight: 700;
-
-  border: 0;
-  border-radius: 5px;
-
-  background: var(--av-green-400);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.98),
+      rgba(241, 245, 242, 0.88)
+    );
+
+  box-shadow:
+    0 2px 5px rgba(21, 42, 39, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
 
   cursor: pointer;
 
   transition:
-    background 120ms ease,
-    transform 120ms ease;
+    transform 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.recommendationFilter:hover {
+  color: var(--av-green-500);
+
+  transform: translateY(-1px);
+
+  border-color: rgba(118, 159, 17, 0.28);
+
+  background: var(--av-lime-50);
+
+  box-shadow:
+    0 5px 10px rgba(21, 42, 39, 0.06);
+}
+
+.recommendationFilter:active {
+  transform: translateY(0);
+}
+
+
+/* ===========================================================
+   6. RECOMENDACIONES PRIORIZADAS
+   =========================================================== */
+
+.recommendationPriorityList {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  gap: 7px;
+}
+
+
+/* ===========================================================
+   Card de recomendación
+   =========================================================== */
+
+.priorityRecommendation {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 96px;
+
+  display: grid;
+
+  grid-template-columns:
+    42px
+    minmax(130px, 1.05fr)
+    minmax(115px, 0.95fr)
+    minmax(115px, 0.95fr)
+    15px;
+
+  align-items: center;
+
+  column-gap: 10px;
+
+  padding: 9px 10px 9px 12px;
+
+  overflow: hidden;
+
+  color: inherit;
+
+  text-align: left;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.99),
+      rgba(248, 250, 248, 0.92)
+    );
+
+  box-shadow:
+    0 2px 5px rgba(21, 42, 39, 0.03);
+
+  cursor: pointer;
+
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
+}
+
+
+/* ===========================================================
+   Línea semántica lateral
+   =========================================================== */
+
+.priorityRecommendation::before {
+  content: "";
+
+  position: absolute;
+
+  inset:
+    0
+    auto
+    0
+    0;
+
+  width: 3px;
+
+  border-radius:
+    10px
+    0
+    0
+    10px;
+}
+
+.priorityRecommendation--danger::before,
+.priorityRecommendation--high::before {
+  background: var(--av-danger);
+}
+
+.priorityRecommendation--warning::before {
+  background: var(--av-amber-500);
+}
+
+.priorityRecommendation--success::before {
+  background: var(--av-success);
+}
+
+
+/* ===========================================================
+   Hover / selección
+   =========================================================== */
+
+.priorityRecommendation:hover {
+  transform: translateY(-1px);
+
+  border-color: rgba(183, 198, 191, 0.9);
+
+  box-shadow:
+    0 7px 15px rgba(21, 42, 39, 0.065);
+}
+
+.priorityRecommendation.is-selected {
+  border-color: rgba(167, 217, 30, 0.42);
+
+  background:
+    linear-gradient(
+      110deg,
+      rgba(250, 253, 232, 0.96),
+      rgba(255, 255, 255, 0.98) 52%
+    );
+
+  box-shadow:
+    0 7px 18px rgba(21, 42, 39, 0.06),
+    inset 0 0 0 1px rgba(167, 217, 30, 0.07);
+}
+
+
+/* ===========================================================
+   Icono
+   =========================================================== */
+
+.priorityRecommendation__icon {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  align-self: center;
+
+  overflow: hidden;
+
+  border-radius: 9px;
+
+  box-shadow:
+    0 4px 10px rgba(21, 42, 39, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.priorityRecommendation__icon img {
+  width: 22px;
+  height: 22px;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.priorityRecommendation__icon--danger,
+.priorityRecommendation__icon--high {
+  background: var(--av-danger);
+}
+
+.priorityRecommendation__icon--warning {
+  background: var(--av-amber-500);
+}
+
+.priorityRecommendation__icon--success {
+  background: var(--av-green-300);
+}
+
+
+/* ===========================================================
+   Copy principal
+   =========================================================== */
+
+.priorityRecommendation__main {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  gap: 3px;
+}
+
+.priorityRecommendation__main .avStatusBadge {
+  flex: 0 0 auto;
+
+  margin-bottom: 1px;
+}
+
+.priorityRecommendation__main > strong {
+  width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.63rem;
+  font-weight: 750;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.priorityRecommendation__main > p {
+  width: 100%;
+  min-width: 0;
+
+  display: -webkit-box;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.53rem;
+  font-weight: 500;
+  line-height: 1.32;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+
+/* ===========================================================
+   Columnas internas
+   =========================================================== */
+
+.priorityRecommendation__column {
+  min-width: 0;
+
+  align-self: stretch;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 4px;
+
+  padding-left: 10px;
+
+  border-left:
+    1px solid
+    rgba(228, 236, 231, 0.95);
+}
+
+.priorityRecommendation__column > span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text-muted2);
+
+  font-size: 0.47rem;
+  font-weight: 600;
+  line-height: 1;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.priorityRecommendation__column > strong {
+  min-width: 0;
+
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.55rem;
+  font-weight: 650;
+  line-height: 1.3;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+
+/* ===========================================================
+   Flecha
+   =========================================================== */
+
+.priorityRecommendation__arrow {
+  width: 15px;
+  height: 15px;
+
+  display: grid;
+  place-items: center;
+
+  justify-self: end;
+}
+
+.priorityRecommendation__arrow img {
+  width: 12px;
+  height: 12px;
+
+  display: block;
+
+  object-fit: contain;
+
+  opacity: 0.55;
+
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.priorityRecommendation:hover
+.priorityRecommendation__arrow img {
+  opacity: 0.95;
+
+  transform: translateX(2px);
+}
+
+
+/* ===========================================================
+   7. CTA PRINCIPAL
+   =========================================================== */
+
+.recommendationPrimaryAction,
+.recommendationSecondaryAction {
+  width: max-content;
+  min-height: 31px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 5px;
+
+  color: #ffffff;
+
+  font-family: var(--av-font-body);
+  font-size: 0.67rem;
+  font-weight: 700;
+  line-height: 1;
+
+  white-space: nowrap;
+
+  border:
+    1px solid
+    rgba(118, 159, 17, 0.22);
+
+  border-radius:
+    10px 0 10px 0;
+
+  background: var(--av-lime-600);
+
+  cursor: pointer;
+
+  transition:
+    transform 140ms ease,
+    color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.recommendationPrimaryAction {
+  margin:
+    12px
+    auto
+    0;
+}
+
+.recommendationPrimaryAction img,
+.recommendationSecondaryAction img {
+  width: 15px;
+  height: 15px;
+
+  display: block;
+
+  object-fit: contain;
+
+  opacity: 0.82;
+
+  transition:
+    transform 140ms ease,
+    opacity 140ms ease;
+}
+
+.recommendationPrimaryAction:hover,
+.recommendationSecondaryAction:hover {
+  color: var(--av-green-700);
+
+  transform: translateY(-1px);
+
+  background:
+    rgba(206, 238, 190, 0.95);
+
+  box-shadow:
+    0 4px 11px rgba(21, 42, 39, 0.09);
+}
+
+.recommendationPrimaryAction:hover img,
+.recommendationSecondaryAction:hover img {
+  opacity: 1;
+
+  transform: translateX(2px);
+}
+
+
+/* ===========================================================
+   8. DETALLE DE RECOMENDACIÓN
+   =========================================================== */
+
+.recommendationDetail {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  gap: 10px;
+}
+
+
+/* ===========================================================
+   Hero
+   =========================================================== */
+
+.recommendationDetail__hero {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    48px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding:
+    10px
+    11px;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(227, 26, 22, 0.1);
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      105deg,
+      rgba(254, 242, 242, 0.85),
+      rgba(255, 255, 255, 0.98) 64%
+    );
+}
+
+
+/* ===========================================================
+   Icono del detalle
+   =========================================================== */
+
+.recommendationDetailIcon {
+  width: 46px;
+  height: 46px;
+
+  display: grid;
+  place-items: center;
+
+  overflow: hidden;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 5px 12px rgba(21, 42, 39, 0.09);
+}
+
+.recommendationDetailIcon img {
+  width: 25px;
+  height: 25px;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.recommendationDetailIcon--danger,
+.recommendationDetailIcon--high {
+  background: var(--av-danger);
+}
+
+.recommendationDetailIcon--warning {
+  background: var(--av-amber-500);
+}
+
+.recommendationDetailIcon--success {
+  background: var(--av-green-300);
+}
+
+
+/* ===========================================================
+   Hero copy
+   =========================================================== */
+
+.recommendationDetail__heroCopy {
+  min-width: 0;
+}
+
+.recommendationDetail__heroCopy > span {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: var(--av-text-muted2);
+
+  font-size: 0.48rem;
+  font-weight: 750;
+  line-height: 1;
+
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.recommendationDetail__heroCopy > strong {
+  min-width: 0;
+
+  display: block;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.78rem;
+  font-weight: 750;
+  line-height: 1.25;
+
+  overflow-wrap: anywhere;
+}
+
+.recommendationDetail__heroCopy > p {
+  min-width: 0;
+
+  display: -webkit-box;
+
+  margin:
+    4px
+    0
+    0;
+
+  overflow: hidden;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.56rem;
+  font-weight: 500;
+  line-height: 1.35;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+
+/* ===========================================================
+   Prioridad
+   =========================================================== */
+
+.recommendationDetail__priority {
+  min-width: 68px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  gap: 5px;
+}
+
+.recommendationDetail__priority > span {
+  color: var(--av-text-muted2);
+
+  font-size: 0.46rem;
+  font-weight: 600;
+}
+
+
+/* ===========================================================
+   Metadata
+   =========================================================== */
+
+.recommendationDetail__meta {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  overflow: hidden;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(248, 250, 248, 0.92),
+      rgba(255, 255, 255, 0.98)
+    );
+}
+
+.recommendationDetailMeta {
+  min-width: 0;
+  min-height: 54px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 4px;
+
+  padding:
+    7px
+    9px;
+
+  border-right:
+    1px solid
+    var(--av-border-soft);
+}
+
+.recommendationDetailMeta:last-child {
+  border-right: 0;
+}
+
+.recommendationDetailMeta > span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text-muted2);
+
+  font-size: 0.45rem;
+  font-weight: 600;
+  line-height: 1;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendationDetailMeta > strong {
+  min-width: 0;
+
+  display: block;
+
+  overflow: hidden;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.56rem;
+  font-weight: 700;
+  line-height: 1.2;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ===========================================================
+   Bloques prescriptivos
+   =========================================================== */
+
+.recommendationDetail__sections {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+}
+
+.recommendationDetailSection {
+  min-width: 0;
+
+  padding:
+    7px
+    2px;
+
+  border-bottom:
+    1px solid
+    rgba(228, 236, 231, 0.82);
+}
+
+.recommendationDetailSection:last-child {
+  border-bottom: 0;
+}
+
+.recommendationDetailSection > strong {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.59rem;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.recommendationDetailSection > p {
+  margin: 0;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.55rem;
+  font-weight: 500;
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* ===========================================================
+   Evidencia — heading
+   =========================================================== */
+
+.recommendationDetail__evidenceTitle {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+}
+
+.recommendationDetail__evidenceTitle > strong {
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.63rem;
+  font-weight: 750;
+}
+
+.recommendationDetail__evidenceTitle > span {
+  color: var(--av-text-muted2);
+
+  font-size: 0.48rem;
+  font-weight: 600;
+}
+
+
+/* ===========================================================
+   Evidencia
+   =========================================================== */
+
+.recommendationEvidenceMini {
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 6px;
+}
+
+.recommendationEvidenceMini__item {
+  min-width: 0;
+  min-height: 72px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  gap: 4px;
+
+  padding:
+    8px
+    9px;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(167, 217, 30, 0.18);
+
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(250, 253, 232, 0.92),
+      rgba(255, 255, 255, 0.96)
+    );
+}
+
+.recommendationEvidenceMini__item > span {
+  width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.48rem;
+  font-weight: 600;
+  line-height: 1.1;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendationEvidenceMini__item > strong {
+  width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.15;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendationEvidenceMini__item > small {
+  width: max-content;
+  max-width: 100%;
+
+  padding:
+    2px
+    6px;
+
+  overflow: hidden;
+
+  color: var(--av-green-600);
+
+  font-size: 0.42rem;
+  font-weight: 700;
+  line-height: 1;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  border-radius: 999px;
+
+  background:
+    rgba(48, 183, 106, 0.09);
+}
+
+
+/* ===========================================================
+   Estados de evidencia
+   =========================================================== */
+
+.recommendationEvidenceMini__item--critical {
+  border-color:
+    rgba(227, 26, 22, 0.15);
+
+  background:
+    rgba(254, 242, 242, 0.84);
+}
+
+.recommendationEvidenceMini__item--critical
+> small {
+  color: var(--av-danger-text);
+
+  background:
+    rgba(227, 26, 22, 0.09);
+}
+
+.recommendationEvidenceMini__item--warning,
+.recommendationEvidenceMini__item--watch {
+  border-color:
+    rgba(246, 173, 4, 0.18);
+
+  background:
+    rgba(254, 251, 232, 0.9);
+}
+
+.recommendationEvidenceMini__item--warning
+> small,
+.recommendationEvidenceMini__item--watch
+> small {
+  color: var(--av-warning-text);
+
+  background:
+    rgba(246, 173, 4, 0.1);
+}
+
+.recommendationEvidenceMini__item--normal {
+  border-color:
+    rgba(48, 183, 106, 0.15);
+
+  background:
+    rgba(239, 250, 239, 0.9);
+}
+
+.recommendationEvidenceMini__item--normal
+> small {
+  color: var(--av-success-text);
+
+  background:
+    rgba(48, 183, 106, 0.1);
+}
+
+
+/* ===========================================================
+   CTA detalle
+   =========================================================== */
+
+.recommendationCompleteButton {
+  width: 100%;
+  min-height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding:
+    0
+    16px;
+
+  color: #ffffff;
+
+  font-family: var(--av-font-body);
+  font-size: 0.62rem;
+  font-weight: 750;
+  line-height: 1;
+
+  border: 0;
+  border-radius: 7px;
+
+  background:
+    linear-gradient(
+      100deg,
+      var(--av-green-300),
+      var(--av-green-400)
+    );
+
+  box-shadow:
+    0 4px 10px rgba(21, 42, 39, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.13);
+
+  cursor: pointer;
+
+  transition:
+    transform 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .recommendationCompleteButton:hover {
   transform: translateY(-1px);
 
-  background: var(--av-green-300);
+  background:
+    linear-gradient(
+      100deg,
+      var(--av-green-200),
+      var(--av-green-300)
+    );
+
+  box-shadow:
+    0 7px 15px rgba(21, 42, 39, 0.1);
 }
 
-/* Bottom */
+
+/* ===========================================================
+   9. ZONA INFERIOR
+   =========================================================== */
 
 .recommendationsFigma__bottom {
+  width: 100%;
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: 0.75fr 1.65fr;
+
+  grid-template-columns:
+    minmax(360px, 0.9fr)
+    minmax(0, 1.35fr);
+
+  align-items: start;
 
   gap: 10px;
 }
 
-.expectedImpactGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.recommendationsFigma__bottom > .avPanel {
+  width: 100%;
+  min-width: 0;
+  height: auto;
 
-  gap: 5px;
+  align-self: start;
 }
 
-.impactMetric {
+
+/* ===========================================================
+   IMPACT PANEL — container query
+   =========================================================== */
+
+.recommendationsPanel--impact {
+  container-type: inline-size;
+  container-name: impact-panel;
+}
+
+
+/* ===========================================================
+   10. IMPACTO ESPERADO
+   =========================================================== */
+
+.expectedImpactGrid {
+  width: 100%;
   min-width: 0;
 
   display: grid;
-  gap: 3px;
 
-  padding: 7px;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 7px;
+}
+
+
+/* ===========================================================
+   Card de impacto
+   =========================================================== */
+
+.impactMetric {
+  position: relative;
+
+  min-width: 0;
+  min-height: 142px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  padding:
+    10px
+    10px
+    9px;
+
+  overflow: hidden;
 
   border: 1px solid var(--av-border-soft);
-  border-radius: 5px;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 5px rgba(21, 42, 39, 0.03);
+
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
-.impactMetric span {
-  color: var(--av-text-muted);
+.impactMetric:hover {
+  transform: translateY(-2px);
 
-  font-size: 0.42rem;
+  box-shadow:
+    0 8px 17px rgba(21, 42, 39, 0.07);
 }
 
-.impactMetric strong {
+
+/* ===========================================================
+   Tonos
+   =========================================================== */
+
+.impactMetric--green {
+  border-color:
+    rgba(48, 183, 106, 0.16);
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(239, 250, 239, 0.82),
+      #ffffff 66%
+    );
+}
+
+.impactMetric--lime {
+  border-color:
+    rgba(167, 217, 30, 0.18);
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(250, 253, 232, 0.9),
+      #ffffff 66%
+    );
+}
+
+.impactMetric--teal {
+  border-color:
+    rgba(21, 183, 169, 0.16);
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(235, 251, 248, 0.84),
+      #ffffff 66%
+    );
+}
+
+.impactMetric--blue {
+  border-color:
+    rgba(46, 158, 200, 0.16);
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(235, 248, 253, 0.84),
+      #ffffff 66%
+    );
+}
+
+
+/* ===========================================================
+   Icono de impacto
+   =========================================================== */
+
+.impactMetric__icon {
+  width: 31px;
+  height: 31px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 8px;
+}
+
+.impactMetric__icon img {
+  width: 18px;
+  height: 18px;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.impactMetric--green
+.impactMetric__icon {
+  background:
+    rgba(48, 183, 106, 0.1);
+}
+
+.impactMetric--lime
+.impactMetric__icon {
+  background:
+    var(--av-lime-100);
+}
+
+.impactMetric--teal
+.impactMetric__icon {
+  background:
+    rgba(21, 183, 169, 0.1);
+}
+
+.impactMetric--blue
+.impactMetric__icon {
+  background:
+    rgba(46, 158, 200, 0.1);
+}
+
+
+/* ===========================================================
+   Copy
+   =========================================================== */
+
+.impactMetric__label {
+  min-width: 0;
+  min-height: 29px;
+
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.59rem;
+  font-weight: 650;
+  line-height: 1.25;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.impactMetric > strong {
+  min-width: 0;
+
+  overflow: hidden;
+
   color: var(--av-text);
 
   font-family: var(--av-font-heading);
-  font-size: 0.9rem;
+  font-size: 0.98rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.impactMetric small {
+.impactMetric > small {
+  margin-top: auto;
+
   color: var(--av-text-muted);
 
-  font-size: 0.42rem;
+  font-size: 0.49rem;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
-@media (max-width: 900px) {
-  .recommendationsFigma__workspace,
+
+/* ===========================================================
+   RECHARTS
+   ===========================================================
+   ResponsiveContainer necesita un padre con altura real.
+   Esta regla es obligatoria.
+   =========================================================== */
+
+.impactMetric__chart {
+  width: 100%;
+  height: 18px;
+  min-height: 18px;
+
+  margin-top: 2px;
+
+  overflow: hidden;
+}
+
+.impactMetric__chart
+.recharts-responsive-container {
+  min-width: 0;
+}
+
+.impactMetric__chart
+.recharts-wrapper,
+.impactMetric__chart
+.recharts-surface {
+  overflow: visible;
+}
+
+
+/* ===========================================================
+   Container responsive del Impacto
+   =========================================================== */
+
+@container impact-panel (max-width: 560px) {
+  .expectedImpactGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .impactMetric {
+    min-height: 128px;
+  }
+}
+
+@container impact-panel (max-width: 300px) {
+  .expectedImpactGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ===========================================================
+   11. RECOMENDACIONES RECIENTES
+   =========================================================== */
+
+.recommendationsPanel--recent {
+  min-width: 0;
+}
+
+.recommendationsRecentList {
+  width: 100%;
+  min-width: 0;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 9px;
+
+  background: #ffffff;
+}
+
+
+/* ===========================================================
+   Cabecera y filas comparten exactamente columnas
+   =========================================================== */
+
+.recommendationsRecentList__head,
+.recommendationsRecentRow {
+  width: 100%;
+  min-width: 700px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(270px, 1.65fr)
+    84px
+    74px
+    82px
+    100px
+    22px;
+
+  align-items: center;
+
+  column-gap: 8px;
+}
+
+
+/* ===========================================================
+   Cabecera
+   =========================================================== */
+
+.recommendationsRecentList__head {
+  min-height: 31px;
+
+  padding:
+    0
+    9px;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 1;
+
+  background:
+    linear-gradient(
+      180deg,
+      var(--av-neutral-100),
+      rgba(241, 245, 242, 0.75)
+    );
+
+  border-bottom:
+    1px solid
+    var(--av-border-soft);
+}
+
+.recommendationsRecentList__head > span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ===========================================================
+   Filas
+   =========================================================== */
+
+.recommendationsRecentRow {
+  min-height: 48px;
+
+  padding:
+    6px
+    9px;
+
+  color: var(--av-text-secondary);
+
+  text-align: left;
+
+  border: 0;
+  border-bottom:
+    1px solid
+    var(--av-border-soft);
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    background 130ms ease;
+}
+
+.recommendationsRecentRow:last-child {
+  border-bottom: 0;
+}
+
+.recommendationsRecentRow:nth-child(odd) {
+  background:
+    rgba(248, 250, 248, 0.6);
+}
+
+.recommendationsRecentRow:hover {
+  background:
+    rgba(241, 251, 204, 0.28);
+}
+
+.recommendationsRecentRow > span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  font-size: 0.54rem;
+  font-weight: 500;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ===========================================================
+   Primera columna
+   =========================================================== */
+
+.recommendationsRecentRow__main {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+.recommendationsRecentRow__main > strong {
+  min-width: 0;
+
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.56rem;
+  font-weight: 650;
+  line-height: 1.25;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+
+/* ===========================================================
+   Icono
+   =========================================================== */
+
+.recommendationsRecentRow__icon {
+  width: 26px;
+  height: 26px;
+
+  min-width: 26px;
+
+  flex: 0 0 26px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 7px;
+}
+
+.recommendationsRecentRow__icon img {
+  width: 14px;
+  height: 14px;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.recommendationsRecentRow__icon--danger,
+.recommendationsRecentRow__icon--high {
+  background:
+    rgba(227, 26, 22, 0.09);
+}
+
+.recommendationsRecentRow__icon--warning {
+  background:
+    rgba(246, 173, 4, 0.1);
+}
+
+.recommendationsRecentRow__icon--success {
+  background:
+    rgba(48, 183, 106, 0.1);
+}
+
+
+/* ===========================================================
+   Badges
+   =========================================================== */
+
+.recommendationsRecentRow
+.avStatusBadge {
+  justify-self: start;
+
+  white-space: nowrap;
+}
+
+
+/* ===========================================================
+   Flecha
+   =========================================================== */
+
+.recommendationsRecentRow__arrow {
+  width: 18px;
+  height: 18px;
+
+  display: grid;
+  place-items: center;
+
+  justify-self: end;
+}
+
+.recommendationsRecentRow__arrow img {
+  width: 11px;
+  height: 11px;
+
+  display: block;
+
+  object-fit: contain;
+
+  opacity: 0.48;
+
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease;
+}
+
+.recommendationsRecentRow:hover
+.recommendationsRecentRow__arrow img {
+  opacity: 0.9;
+
+  transform: translateX(2px);
+}
+
+
+/* ===========================================================
+   Acción secundaria
+   =========================================================== */
+
+.recommendationSecondaryAction {
+  margin:
+    10px
+    0
+    0
+    auto;
+}
+
+
+/* ===========================================================
+   Scrollbars
+   =========================================================== */
+
+.recommendationsRecentList::-webkit-scrollbar {
+  height: 5px;
+}
+
+.recommendationsRecentList::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background: var(--av-neutral-300);
+}
+
+.recommendationsRecentList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* ===========================================================
+   12. COMPONENTES REUTILIZABLES
+   ===========================================================
+   RecommendationCard
+   =========================================================== */
+
+.recommendationCard {
+  width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+
+  border: 1px solid var(--av-border);
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 5px 16px rgba(21, 42, 39, 0.06);
+}
+
+.recommendationCard--main {
+  border-color:
+    rgba(167, 217, 30, 0.28);
+}
+
+
+/* ===========================================================
+   Card header
+   =========================================================== */
+
+.recommendationCard__header {
+  min-width: 0;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border-bottom:
+    1px solid
+    var(--av-border-soft);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(241, 251, 204, 0.7),
+      rgba(248, 250, 248, 0.96)
+    );
+}
+
+.recommendationCard__header > div {
+  min-width: 0;
+}
+
+.recommendationCard__header p {
+  margin:
+    0
+    0
+    3px;
+
+  color: var(--av-lime-700);
+
+  font-size: 0.56rem;
+  font-weight: 800;
+
+  text-transform: uppercase;
+}
+
+.recommendationCard__header h2 {
+  margin: 0;
+
+  color: var(--av-text);
+
+  font-size: 0.94rem;
+  line-height: 1.2;
+}
+
+.recommendationCard__header span {
+  display: -webkit-box;
+
+  margin-top: 4px;
+
+  overflow: hidden;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.64rem;
+  line-height: 1.35;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.recommendationCard__header > strong {
+  flex: 0 0 auto;
+
+  padding:
+    4px
+    7px;
+
+  color: var(--av-green-700);
+
+  font-size: 0.56rem;
+
+  border-radius: 999px;
+
+  background:
+    rgba(48, 183, 106, 0.09);
+}
+
+
+/* ===========================================================
+   Card action
+   =========================================================== */
+
+.recommendationCard__action {
+  padding:
+    11px
+    14px;
+
+  border-bottom:
+    1px solid
+    var(--av-border-soft);
+}
+
+.recommendationCard__action small {
+  color: var(--av-text-muted);
+
+  font-size: 0.56rem;
+  font-weight: 700;
+}
+
+.recommendationCard__action p {
+  margin:
+    4px
+    0
+    0;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+
+/* ===========================================================
+   Card metadata
+   =========================================================== */
+
+.recommendationCard__meta {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  padding:
+    10px
+    14px;
+
+  border-bottom:
+    1px solid
+    var(--av-border-soft);
+}
+
+.recommendationCard__meta span {
+  padding:
+    3px
+    6px;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.53rem;
+  font-weight: 600;
+
+  border-radius: 999px;
+
+  background: var(--av-neutral-100);
+}
+
+.recommendationCard__evidence {
+  padding:
+    11px
+    14px
+    14px;
+}
+
+.recommendationCard__evidence h3 {
+  margin:
+    0
+    0
+    8px;
+
+  color: var(--av-text);
+
+  font-size: 0.66rem;
+}
+
+
+/* ===========================================================
+   13. ExpectedImpactBadge
+   =========================================================== */
+
+.expectedImpactBadge {
+  min-width: 0;
+
+  display: grid;
+
+  gap: 4px;
+
+  padding:
+    11px
+    14px;
+
+  border-bottom:
+    1px solid
+    var(--av-border-soft);
+
+  background:
+    linear-gradient(
+      110deg,
+      rgba(241, 251, 204, 0.46),
+      rgba(248, 250, 248, 0.92)
+    );
+}
+
+.expectedImpactBadge__header {
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+}
+
+.expectedImpactBadge__indicator {
+  width: 7px;
+  height: 7px;
+
+  flex: 0 0 7px;
+
+  border-radius: 50%;
+
+  background: var(--av-lime-600);
+
+  box-shadow:
+    0 0 0 3px rgba(167, 217, 30, 0.1);
+}
+
+.expectedImpactBadge__header small {
+  color: var(--av-text-muted);
+
+  font-size: 0.52rem;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.expectedImpactBadge__area {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-green-700);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.68rem;
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.expectedImpactBadge__description {
+  margin: 0;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.6rem;
+  line-height: 1.4;
+}
+
+
+/* ===========================================================
+   14. RecommendationEvidenceList
+   =========================================================== */
+
+.recommendationEvidenceList {
+  min-width: 0;
+
+  display: grid;
+
+  gap: 6px;
+}
+
+.recommendationEvidenceList__empty {
+  margin: 0;
+
+  padding: 10px;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.6rem;
+  text-align: center;
+
+  border-radius: 8px;
+
+  background: var(--av-neutral-50);
+}
+
+.recommendationEvidenceItem {
+  min-width: 0;
+
+  display: grid;
+
+  gap: 3px;
+
+  padding: 8px;
+
+  border: 1px solid var(--av-border-soft);
+  border-radius: 8px;
+
+  background: var(--av-neutral-50);
+}
+
+.recommendationEvidenceItem strong {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text);
+
+  font-size: 0.61rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendationEvidenceItem span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.57rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recommendationEvidenceItem small {
+  display: -webkit-box;
+
+  overflow: hidden;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.53rem;
+  line-height: 1.35;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.recommendationEvidenceItem--critical {
+  border-color:
+    rgba(227, 26, 22, 0.14);
+
+  background:
+    rgba(254, 242, 242, 0.72);
+}
+
+.recommendationEvidenceItem--warning {
+  border-color:
+    rgba(246, 173, 4, 0.16);
+
+  background:
+    rgba(254, 251, 232, 0.74);
+}
+
+.recommendationEvidenceItem--normal {
+  border-color:
+    rgba(48, 183, 106, 0.14);
+
+  background:
+    rgba(239, 250, 239, 0.74);
+}
+
+
+/* ===========================================================
+   15. RESPONSIVE — escritorio intermedio
+   =========================================================== */
+
+@media (max-width: 1180px) {
+
+  .recommendationsFigma__workspace {
+    grid-template-columns:
+      minmax(0, 1.08fr)
+      minmax(340px, 0.92fr);
+  }
+
+  .priorityRecommendation {
+    grid-template-columns:
+      40px
+      minmax(125px, 1fr)
+      minmax(105px, 0.92fr)
+      minmax(105px, 0.92fr)
+      14px;
+
+    column-gap: 8px;
+  }
+
+  .recommendationsFigma__bottom {
+    grid-template-columns:
+      minmax(340px, 0.95fr)
+      minmax(0, 1.25fr);
+  }
+
+}
+
+
+/* ===========================================================
+   16. RESPONSIVE — laptop
+   =========================================================== */
+
+@media (max-width: 1020px) {
+
+  .recommendationsFigma__workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendationsFigma__workspace > .avPanel {
+    width: 100%;
+  }
+
   .recommendationsFigma__bottom {
     grid-template-columns: 1fr;
   }
+
+  .expectedImpactGrid {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ===========================================================
+   17. RESPONSIVE — tablet
+   =========================================================== */
+
+@media (max-width: 820px) {
+
+  .priorityRecommendation {
+    grid-template-columns:
+      40px
+      minmax(0, 1fr)
+      15px;
+
+    grid-template-areas:
+      "icon main arrow"
+      "action action action"
+      "impact impact impact";
+
+    row-gap: 8px;
+
+    padding:
+      9px
+      10px;
+  }
+
+  .priorityRecommendation__icon {
+    grid-area: icon;
+  }
+
+  .priorityRecommendation__main {
+    grid-area: main;
+  }
+
+  .priorityRecommendation__column {
+    min-height: 0;
+
+    padding:
+      8px
+      0
+      0;
+
+    border-left: 0;
+    border-top:
+      1px solid
+      var(--av-border-soft);
+  }
+
+  .priorityRecommendation__column:nth-of-type(2) {
+    grid-area: action;
+  }
+
+  .priorityRecommendation__column:nth-of-type(3) {
+    grid-area: impact;
+  }
+
+  .priorityRecommendation__arrow {
+    grid-area: arrow;
+  }
+
+  .recommendationDetail__meta {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .recommendationDetailMeta:nth-child(2) {
+    border-right: 0;
+  }
+
+  .recommendationDetailMeta:nth-child(1),
+  .recommendationDetailMeta:nth-child(2) {
+    border-bottom:
+      1px solid
+      var(--av-border-soft);
+  }
+
+  .recommendationEvidenceMini {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .expectedImpactGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ===========================================================
+   18. RESPONSIVE — móvil
+   =========================================================== */
+
+@media (max-width: 580px) {
+
+  .recommendationsFigma {
+    gap: 9px;
+  }
+
+  .recommendationsFigma
+  .recommendationsPanel {
+    border-radius: 12px;
+  }
+
+  .recommendationsPanelLead {
+    font-size: 0.64rem;
+  }
+
+
+  /* -----------------------------------------
+     Priorizadas
+     ----------------------------------------- */
+
+  .priorityRecommendation {
+    grid-template-columns:
+      36px
+      minmax(0, 1fr)
+      14px;
+
+    min-height: 0;
+
+    column-gap: 8px;
+  }
+
+  .priorityRecommendation__icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .priorityRecommendation__icon img {
+    width: 19px;
+    height: 19px;
+  }
+
+  .priorityRecommendation__main > strong {
+    font-size: 0.61rem;
+  }
+
+  .priorityRecommendation__main > p {
+    font-size: 0.51rem;
+  }
+
+
+  /* -----------------------------------------
+     Detalle
+     ----------------------------------------- */
+
+  .recommendationDetail__hero {
+    grid-template-columns:
+      42px
+      minmax(0, 1fr);
+
+    align-items: start;
+  }
+
+  .recommendationDetailIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .recommendationDetailIcon img {
+    width: 21px;
+    height: 21px;
+  }
+
+  .recommendationDetail__priority {
+    grid-column: 2;
+
+    min-width: 0;
+
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+
+    margin-top: 2px;
+  }
+
+  .recommendationDetail__priority > span {
+    display: none;
+  }
+
+  .recommendationDetail__meta {
+    grid-template-columns: 1fr;
+  }
+
+  .recommendationDetailMeta {
+    min-height: 45px;
+
+    border-right: 0;
+    border-bottom:
+      1px solid
+      var(--av-border-soft);
+  }
+
+  .recommendationDetailMeta:last-child {
+    border-bottom: 0;
+  }
+
+  .recommendationEvidenceMini {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  /* -----------------------------------------
+     Impacto
+     ----------------------------------------- */
+
+  .expectedImpactGrid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .impactMetric {
+    min-height: 128px;
+  }
+
+
+  /* -----------------------------------------
+     Acciones
+     ----------------------------------------- */
+
+  .recommendationPrimaryAction,
+  .recommendationSecondaryAction {
+    min-height: 30px;
+
+    font-size: 0.63rem;
+  }
+
+  .recommendationPrimaryAction {
+    max-width: 100%;
+  }
+
+}
+
+
+/* ===========================================================
+   19. RESPONSIVE — móvil pequeño
+   =========================================================== */
+
+@media (max-width: 410px) {
+
+  .recommendationEvidenceMini,
+  .expectedImpactGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .impactMetric {
+    min-height: 118px;
+  }
+
+  .recommendationPrimaryAction {
+    width: 100%;
+  }
+
+}
+
+
+/* ===========================================================
+   20. PANTALLAS DE POCA ALTURA
+   =========================================================== */
+
+@media (max-height: 720px) {
+
+  .priorityRecommendation {
+    min-height: 88px;
+  }
+
+  .impactMetric {
+    min-height: 126px;
+  }
+
+  .recommendationDetail {
+    gap: 8px;
+  }
+
+  .recommendationDetailSection {
+    padding-block: 6px;
+  }
+
+}
+
+
+/* ===========================================================
+   21. ACCESIBILIDAD — REDUCED MOTION
+   =========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .recommendationFilter,
+  .priorityRecommendation,
+  .priorityRecommendation__arrow img,
+  .recommendationPrimaryAction,
+  .recommendationPrimaryAction img,
+  .recommendationSecondaryAction,
+  .recommendationSecondaryAction img,
+  .recommendationCompleteButton,
+  .impactMetric,
+  .recommendationsRecentRow,
+  .recommendationsRecentRow__arrow img {
+    transition: none;
+  }
+
 }

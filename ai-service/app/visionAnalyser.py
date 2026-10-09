@@ -10,6 +10,7 @@ from app.schemas import (
     VisionAnalyzeRequest,
     VisionAnalyzeResponse,
     VisionEvidence,
+    VisionVisualMetrics,
 )
 
 
@@ -21,7 +22,7 @@ def analyze_image(request: VisionAnalyzeRequest) -> VisionAnalyzeResponse:
     un modelo de inteligencia artificial entrenado ni un diagnóstico agronómico definitivo.
     """
 
-    image_name = request.image.lower()
+    image_name = request.image_file_name.lower()
 
     if "dry" in image_name:
         prediction = "DRY_AREA"
@@ -102,6 +103,7 @@ def analyze_image(request: VisionAnalyzeRequest) -> VisionAnalyzeResponse:
         VisionEvidence(
             metric=metric,
             value=prediction,
+            unit=None,
             explanation=explanation,
         )
     ]
@@ -110,6 +112,18 @@ def analyze_image(request: VisionAnalyzeRequest) -> VisionAnalyzeResponse:
         prediction=prediction,
         confidence=confidence,
         metrics=[metric],
+        visualMetrics=VisionVisualMetrics(
+            greenCoveragePercentage=None,
+            dryAreaPercentage=None,
+            chlorosisSuspected=prediction == "CHLOROSIS",
+            leafSpotSuspected=prediction == "LEAF_SPOT",
+            stressPatternDetected=prediction in {
+                "WATER_STRESS",
+                "DRY_AREA",
+                "CHLOROSIS",
+                "LEAF_SPOT",
+            },
+        ),
         evidence=evidence,
         explanation=explanation,
         recommendation=recommendation,

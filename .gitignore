@@ -20,3 +20,34 @@ backend/src/generated/
 
 ai-service/.venv/
 
+# Dataset Manager: datasets and generated reports stay local.
+ai-service/data/raw/
+ai-service/data/processed/
+ai-service/data/reports/
+
+# Machine-learning artifacts must never be committed.
+ai-service/checkpoints/
+ai-service/weights/
+ai-service/**/*.ckpt
+ai-service/**/*.pth
+ai-service/**/*.pt
+ai-service/**/*.onnx
+ai-service/**/*.safetensors
+ai-service/**/*.bin
+ai-service/**/*.h5
+ai-service/**/*.keras
+ai-service/runs/
+ai-service/artifacts/
+ai-service/exports/
+
+# Python caches and temporary dataset preparation directories.
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+ai-service/data/.prepare-*/
+ai-service/data/**/*.tmp
+ai-service/data/**/*.temp
+ai-service/data/**/*.part
+

@@ -31,6 +31,7 @@ export const INSIGHT_RISK_LEVELS = [
 
 // Catálogo de cultivos definido por el backend.
 export const INSIGHT_CROP_TYPES = [
+    "CORN",
     "RED_BEAN",
     "CASSAVA",
     "QUEQUISQUE",

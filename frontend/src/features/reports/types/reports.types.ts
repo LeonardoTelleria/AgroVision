@@ -20,6 +20,7 @@
 */
 
 export type CropType =
+    | "CORN"
     | "RED_BEAN"
     | "CASSAVA"
     | "QUEQUISQUE"

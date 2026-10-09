@@ -16,6 +16,7 @@
 
 // Cultivos estratégicos definidos para el proyecto 
 export type CropType =
+  | "CORN"
   | "RED_BEAN"
   | "CASSAVA"
   | "QUEQUISQUE"

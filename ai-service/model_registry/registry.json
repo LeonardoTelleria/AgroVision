@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "models": [
+    {
+      "modelId": "agrovision-efficientnet-b0-corn",
+      "modelVersion": "0.0.0",
+      "status": "NOT_TRAINED",
+      "architecture": "efficientnet_b0",
+      "cropType": "CORN",
+      "classNames": [
+        "blight",
+        "common_rust",
+        "gray_leaf_spot",
+        "healthy"
+      ],
+      "datasetVersion": "v1",
+      "checkpointPath": null,
+      "preprocessing": {
+        "inputSize": 224,
+        "resizeSize": 256,
+        "mean": [0.485, 0.456, 0.406],
+        "std": [0.229, 0.224, 0.225]
+      },
+      "metrics": null,
+      "trainedAt": null,
+      "frameworkVersion": null,
+      "checksum": null
+    },
+    {
+      "modelId": "agrovision-efficientnet-b0-red-bean",
+      "modelVersion": "0.0.0",
+      "status": "NOT_TRAINED",
+      "architecture": "efficientnet_b0",
+      "cropType": "RED_BEAN",
+      "classNames": [
+        "angular_leaf_spot",
+        "bean_rust",
+        "healthy"
+      ],
+      "datasetVersion": "v1",
+      "checkpointPath": null,
+      "preprocessing": {
+        "inputSize": 224,
+        "resizeSize": 256,
+        "mean": [0.485, 0.456, 0.406],
+        "std": [0.229, 0.224, 0.225]
+      },
+      "metrics": null,
+      "trainedAt": null,
+      "frameworkVersion": null,
+      "checksum": null
+    },
+    {
+      "modelId": "agrovision-efficientnet-b0-orange",
+      "modelVersion": "0.0.0",
+      "status": "NOT_TRAINED",
+      "architecture": "efficientnet_b0",
+      "cropType": "ORANGE",
+      "classNames": [
+        "black_spot",
+        "canker",
+        "greening",
+        "healthy",
+        "melanose"
+      ],
+      "datasetVersion": "v1",
+      "checkpointPath": null,
+      "preprocessing": {
+        "inputSize": 224,
+        "resizeSize": 256,
+        "mean": [0.485, 0.456, 0.406],
+        "std": [0.229, 0.224, 0.225]
+      },
+      "metrics": null,
+      "trainedAt": null,
+      "frameworkVersion": null,
+      "checksum": null
+    }
+  ]
+}

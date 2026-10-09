@@ -963,7 +963,7 @@ export function WeatherModal({
             {onRetry && (
               <button
                 type="button"
-                className="weatherModal__retry"
+                className="weatherModal__retry avActionButton"
                 onClick={onRetry}
               >
                 Intentar nuevamente

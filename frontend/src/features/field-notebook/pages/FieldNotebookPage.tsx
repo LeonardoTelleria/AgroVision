@@ -43,6 +43,8 @@ import locationIcon from "../../../assets/icons/location-icon.svg";
 import plantIcon from "../../../assets/icons/plant-01-icon.svg";
 import notebookIcon from "../../../assets/icons/notebook-icon.svg";
 import uploadFileIcon from "../../../assets/icons/subirArchivo-icon.png";
+import waterIcon from "../../../assets/icons/water-icon.svg";
+
 
 const INITIAL_FORM: FieldObservationForm = {
   cropType: "ORANGE",
@@ -215,6 +217,7 @@ export function FieldNotebookPage() {
                   value={form.cropType}
                   onChange={handleFieldChange}
                 >
+                  <option value="CORN">Maíz</option>
                   <option value="ORANGE">Naranjo</option>
                   <option value="RED_BEAN">Frijol rojo</option>
                   <option value="CASSAVA">Yuca</option>
@@ -314,14 +317,14 @@ export function FieldNotebookPage() {
             <div className="fieldNotebookForm__actions">
               <button
                 type="button"
-                className="fieldNotebookButton fieldNotebookButton--secondary"
+                className="fieldNotebookButton fieldNotebookButton--secondary avActionButton avActionButton--secondary"
                 onClick={handleResetForm}
               >
                 Cancelar
               </button>
               <button
                 type="submit"
-                className="fieldNotebookButton fieldNotebookButton--primary"
+                className="fieldNotebookButton fieldNotebookButton--primary avActionButton"
                 disabled={isSaving}
               >
                 {isSaving ? "Guardando..." : "Guardar observación"}
@@ -364,7 +367,7 @@ export function FieldNotebookPage() {
           <Panel title="Atajos de registro" showInfo={false}>
             <div className="fieldNotebookShortcuts">
               <Shortcut label="Registrar inspección" icon={infoIcon} />
-              <Shortcut label="Registrar riego" icon={alertIcon} />
+              <Shortcut label="Registrar riego" icon={waterIcon} />
               <Shortcut label="Registrar fertilización" icon={plantIcon} />
               <Shortcut label="Registrar control de plagas" icon={bugIcon} />
               <Shortcut
@@ -432,9 +435,9 @@ export function FieldNotebookPage() {
 
           <button
             type="button"
-            className="avTextAction fieldNotebookCenteredAction"
+            className="avTextAction fieldNotebookCenteredAction avActionButton"
           >
-            Ver todo el historial →
+            Ver todo el historial
           </button>
         </Panel>
 
@@ -464,9 +467,9 @@ export function FieldNotebookPage() {
 
           <button
             type="button"
-            className="avTextAction fieldNotebookCenteredAction"
+            className="avTextAction fieldNotebookCenteredAction avActionButton"
           >
-            Ver las vinculaciones →
+            Ver las vinculaciones
           </button>
         </Panel>
       </section>
@@ -479,8 +482,8 @@ export function FieldNotebookPage() {
         title="Archivos evidencia"
         showInfo={false}
         headerAction={
-          <button type="button" className="avTextAction">
-            Ver todos los archivos →
+          <button type="button" className="avTextAction avActionButton">
+            Ver todos los archivos
           </button>
         }
       >

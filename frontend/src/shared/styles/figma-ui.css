@@ -393,33 +393,67 @@
 }
 .avPanel {
   min-width: 0;
-  padding: 14px 16px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
   border: 1px solid var(--av-border);
-  border-radius: var(--av-radius-card);
-  background: var(--av-neutral-50);
+  border-radius: 16px;
+  background: #031410;
   box-shadow: var(--av-shadow-card);
 }
-.avPanel__header {
-  min-height: 20px;
+:root .avPanel.avPanel {
+  border-radius: 16px;
+  background: #031410;
+}
+.avPanel > .avPanel__header {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  min-height: 44px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  margin-bottom: 8px;
+  margin: 0;
+  padding: 2px 20px;
+  border-radius: 16px;
+  background: #031410;
+}
+.avPanel > .avPanel__body {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 14px 16px 16px;
+  border-radius: 16px;
+  background: var(--av-neutral-50);
+  
 }
 .avPanel__title {
+  width: 100%;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 5px;
-  white-space: nowrap;
+  justify-content: space-between;
+  gap: 12px;
+  white-space: normal;
 }
 .avPanel__title h2 {
+  min-width: 0;
+  flex: 1 1 auto;
   margin: 0;
-  color: var(--av-text);
+  color: var(--av-neutral-50);
   font-family: var(--av-font-heading);
   font-size: 1.2rem;
   font-weight: 700;
+  line-height: 1.2;
   letter-spacing: 0.0008em;
+  overflow-wrap: anywhere;
+}
+.avPanel__header .avPanel__infoIcon {
+  filter: brightness(0) invert(1);
+  opacity: 0.82;
 }
 .avPanel__infoIcon {
   width: 20px;
@@ -573,6 +607,108 @@
   color: var(--av-teal-300);
   transform: translateX(2px);
 }
+
+/* =========================================
+   Botón de acción universal
+   ========================================= */
+
+:root .avActionButton.avActionButton {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  overflow: hidden;
+  color: #ffffff;
+  font-family: var(--av-font-body);
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  border: 1px solid rgba(83, 128, 5, 0.34);
+  border-radius: 12px 0 12px 0;
+  background: var(--av-lime-600);
+  appearance: none;
+  box-shadow: 0 3px 9px rgba(75, 116, 8, 0.16);
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+:root .avActionButton.avActionButton::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  background-color: currentColor;
+  -webkit-mask:
+    url("../../assets/icons/arrow2-icon.png")
+    center / contain no-repeat;
+  mask:
+    url("../../assets/icons/arrow2-icon.png")
+    center / contain no-repeat;
+  opacity: 0.9;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+:root .avActionButton.avActionButton:hover {
+  color: #ffffff;
+  text-decoration: none;
+  border-color: rgba(70, 111, 3, 0.48);
+  background: var(--av-lime-700);
+  box-shadow: 0 6px 14px rgba(75, 116, 8, 0.22);
+  transform: translateY(-1px);
+}
+
+:root .avActionButton.avActionButton:hover::after {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+:root .avActionButton.avActionButton:active {
+  box-shadow: 0 2px 5px rgba(75, 116, 8, 0.14);
+  transform: translateY(0);
+}
+
+:root .avActionButton.avActionButton:focus-visible {
+  outline: 2px solid rgba(167, 217, 30, 0.48);
+  outline-offset: 2px;
+}
+
+:root .avActionButton.avActionButton:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Las implementaciones antiguas incluían una imagen de flecha. */
+:root .avActionButton.avActionButton > img[aria-hidden="true"] {
+  display: none;
+}
+
+:root .avActionButton.avActionButton--secondary {
+  color: var(--av-green-700);
+  border-color: rgba(83, 128, 5, 0.3);
+  background: #ffffff;
+  box-shadow: 0 2px 7px rgba(21, 42, 39, 0.08);
+}
+
+:root .avActionButton.avActionButton--secondary:hover {
+  color: var(--av-green-800);
+  border-color: rgba(83, 128, 5, 0.42);
+  background: var(--av-lime-50);
+}
 .avState {
   min-height: 220px;
   display: grid;
@@ -606,7 +742,9 @@
   .avMetricCard,
   .avMetricCard__action span,
   .avCompactRow,
-  .avTextAction {
+  .avTextAction,
+  .avActionButton,
+  .avActionButton::after {
     transition: none;
   }
 }
