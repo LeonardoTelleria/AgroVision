@@ -41,45 +41,90 @@ Mixed precision se activa automáticamente solo en CUDA. En CPU se desactiva. `-
 
 La combinación verificada en la matriz oficial es PyTorch 2.13.0 con Torchvision 0.28.0. Debe elegirse el índice que coincida con el equipo; no se deben mezclar ruedas CPU y CUDA.
 
-```text
+Usa Python 3.11 o 3.12 para evitar incompatibilidades de ruedas. Primero entra a `ai-service` y crea el entorno virtual **dentro de esa carpeta**. Los comandos para activarlo dependen de la terminal.
+
+### Windows con Git Bash
+
+```bash
 cd ai-service
 python -m venv .venv-training
-.venv-training\Scripts\python -m pip install --upgrade pip
-.venv-training\Scripts\python -m pip install -r requirements.txt
+source .venv-training/Scripts/activate
+python --version
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
+
+En Git Bash deben usarse `/`; una ruta como `.venv-training\Scripts\python` pierde las barras invertidas porque Bash las interpreta como caracteres de escape. Sin activar el entorno, el ejecutable equivalente es `./.venv-training/Scripts/python.exe`.
+
+### Windows con PowerShell
+
+```powershell
+cd ai-service
+py -3.12 -m venv .venv-training
+.\.venv-training\Scripts\Activate.ps1
+python --version
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Si PowerShell no permite ejecutar `Activate.ps1`, no es necesario cambiar la política del sistema: usa directamente `.\.venv-training\Scripts\python.exe -m pip ...`.
+
+### Linux o macOS
+
+```bash
+cd ai-service
+python3 -m venv .venv-training
+source .venv-training/bin/activate
+python --version
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+Después de activar el entorno, selecciona **solo una** de las siguientes instalaciones de PyTorch.
 
 CPU, Windows o Linux:
 
-```text
-.venv-training\Scripts\python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cpu
+```bash
+python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cpu
 ```
 
 CUDA 12.6:
 
-```text
-.venv-training\Scripts\python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cu126
+```bash
+python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cu126
 ```
 
-CUDA 13.0 o 13.2:
+CUDA 13.0:
 
-```text
-.venv-training\Scripts\python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cu130
-.venv-training\Scripts\python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cu132
+```bash
+python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cu130
 ```
 
-Verificación:
+CUDA 13.2:
 
-```text
-.venv-training\Scripts\python -c "import torch, torchvision; print(torch.__version__, torchvision.__version__, torch.cuda.is_available())"
+```bash
+python -m pip install torch==2.13.0 torchvision==0.28.0 --index-url https://download.pytorch.org/whl/cu132
+```
+
+macOS:
+
+```bash
+python -m pip install torch==2.13.0 torchvision==0.28.0
+```
+
+Verificación del entorno y de CUDA:
+
+```bash
+python -c "import sys, torch, torchvision; print(sys.executable); print(torch.__version__, torchvision.__version__); print('CUDA:', torch.cuda.is_available())"
 ```
 
 Consultar siempre el selector [Start Locally](https://docs.pytorch.org/get-started/locally/) y la [matriz oficial de versiones](https://pytorch.org/get-started/previous-versions/) si cambia el sistema operativo, Python, driver o CUDA.
 
 ## Preparación de datos
 
-```text
-.venv-training\Scripts\python -m app.dataset_manager.cli audit --raw data/raw --output data/reports/audit.json
-.venv-training\Scripts\python -m app.dataset_manager.cli prepare --raw data/raw --out data/processed/v1 --seed 42 --report data/reports/prepare.json
+```bash
+python -m app.dataset_manager.cli audit --raw data/raw --output data/reports/audit.json
+python -m app.dataset_manager.cli prepare --raw data/raw --out data/processed/v1 --seed 42 --report data/reports/prepare.json
 ```
 
 Actualmente `CORN` y `ORANGE` están disponibles localmente. `RED_BEAN` falla de forma intencional y clara hasta instalar `train.zip`, `validation.zip` y `test.zip` de iBean y volver a ejecutar Dataset Manager.

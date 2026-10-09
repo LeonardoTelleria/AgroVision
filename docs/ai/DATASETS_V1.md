@@ -28,15 +28,33 @@ No se descargan datasets automáticamente. Esto evita introducir credenciales, a
 
 Desde `ai-service`:
 
-```text
+```bash
 python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
-.venv\Scripts\python -m app.dataset_manager.cli audit --raw data/raw --output data/reports/audit.json
-.venv\Scripts\python -m app.dataset_manager.cli prepare --raw data/raw --out data/processed/v1 --seed 42 --report data/reports/prepare.json
-.venv\Scripts\python -m unittest discover -s tests -v
 ```
 
-En Linux/macOS se reemplaza `.venv\Scripts\python` por `.venv/bin/python`.
+Activa el entorno según la terminal:
+
+```bash
+# Windows con Git Bash
+source .venv/Scripts/activate
+
+# Linux o macOS
+source .venv/bin/activate
+```
+
+```powershell
+# Windows con PowerShell
+.\.venv\Scripts\Activate.ps1
+```
+
+Con el entorno activo, los comandos son iguales en las tres terminales:
+
+```bash
+python -m pip install -r requirements.txt
+python -m app.dataset_manager.cli audit --raw data/raw --output data/reports/audit.json
+python -m app.dataset_manager.cli prepare --raw data/raw --out data/processed/v1 --seed 42 --report data/reports/prepare.json
+python -m unittest discover -s tests -v
+```
 
 `audit` termina correctamente aunque falten ZIP: registra cada archivo como `missing` en JSON/Markdown. `prepare` procesa las fuentes disponibles y omite las ausentes; falla claramente si no existe ninguna muestra válida.
 
