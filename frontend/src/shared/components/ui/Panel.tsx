@@ -9,7 +9,12 @@ interface PanelProps {
   readonly showCardTag?: boolean;
 }
 
-export function Panel({ title, children, className = "" }: PanelProps) {
+export function Panel({
+  title,
+  children,
+  className = "",
+
+}: PanelProps) {
   return (
     <section className={`avPanel ${className}`}>
       <header className="avPanel__header">

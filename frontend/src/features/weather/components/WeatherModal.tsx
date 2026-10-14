@@ -1276,7 +1276,7 @@ export function WeatherModal({
 
                   <div className="weatherModal__widgetTitle">
                     <strong>
-                      Amanecer / Atardecer
+                      Amanecer
                     </strong>
                   </div>
 

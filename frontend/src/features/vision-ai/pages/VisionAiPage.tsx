@@ -1,514 +1,2554 @@
-// /**
-//  * =========================================
-//  * VisionAiPage
-//  * =========================================
-//  *
-//  * Pantalla reconstruida siguiendo la
-//  * composición oficial definida en Figma.
-//  *
-//  * La refactorización modifica únicamente:
-//  * - estructura visual;
-//  * - interacción de carga;
-//  * - presentación de resultado;
-//  * - distribución de evidencias.
-//  *
-//  * NO modifica:
-//  * - POST /api/vision/analyze;
-//  * - backend/fallback;
-//  * - contrato VisionInspection;
-//  * - categorías de predicción;
-//  * - lógica del AI Service.
-//  */
+/**
+ * =========================================
+ * VisionAiPage
+ * =========================================
+ *
+ * Módulo principal de análisis visual de AgroVision.
+ *
+ * Objetivos de esta versión:
+ * - mantener el flujo real de Vision AI;
+ * - convertir el área de análisis en un canvas protagonista;
+ * - aplicar una arquitectura visual similar a Mapping GIS;
+ * - mostrar controles y métricas como overlays flotantes;
+ * - disponer de un inspector lateral plegable;
+ * - mostrar telemetría visual del proceso mediante Recharts;
+ * - iluminar el canvas durante el análisis;
+ * - conservar evidencia e historial;
+ * - mantener estados seguros mientras el backend responde.
+ *
+ * IMPORTANTE:
+ * - NO modifica POST /api/vision/analyze;
+ * - NO modifica visionAIService;
+ * - NO modifica VisionInspection;
+ * - NO modifica los tipos del dominio;
+ * - NO reemplaza resultados reales con datos inventados.
+ *
+ * La gráfica inferior representa únicamente progreso visual
+ * del procesamiento de la interfaz mientras esperamos el
+ * resultado del servicio. Cuando el backend exponga streaming,
+ * podrá alimentarse directamente con esos datos.
+ * =========================================
+ */
 
-import { useEffect, useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type ChangeEvent,
+} from "react";
+
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
 import { MetricCard } from "../../../shared/components/ui/MetricCard";
 import { Panel } from "../../../shared/components/ui/Panel";
 import { StatusBadge } from "../../../shared/components/ui/StatusBadge";
+
 import { getCropProfiles } from "../../crops/services/cropProfilesService";
-import type { CropProfile, CropType } from "../../crops/types/cropProfile.types";
+
+import type {
+  CropProfile,
+  CropType,
+} from "../../crops/types/cropProfile.types";
+
 import { VisionResultCard } from "../components/VisionResultCard";
-import { analyzeVisionImage, VisionRequestError } from "../services/visionAIService";
-import type { VisionAnalysisResult, VisionAnalysisStatus, VisionInspection } from "../types/visionAI.types";
+
+import {
+  analyzeVisionImage,
+  VisionRequestError,
+} from "../services/visionAIService";
+
+import type {
+  VisionAnalysisResult,
+  VisionAnalysisStatus,
+  VisionInspection,
+} from "../types/visionAI.types";
+
 import "../vision-ai.css";
 
+
+/* ===========================================================
+   CONSTANTES
+   =========================================================== */
+
 /**
- * Caso oficial de demostración.
+ * Caso oficial utilizado actualmente por la demo.
  */
 const DEFAULT_FIELD_ID = "field-001";
 const DEFAULT_ZONE_ID = "zone-03";
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const SUPPORTED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+const MAX_IMAGE_BYTES =
+  10 * 1024 * 1024;
+
+const SUPPORTED_IMAGE_TYPES =
+  new Set([
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+  ]);
+
+
+/* ===========================================================
+   TELEMETRÍA VISUAL
+   =========================================================== */
+
+/**
+ * Punto utilizado por la gráfica de progreso.
+ *
+ * No representa una métrica calculada por el modelo.
+ * Es únicamente telemetría visual de la ejecución
+ * del flujo desde la interfaz.
+ */
+interface VisionTimelinePoint {
+  readonly sample: number;
+  readonly value: number;
+}
+
+
+/* ===========================================================
+   PÁGINA PRINCIPAL
+   =========================================================== */
+
 export function VisionAiPage() {
-  const [profiles, setProfiles] = useState<ReadonlyArray<CropProfile>>([]);
-  const [selectedCropType, setSelectedCropType] = useState<CropType>("ORANGE");
-  const [selectedZoneId, setSelectedZoneId] = useState(DEFAULT_ZONE_ID);
+  /* -----------------------------------------
+     Perfiles agrícolas
+     ----------------------------------------- */
 
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [profiles, setProfiles] =
+    useState<ReadonlyArray<CropProfile>>([]);
 
-  const [analysisResult, setAnalysisResult] = useState<VisionAnalysisResult | null>(null);
-  const [analysisStatus, setAnalysisStatus] = useState<VisionAnalysisStatus>("IDLE");
-  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [
+    selectedCropType,
+    setSelectedCropType,
+  ] =
+    useState<CropType>("ORANGE");
 
-  /**
-   * Carga los perfiles agrícolas disponibles.
-   *
-   * La página no consume mocks directamente.
-   */
+  const [
+    selectedZoneId,
+    setSelectedZoneId,
+  ] =
+    useState(DEFAULT_ZONE_ID);
+
+
+  /* -----------------------------------------
+     Imagen
+     ----------------------------------------- */
+
+  const [
+    imagePreviewUrl,
+    setImagePreviewUrl,
+  ] =
+    useState<string | null>(null);
+
+
+  /* -----------------------------------------
+     Resultado
+     ----------------------------------------- */
+
+  const [
+    analysisResult,
+    setAnalysisResult,
+  ] =
+    useState<VisionAnalysisResult | null>(
+      null,
+    );
+
+  const [
+    analysisStatus,
+    setAnalysisStatus,
+  ] =
+    useState<VisionAnalysisStatus>(
+      "IDLE",
+    );
+
+  const [
+    feedbackMessage,
+    setFeedbackMessage,
+  ] =
+    useState<string | null>(null);
+
+
+  /* -----------------------------------------
+     Inspector visual
+     ----------------------------------------- */
+
+  const [
+    isInspectorOpen,
+    setIsInspectorOpen,
+  ] =
+    useState(true);
+
+
+  /* -----------------------------------------
+     Progreso visual de análisis
+     ----------------------------------------- */
+
+  const [
+    analysisProgress,
+    setAnalysisProgress,
+  ] =
+    useState(0);
+
+  const [
+    analysisTimeline,
+    setAnalysisTimeline,
+  ] =
+    useState<
+      ReadonlyArray<VisionTimelinePoint>
+    >([
+      {
+        sample: 0,
+        value: 0,
+      },
+    ]);
+
+
+  /* =========================================================
+     CARGA DE PERFILES
+     ========================================================= */
+
   useEffect(() => {
     async function loadProfiles() {
       try {
-        const data = await getCropProfiles();
+        const data =
+          await getCropProfiles();
+
         setProfiles(data);
       } catch {
-        setFeedbackMessage("No se pudieron cargar los perfiles agrícolas.");
+        setFeedbackMessage(
+          "No se pudieron cargar los perfiles agrícolas.",
+        );
       }
     }
 
     void loadProfiles();
   }, []);
 
-  /**
-   * Libera la URL temporal de la imagen cuando
-   * cambia el archivo o se desmonta la página.
-   */
+
+  /* =========================================================
+     LIBERACIÓN DE PREVIEW
+     ========================================================= */
+
   useEffect(() => {
     return () => {
-      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(
+          imagePreviewUrl,
+        );
+      }
     };
   }, [imagePreviewUrl]);
 
-  /**
-   * Ejecuta el flujo real:
-   *
-   * UI
-   * → visionAIService
-   * → backend
-   * → fallback si backend falla.
-   */
-  async function runAnalysis(file: File, fileName: string) {
+
+  /* =========================================================
+     ANIMACIÓN VISUAL DURANTE ANÁLISIS
+     =========================================================
+     Mantiene la interfaz viva mientras esperamos backend.
+
+     NO pretende representar progreso interno real del modelo.
+
+     El servicio actual devuelve la respuesta completa al final.
+     Cuando exista streaming real, esta misma visualización
+     puede alimentarse con eventos del AI Service.
+     ========================================================= */
+
+  useEffect(() => {
+    if (
+      analysisStatus !== "ANALYZING"
+    ) {
+      return;
+    }
+
+    const interval =
+      window.setInterval(() => {
+        setAnalysisProgress(
+          (currentProgress) => {
+            const nextProgress =
+              getNextAnalysisProgress(
+                currentProgress,
+              );
+
+            setAnalysisTimeline(
+              (currentTimeline) => [
+                ...currentTimeline,
+                {
+                  sample:
+                    currentTimeline.length,
+                  value: nextProgress,
+                },
+              ].slice(-22),
+            );
+
+            return nextProgress;
+          },
+        );
+      }, 140);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [analysisStatus]);
+
+
+  /* =========================================================
+     COMPLETAR TELEMETRÍA
+     ========================================================= */
+
+  useEffect(() => {
+    if (analysisStatus !== "RESULT") {
+      return;
+    }
+
+  }, [analysisStatus]);
+
+
+  /* =========================================================
+     EJECUTAR ANÁLISIS
+     ========================================================= */
+
+  async function runAnalysis(
+    file: File,
+    fileName: string,
+  ) {
+    /**
+     * Limpiamos el resultado anterior para que
+     * durante un nuevo análisis nunca aparezcan
+     * datos pertenecientes a otra imagen.
+     */
+    setAnalysisResult(null);
+
+    setAnalysisProgress(8);
+
+    setAnalysisTimeline([
+      {
+        sample: 0,
+        value: 3,
+      },
+      {
+        sample: 1,
+        value: 8,
+      },
+    ]);
+
     setAnalysisStatus("ANALYZING");
+
     setFeedbackMessage(null);
 
+    setIsInspectorOpen(true);
+
     try {
-      const result = await analyzeVisionImage({
-        cropType: selectedCropType,
-        fieldId: DEFAULT_FIELD_ID,
-        zoneId: selectedZoneId,
-        imageFileName: fileName,
-        imageFile: file,
-      });
+      const result =
+        await analyzeVisionImage({
+          cropType:
+            selectedCropType,
+
+          fieldId:
+            DEFAULT_FIELD_ID,
+
+          zoneId:
+            selectedZoneId,
+
+          imageFileName:
+            fileName,
+
+          imageFile:
+            file,
+        });
 
       setAnalysisResult(result);
 
-      if (result.source === "FALLBACK") {
-        setAnalysisStatus("FALLBACK");
-        setFeedbackMessage("Se utiliza análisis preliminar local porque el backend no respondió.");
-        return;
-      }
+      setAnalysisProgress(100);
+
+      setAnalysisTimeline(
+        (currentTimeline) => [
+          ...currentTimeline,
+          {
+            sample:
+              currentTimeline.length,
+            value: 100,
+          },
+        ].slice(-22),
+      );
 
       setAnalysisStatus("RESULT");
     } catch (error: unknown) {
       setAnalysisStatus("ERROR");
+
       setFeedbackMessage(
-        error instanceof VisionRequestError
+        error instanceof
+          VisionRequestError
           ? error.message
           : "No fue posible completar el análisis visual.",
       );
     }
   }
 
-  /**
-   * Selecciona la imagen.
-   *
-   * Al elegir un archivo:
-   * - crea preview;
-   * - registra nombre;
-   * - ejecuta automáticamente el análisis.
-   *
-   * Esto permite conservar en pantalla el botón
-   * "Subir imagen" de la maqueta sin añadir un CTA
-   * adicional que Figma no contiene.
-   */
-  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
+
+  /* =========================================================
+     SELECCIÓN DE IMAGEN
+     ========================================================= */
+
+  function handleImageChange(
+    event:
+      ChangeEvent<HTMLInputElement>,
+  ) {
+    const file =
+      event.target.files?.[0];
 
     if (!file) return;
 
-    if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
+
+    /* ---------------------------------------
+       Validación de formato
+       --------------------------------------- */
+
+    if (
+      !SUPPORTED_IMAGE_TYPES.has(
+        file.type,
+      )
+    ) {
       setAnalysisResult(null);
+
       setAnalysisStatus("ERROR");
-      setFeedbackMessage("Selecciona una imagen JPEG, PNG o WebP.");
+
+      setFeedbackMessage(
+        "Selecciona una imagen JPEG, PNG o WebP.",
+      );
+
       event.target.value = "";
+
       return;
     }
 
-    if (file.size > MAX_IMAGE_BYTES) {
+
+    /* ---------------------------------------
+       Validación de tamaño
+       --------------------------------------- */
+
+    if (
+      file.size >
+      MAX_IMAGE_BYTES
+    ) {
       setAnalysisResult(null);
+
       setAnalysisStatus("ERROR");
-      setFeedbackMessage("La imagen supera el límite permitido de 10 MB.");
+
+      setFeedbackMessage(
+        "La imagen supera el límite permitido de 10 MB.",
+      );
+
       event.target.value = "";
+
       return;
     }
 
-    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
 
-    const previewUrl = URL.createObjectURL(file);
+    /* ---------------------------------------
+       Preview
+       --------------------------------------- */
 
-    setImagePreviewUrl(previewUrl);
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(
+        imagePreviewUrl,
+      );
+    }
 
-    void runAnalysis(file, file.name);
+    const previewUrl =
+      URL.createObjectURL(file);
+
+    setImagePreviewUrl(
+      previewUrl,
+    );
+
+
+    /* ---------------------------------------
+       Análisis automático
+       --------------------------------------- */
+
+    void runAnalysis(
+      file,
+      file.name,
+    );
   }
 
-  /**
-   * Cambiar cultivo invalida el análisis anterior.
-   */
-  function handleCropChange(event: ChangeEvent<HTMLSelectElement>) {
-    setSelectedCropType(event.target.value as CropType);
+
+  /* =========================================================
+     CAMBIO DE CULTIVO
+     ========================================================= */
+
+  function handleCropChange(
+    event:
+      ChangeEvent<HTMLSelectElement>,
+  ) {
+    setSelectedCropType(
+      event.target.value as CropType,
+    );
+
+    resetAnalysis();
+  }
+
+
+  /* =========================================================
+     CAMBIO DE ZONA
+     ========================================================= */
+
+  function handleZoneChange(
+    event:
+      ChangeEvent<HTMLSelectElement>,
+  ) {
+    setSelectedZoneId(
+      event.target.value,
+    );
+
+    resetAnalysis();
+  }
+
+
+  /* =========================================================
+     RESET VISUAL
+     ========================================================= */
+
+  function resetAnalysis() {
     setAnalysisResult(null);
+
     setAnalysisStatus("IDLE");
+
+    setAnalysisProgress(0);
+
+    setAnalysisTimeline([
+      {
+        sample: 0,
+        value: 0,
+      },
+    ]);
+
+    setFeedbackMessage(null);
   }
 
-  /**
-   * Cambiar zona invalida el análisis anterior.
-   */
-  function handleZoneChange(event: ChangeEvent<HTMLSelectElement>) {
-    setSelectedZoneId(event.target.value);
-    setAnalysisResult(null);
-    setAnalysisStatus("IDLE");
-  }
 
-  const inspection = analysisResult?.inspection ?? null;
-  const confidencePercentage = inspection ? normalizeConfidence(inspection.confidence) : 0;
+  /* =========================================================
+     DATOS DERIVADOS
+     ========================================================= */
 
-  const detectedAnomalies = inspection && inspection.prediction !== "HEALTHY" && inspection.prediction !== "UNKNOWN" ? 1 : 0;
+  const inspection =
+    analysisResult?.inspection ??
+    null;
+
+  const confidencePercentage =
+    inspection
+      ? normalizeConfidence(
+          inspection.confidence,
+        )
+      : 0;
+
+  const detectedAnomalies =
+    inspection &&
+    inspection.prediction !==
+      "HEALTHY" &&
+    inspection.prediction !==
+      "UNKNOWN"
+      ? 1
+      : 0;
+
+  const analysisStage =
+    getAnalysisStage(
+      analysisProgress,
+      analysisStatus,
+    );
+
 
   return (
     <section className="avScreen visionFigma">
-      <h1 className="avScreenTitle">Vision AI</h1>
-      {/* =====================================
+
+      {/* =====================================================
+          TÍTULO
+          ===================================================== */}
+
+      <h1 className="avScreenTitle">
+        Vision AI
+      </h1>
+
+
+      {/* =====================================================
           KPI SUPERIORES
-          ===================================== */}
+          =====================================================
+          Se conservan las MetricCard originales del módulo.
+          ===================================================== */}
 
       <section className="avMetricGrid">
-        <MetricCard title="Imágenes analizadas" value={inspection ? "100%" : "0%"} description={inspection ? "1 imagen analizada. Imagen procesada correctamente." : "Esperando imagen para análisis."} progress={inspection ? 100 : 0} actionLabel="Ver todas las imágenes" />
 
-        <MetricCard title="Anomalías detectadas" value={inspection ? "100%" : "0%"} description={detectedAnomalies ? "1 anomalía detectada. Patrón de estrés identificado." : "Sin anomalías confirmadas."} progress={detectedAnomalies ? 100 : 0} tone="AMBER" actionLabel="Ver listado de anomalías" />
+        <MetricCard
+          title="Imágenes analizadas"
+          value={
+            inspection
+              ? "100%"
+              : "0%"
+          }
+          description={
+            inspection
+              ? "1 imagen analizada. Imagen procesada correctamente."
+              : "Esperando imagen para análisis."
+          }
+          progress={
+            inspection
+              ? 100
+              : analysisProgress
+          }
+          actionLabel="Ver todas las imágenes"
+        />
 
-        <MetricCard title="Nivel de confianza" value={`${confidencePercentage}%`} description="Confianza de la predicción" progress={confidencePercentage} tone="TEAL" actionLabel="Ver nivel de confianza promedio" />
+        <MetricCard
+          title="Anomalías detectadas"
+          value={
+            inspection
+              ? "100%"
+              : "0%"
+          }
+          description={
+            detectedAnomalies
+              ? "1 anomalía detectada. Patrón de estrés identificado."
+              : "Sin anomalías confirmadas."
+          }
+          progress={
+            detectedAnomalies
+              ? 100
+              : 0
+          }
+          tone="AMBER"
+          actionLabel="Ver listado de anomalías"
+        />
+
+        <MetricCard
+          title="Nivel de confianza"
+          value={`${confidencePercentage}%`}
+          description="Confianza de la predicción"
+          progress={
+            confidencePercentage
+          }
+          tone="TEAL"
+          actionLabel="Ver nivel de confianza promedio"
+        />
+
       </section>
 
-      {/* =====================================
-          WORKSPACE PRINCIPAL
-          ===================================== */}
 
-      <section className="visionFigma__workspace">
+      {/* =====================================================
+          WORKSPACE
+          ===================================================== */}
+
+      <section
+        className={
+          isInspectorOpen
+            ? "visionFigma__workspace"
+            : "visionFigma__workspace is-inspector-collapsed"
+        }
+      >
+
+        {/* ===================================================
+            COLUMNA PRINCIPAL
+            =================================================== */}
+
         <div className="visionFigma__left">
-          <Panel title="Carga y análisis de imagen" showInfo={false}>
-            <div className="visionFigma__controls">
-              <label>
-                <span>Seleccionar cultivo</span>
 
-                <select value={selectedCropType} onChange={handleCropChange}>
-                  {profiles.length === 0 && <option value="ORANGE">Naranjo</option>}
+          {/* ===============================================
+              CANVAS PRINCIPAL
+              =============================================== */}
 
-                  {profiles.map((profile) => (
-                    <option key={profile.cropType} value={profile.cropType}>
-                      {profile.displayName}
+          <Panel
+            title="Carga y análisis de imagen"
+            showInfo={false}
+            className="visionHeroPanel"
+          >
+
+            <div
+              className={[
+                "visionAnalysisStage",
+                analysisStatus ===
+                "ANALYZING"
+                  ? "is-analyzing"
+                  : "",
+                inspection
+                  ? "has-result"
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+
+              {/* ===========================================
+                  IMAGEN AGRÍCOLA
+                  =========================================== */}
+
+              <VisionImagePreview
+                previewUrl={
+                  imagePreviewUrl
+                }
+                inspection={
+                  inspection
+                }
+                status={
+                  analysisStatus
+                }
+                progress={
+                  analysisProgress
+                }
+                stage={
+                  analysisStage
+                }
+              />
+
+
+              {/* ===========================================
+                  CONTROLES FLOTANTES
+                  =========================================== */}
+
+              <div className="visionFigma__controls visionGlass">
+
+                <label>
+
+                  <span>
+                    Cultivo
+                  </span>
+
+                  <select
+                    value={
+                      selectedCropType
+                    }
+                    onChange={
+                      handleCropChange
+                    }
+                  >
+
+                    {profiles.length ===
+                      0 && (
+                      <option value="ORANGE">
+                        Naranjo
+                      </option>
+                    )}
+
+                    {profiles.map(
+                      (profile) => (
+                        <option
+                          key={
+                            profile.cropType
+                          }
+                          value={
+                            profile.cropType
+                          }
+                        >
+                          {
+                            profile.displayName
+                          }
+                        </option>
+                      ),
+                    )}
+
+                  </select>
+
+                </label>
+
+
+                <label>
+
+                  <span>
+                    Zona
+                  </span>
+
+                  <select
+                    value={
+                      selectedZoneId
+                    }
+                    onChange={
+                      handleZoneChange
+                    }
+                  >
+                    <option value="zone-03">
+                      Zona 03
                     </option>
-                  ))}
-                </select>
-              </label>
 
-              <label>
-                <span>Seleccione zona</span>
+                    <option value="zone-02">
+                      Zona 02
+                    </option>
 
-                <select value={selectedZoneId} onChange={handleZoneChange}>
-                  <option value="zone-03">Zona 03</option>
-                  <option value="zone-02">Zona 02</option>
-                  <option value="zone-01">Zona 01</option>
-                </select>
-              </label>
+                    <option value="zone-01">
+                      Zona 01
+                    </option>
+                  </select>
 
-              <label className="visionUploadButton">
-                <span className="visionUploadButton__icon">{/* SVG upload */}</span>
-                <strong>{analysisStatus === "ANALYZING" ? "Analizando..." : "Subir imagen"}</strong>
-                <input type="file" accept="image/jpeg,image/png,image/webp" disabled={analysisStatus === "ANALYZING"} onChange={handleImageChange} />
-              </label>
-            </div>
+                </label>
 
-            <VisionImagePreview previewUrl={imagePreviewUrl} inspection={inspection} />
-          </Panel>
 
-          {/* =====================================
-              EVIDENCIA VISUAL
-              ===================================== */}
+                <label className="visionUploadButton">
 
-          <Panel title="Evidencias visuales" showInfo={false}>
-            {inspection ? (
-              <div className="visionEvidenceTable">
-                <div className="visionEvidenceTable__header">
-                  <span>ID</span>
-                  <span />
-                  <span>Región</span>
-                  <span>Descripción</span>
-                  <span>Confianza</span>
-                  <span>Estado</span>
-                  <span />
+                  <span
+                    className="visionUploadButton__icon"
+                    aria-hidden="true"
+                  >
+                    <UploadIcon />
+                  </span>
+
+                  <strong>
+                    {analysisStatus ===
+                    "ANALYZING"
+                      ? "Analizando..."
+                      : "Subir imagen"}
+                  </strong>
+
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    disabled={
+                      analysisStatus ===
+                      "ANALYZING"
+                    }
+                    onChange={
+                      handleImageChange
+                    }
+                  />
+
+                </label>
+
+              </div>
+
+
+              {/* ===========================================
+                  ESTADO DEL MOTOR
+                  =========================================== */}
+
+              <div
+                className={[
+                  "visionEngineStatus",
+                  `visionEngineStatus--${analysisStatus.toLowerCase()}`,
+                ].join(" ")}
+              >
+
+                <span className="visionEngineStatus__icon">
+
+                  {analysisStatus ===
+                  "ANALYZING" ? (
+                    <VisionSpinner />
+                  ) : (
+                    <ScanIcon />
+                  )}
+
+                </span>
+
+                <div>
+
+                  <small>
+                    MOTOR VISUAL
+                  </small>
+
+                  <strong>
+                    {analysisStage}
+                  </strong>
+
                 </div>
 
-                {inspection.evidence.slice(0, 3).map((evidence, index) => (
-                  <div key={`${evidence.metric}-${index}`} className="visionEvidenceTable__row">
-                    <span>EV-{String(index + 1).padStart(2, "0")}</span>
+                <b>
+                  {analysisStatus ===
+                  "ANALYZING"
+                    ? `${analysisProgress}%`
+                    : inspection
+                      ? "Listo"
+                      : "En espera"}
+                </b>
 
-                    <b>{index + 1}</b>
+              </div>
 
-                    <span>{getEvidenceRegion(index)}</span>
 
-                    <p>{evidence.explanation}</p>
+              {/* ===========================================
+                  RESUMEN INFERIOR FLOTANTE
+                  =========================================== */}
 
-                    <span>{index === 0 ? `${confidencePercentage}%` : "No disponible"}</span>
+              <div className="visionCanvasStats">
 
-                    <StatusBadge tone={getEvidenceTone(evidence.status)}>
-                      {formatEvidenceStatus(evidence.status)}
-                    </StatusBadge>
+                <VisionCanvasStat
+                  icon={
+                    <ScanIcon />
+                  }
+                  label="Predicción"
+                  value={
+                    inspection
+                      ? formatPrediction(
+                          inspection.prediction,
+                        )
+                      : analysisStatus ===
+                          "ANALYZING"
+                        ? "Procesando"
+                        : "Pendiente"
+                  }
+                  tone={
+                    detectedAnomalies
+                      ? "WARNING"
+                      : "GREEN"
+                  }
+                />
 
-                    <strong>›</strong>
-                  </div>
-                ))}
+                <VisionCanvasStat
+                  icon={
+                    <ActivityIcon />
+                  }
+                  label="Confianza"
+                  value={
+                    inspection
+                      ? `${confidencePercentage}%`
+                      : analysisStatus ===
+                          "ANALYZING"
+                        ? `${analysisProgress}%`
+                        : "—"
+                  }
+                  tone="TEAL"
+                />
+
+                <VisionCanvasStat
+                  icon={
+                    <ZoneIcon />
+                  }
+                  label="Zona analizada"
+                  value={
+                    formatZone(
+                      selectedZoneId,
+                    )
+                  }
+                  tone="GREEN"
+                />
+
+              </div>
+
+            </div>
+
+
+            {/* =============================================
+                TELEMETRÍA / GRÁFICA
+                ============================================= */}
+
+            <VisionAnalysisTimeline
+              status={
+                analysisStatus
+              }
+              progress={
+                analysisProgress
+              }
+              stage={
+                analysisStage
+              }
+              data={
+                analysisTimeline
+              }
+            />
+
+          </Panel>
+
+
+          {/* ===============================================
+              EVIDENCIAS VISUALES
+              =============================================== */}
+
+          <Panel
+            title="Evidencias visuales"
+            showInfo={false}
+            className="visionEvidencePanel"
+          >
+
+            {inspection ? (
+              <div className="visionEvidenceGallery">
+
+                {inspection.evidence
+                  .slice(0, 4)
+                  .map(
+                    (
+                      evidence,
+                      index,
+                    ) => (
+                      <article
+                        key={`${evidence.metric}-${index}`}
+                        className="visionEvidenceCard"
+                      >
+
+                        <div className="visionEvidenceCard__media">
+
+                          {imagePreviewUrl ? (
+                            <img
+                              src={
+                                imagePreviewUrl
+                              }
+                              alt=""
+                              aria-hidden="true"
+                              className={`visionEvidenceCard__image visionEvidenceCard__image--${index + 1}`}
+                            />
+                          ) : (
+                            <span />
+                          )}
+
+                          <b>
+                            {index + 1}
+                          </b>
+
+                        </div>
+
+
+                        <div className="visionEvidenceCard__body">
+
+                          <div className="visionEvidenceCard__top">
+
+                            <span>
+                              EV-
+                              {String(
+                                index +
+                                  1,
+                              ).padStart(
+                                2,
+                                "0",
+                              )}
+                            </span>
+
+                            <StatusBadge
+                              tone={getEvidenceTone(
+                                evidence.status,
+                              )}
+                            >
+                              {formatEvidenceStatus(
+                                evidence.status,
+                              )}
+                            </StatusBadge>
+
+                          </div>
+
+
+                          <strong>
+                            {getEvidenceRegion(
+                              index,
+                            )}
+                          </strong>
+
+
+                          <p>
+                            {
+                              evidence.explanation
+                            }
+                          </p>
+
+
+                          <footer>
+
+                            <span>
+                              Confianza
+                            </span>
+
+                            <b>
+                              {index ===
+                              0
+                                ? `${confidencePercentage}%`
+                                : "Visual"}
+                            </b>
+
+                          </footer>
+
+                        </div>
+
+                      </article>
+                    ),
+                  )}
+
               </div>
             ) : (
               <div className="visionCompactEmpty">
-                Selecciona una imagen para generar evidencia visual.
+
+                <span
+                  className="visionCompactEmpty__icon"
+                  aria-hidden="true"
+                >
+                  <ScanIcon />
+                </span>
+
+                <strong>
+                  Evidencia pendiente
+                </strong>
+
+                <p>
+                  Selecciona una imagen para generar regiones y señales visuales.
+                </p>
+
               </div>
             )}
+
           </Panel>
+
         </div>
 
-        {/* =====================================
-            COLUMNA DE RESULTADO
-            ===================================== */}
 
-        <aside className="visionFigma__right">
-          {inspection && analysisResult ? (
-            <VisionResultCard result={inspection} source={analysisResult.source} fallbackReason={analysisResult.fallbackReason} />
-          ) : (
-            <VisionResultPlaceholder status={analysisStatus} message={feedbackMessage} />
-          )}
-        </aside>
+        {/* ===================================================
+            INSPECTOR LATERAL
+            =================================================== */}
+
+        {isInspectorOpen ? (
+          <aside className="visionFigma__right visionInspector">
+
+            {/* =============================================
+                HEADER DEL INSPECTOR
+                ============================================= */}
+
+            <div className="visionInspector__header">
+
+              <div>
+
+                <span
+                  className="visionInspector__headerIcon"
+                  aria-hidden="true"
+                >
+                  <InspectorIcon />
+                </span>
+
+                <div>
+                  <small>
+                    INSPECTOR
+                  </small>
+
+                  <strong>
+                    Análisis visual
+                  </strong>
+                </div>
+
+              </div>
+
+
+              <div className="visionInspector__actions">
+
+                {analysisResult && (
+                  <span
+                    className={[
+                      "visionInspector__source",
+                      analysisResult.source ===
+                      "BACKEND"
+                        ? "is-live"
+                        : "is-fallback",
+                    ].join(" ")}
+                  >
+                    {analysisResult.source ===
+                    "BACKEND"
+                      ? "Backend"
+                      : "Respaldo"}
+                  </span>
+                )}
+
+
+                <button
+                  type="button"
+                  className="visionInspector__close"
+                  aria-label="Cerrar inspector"
+                  onClick={() =>
+                    setIsInspectorOpen(
+                      false,
+                    )
+                  }
+                >
+                  ×
+                </button>
+
+              </div>
+
+            </div>
+
+
+            {/* =============================================
+                CONTENIDO
+                ============================================= */}
+
+            <div className="visionInspector__body">
+
+              {inspection && analysisResult ? (
+                <VisionResultCard
+                  result={inspection}
+                  source={analysisResult.source}
+                  fallbackReason={analysisResult.fallbackReason}
+                />
+              ) : (
+                <VisionResultPlaceholder
+                  status={analysisStatus}
+                  message={feedbackMessage}
+                  progress={analysisProgress}
+                />
+              )}
+
+            </div>
+
+          </aside>
+        ) : (
+          <button
+            type="button"
+            className="visionInspectorTrigger visionGlass"
+            onClick={() =>
+              setIsInspectorOpen(
+                true,
+              )
+            }
+          >
+            <InspectorIcon />
+
+            <span>
+              Abrir inspector
+            </span>
+          </button>
+        )}
+
       </section>
 
-      {/* =====================================
-          HISTORIAL
-          ===================================== */}
 
-      <Panel title="Historial de análisis" showInfo={false}>
+      {/* =====================================================
+          HISTORIAL
+          ===================================================== */}
+
+      <Panel
+        title="Historial de análisis"
+        showInfo={false}
+        className="visionHistoryPanel"
+      >
+
         {inspection ? (
           <div className="avTableWrap">
+
             <table className="avTable visionHistoryTable">
+
               <thead>
                 <tr>
-                  <th>Fecha y hora</th>
-                  <th>Cultivo</th>
-                  <th>Zona</th>
-                  <th>Predicción</th>
-                  <th>Confianza</th>
-                  <th>Severidad</th>
-                  <th>Estado</th>
-                  <th>Analizado por</th>
+                  <th>
+                    Fecha y hora
+                  </th>
+
+                  <th>
+                    Cultivo
+                  </th>
+
+                  <th>
+                    Zona
+                  </th>
+
+                  <th>
+                    Predicción
+                  </th>
+
+                  <th>
+                    Confianza
+                  </th>
+
+                  <th>
+                    Severidad
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+
+                  <th>
+                    Analizado por
+                  </th>
                 </tr>
               </thead>
 
+
               <tbody>
+
                 <tr>
-                  <td>{formatDateTime(inspection.createdAt)}</td>
-                  <td>{formatCrop(inspection.cropType)}</td>
-                  <td>{formatZone(inspection.zoneId)}</td>
-                  <td className="visionHistoryPrediction">{formatPrediction(inspection.prediction)}</td>
+
                   <td>
-                    <div className="visionConfidenceCell">
-                      <span>{confidencePercentage}%</span>
-                      <i><b style={{ width: `${confidencePercentage}%` }} /></i>
-                    </div>
+                    {formatDateTime(
+                      inspection.createdAt,
+                    )}
                   </td>
-                  <td><StatusBadge tone={getPredictionTone(inspection.prediction)}>{getSeverityLabel(inspection.prediction)}</StatusBadge></td>
-                  <td><StatusBadge tone={getPredictionTone(inspection.prediction)}>{inspection.prediction === "HEALTHY" ? "Normal" : "Advertencia"}</StatusBadge></td>
-                  <td>Vision AI</td>
+
+                  <td>
+                    {formatCrop(
+                      inspection.cropType,
+                    )}
+                  </td>
+
+                  <td>
+                    {formatZone(
+                      inspection.zoneId,
+                    )}
+                  </td>
+
+                  <td className="visionHistoryPrediction">
+                    {formatPrediction(
+                      inspection.prediction,
+                    )}
+                  </td>
+
+                  <td>
+
+                    <div className="visionConfidenceCell">
+
+                      <span>
+                        {
+                          confidencePercentage
+                        }
+                        %
+                      </span>
+
+                      <i>
+                        <b
+                          style={{
+                            width: `${confidencePercentage}%`,
+                          }}
+                        />
+                      </i>
+
+                    </div>
+
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      tone={getPredictionTone(
+                        inspection.prediction,
+                      )}
+                    >
+                      {getSeverityLabel(
+                        inspection.prediction,
+                      )}
+                    </StatusBadge>
+                  </td>
+
+                  <td>
+                    <StatusBadge
+                      tone={getPredictionTone(
+                        inspection.prediction,
+                      )}
+                    >
+                      {inspection.prediction ===
+                      "HEALTHY"
+                        ? "Normal"
+                        : "Advertencia"}
+                    </StatusBadge>
+                  </td>
+
+                  <td>
+                    Vision AI
+                  </td>
+
                 </tr>
+
               </tbody>
+
             </table>
+
           </div>
         ) : (
           <div className="visionCompactEmpty">
-            Todavía no existen análisis en la sesión actual.
+
+            <span
+              className="visionCompactEmpty__icon"
+              aria-hidden="true"
+            >
+              <HistoryIcon />
+            </span>
+
+            <strong>
+              Sin análisis registrados
+            </strong>
+
+            <p>
+              El análisis actual aparecerá aquí al completarse.
+            </p>
+
           </div>
         )}
 
-        <button type="button" className="avTextAction visionCenteredAction avActionButton">Ver todo el historial</button>
+
+        <button
+          type="button"
+          className="avTextAction visionCenteredAction avActionButton"
+        >
+          Ver todo el historial
+        </button>
+
       </Panel>
+
     </section>
   );
 }
 
+
+/* ===========================================================
+   COMPONENTE — PREVIEW PRINCIPAL
+   =========================================================== */
+
 /**
- * Preview principal.
+ * Canvas visual.
  *
- * Si existe una imagen real utiliza el archivo
- * seleccionado por el usuario.
+ * Durante el análisis:
+ * - ilumina la superficie;
+ * - muestra línea de escaneo;
+ * - presenta loader;
+ * - oculta regiones definitivas.
  *
- * Sin imagen se mantiene el área diseñada sin
- * mostrar un icono roto.
+ * Después:
+ * - presenta zonas de evidencia.
  */
-function VisionImagePreview({ previewUrl, inspection }: { readonly previewUrl: string | null; readonly inspection: VisionInspection | null }) {
+function VisionImagePreview({
+  previewUrl,
+  inspection,
+  status,
+  progress,
+  stage,
+}: {
+  readonly previewUrl:
+    | string
+    | null;
+
+  readonly inspection:
+    | VisionInspection
+    | null;
+
+  readonly status:
+    VisionAnalysisStatus;
+
+  readonly progress:
+    number;
+
+  readonly stage:
+    string;
+}) {
   return (
-    <div className={previewUrl ? "visionImagePreview has-image" : "visionImagePreview"}>
-      {previewUrl && <img src={previewUrl} alt="Imagen agrícola seleccionada para análisis visual" />}
+    <div
+      className={[
+        "visionImagePreview",
+
+        previewUrl
+          ? "has-image"
+          : "",
+
+        status ===
+        "ANALYZING"
+          ? "is-analyzing"
+          : "",
+
+        inspection
+          ? "has-result"
+          : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+
+      {/* -------------------------------------
+          Imagen
+          ------------------------------------- */}
+
+      {previewUrl && (
+        <img
+          src={previewUrl}
+          alt="Imagen agrícola seleccionada para análisis visual"
+        />
+      )}
+
+
+      {/* -------------------------------------
+          Empty
+          ------------------------------------- */}
 
       {!previewUrl && (
         <div className="visionImagePreview__empty">
-          <span>{/* SVG leaf/image */}</span>
-          <strong>Imagen agrícola</strong>
-          <small>Selecciona una imagen para iniciar el análisis preliminar.</small>
+
+          <span aria-hidden="true">
+            <ScanIcon />
+          </span>
+
+          <strong>
+            Imagen agrícola
+          </strong>
+
+          <small>
+            Sube una imagen para iniciar el análisis preliminar.
+          </small>
+
         </div>
       )}
 
-      {previewUrl && (
-        <>
-          <div className="visionImagePreview__marker visionImagePreview__marker--one">1</div>
-          <div className="visionImagePreview__marker visionImagePreview__marker--two">2</div>
-          <div className="visionImagePreview__marker visionImagePreview__marker--three">3</div>
 
-          <div className="visionImagePreview__area visionImagePreview__area--one" />
-          <div className="visionImagePreview__area visionImagePreview__area--two" />
-          <div className="visionImagePreview__area visionImagePreview__area--three" />
-        </>
-      )}
+      {/* -------------------------------------
+          Escaneo activo
+          ------------------------------------- */}
+
+      {status ===
+        "ANALYZING" &&
+        previewUrl && (
+          <>
+            <div className="visionImagePreview__scanBeam" />
+
+            <div className="visionAnalysisLoader visionGlass">
+
+              <span className="visionAnalysisLoader__spinner">
+                <VisionSpinner />
+              </span>
+
+              <div>
+                <small>
+                  ANALIZANDO
+                </small>
+
+                <strong>
+                  {stage}
+                </strong>
+              </div>
+
+              <b>
+                {progress}%
+              </b>
+
+            </div>
+          </>
+        )}
+
+
+      {/* -------------------------------------
+          Evidencias después del análisis
+          ------------------------------------- */}
+
+      {previewUrl &&
+        inspection && (
+          <>
+            <div className="visionImagePreview__marker visionImagePreview__marker--one">
+              1
+            </div>
+
+            <div className="visionImagePreview__marker visionImagePreview__marker--two">
+              2
+            </div>
+
+            <div className="visionImagePreview__marker visionImagePreview__marker--three">
+              3
+            </div>
+
+
+            <div className="visionImagePreview__area visionImagePreview__area--one" />
+
+            <div className="visionImagePreview__area visionImagePreview__area--two" />
+
+            <div className="visionImagePreview__area visionImagePreview__area--three" />
+          </>
+        )}
+
+
+      {/* -------------------------------------
+          Herramientas visuales
+          ------------------------------------- */}
 
       <div className="visionImagePreview__mapControls">
-        <button type="button">+</button>
-        <button type="button">−</button>
-        <button type="button">{/* SVG fit */}</button>
+
+        <button
+          type="button"
+          aria-label="Acercar"
+        >
+          +
+        </button>
+
+        <button
+          type="button"
+          aria-label="Alejar"
+        >
+          −
+        </button>
+
+        <button
+          type="button"
+          aria-label="Ajustar imagen"
+        >
+          <FitIcon />
+        </button>
+
       </div>
 
-      {inspection && <span className="visionImagePreview__file">{formatPrediction(inspection.prediction)}</span>}
+
+      {/* -------------------------------------
+          Etiqueta de resultado
+          ------------------------------------- */}
+
+      {inspection && (
+        <span className="visionImagePreview__file">
+          {formatPrediction(
+            inspection.prediction,
+          )}
+        </span>
+      )}
+
     </div>
   );
 }
 
-function VisionResultPlaceholder({ status, message }: { readonly status: VisionAnalysisStatus; readonly message: string | null }) {
+
+/* ===========================================================
+   COMPONENTE — STAT DEL CANVAS
+   =========================================================== */
+
+function VisionCanvasStat({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  readonly icon:
+    React.ReactNode;
+
+  readonly label:
+    string;
+
+  readonly value:
+    string;
+
+  readonly tone:
+    "GREEN" |
+    "TEAL" |
+    "WARNING";
+}) {
   return (
-    <>
-      <Panel title="Resultado preliminar" showInfo={false}>
-        <div className="visionResultRows visionResultRows--placeholder">
-          <ResultPlaceholderRow label="Predicción" />
-          <ResultPlaceholderRow label="Confianza" />
-          <ResultPlaceholderRow label="Cultivo" />
-          <ResultPlaceholderRow label="Zona Analizada" />
-          <ResultPlaceholderRow label="Estado" />
-        </div>
-      </Panel>
+    <article
+      className={`visionCanvasStat visionCanvasStat--${tone.toLowerCase()}`}
+    >
 
-      <Panel title="Métricas visuales" showInfo={false}>
-        <div className="visionMetricsPlaceholder">
-          <span>Esperando análisis visual.</span>
-        </div>
-      </Panel>
+      <span
+        className="visionCanvasStat__icon"
+        aria-hidden="true"
+      >
+        {icon}
+      </span>
 
-      <div className={`visionPreliminaryNotice visionPreliminaryNotice--${status.toLowerCase()}`}>
-        <span>{/* SVG leaf */}</span>
+      <div>
+
+        <span>
+          {label}
+        </span>
+
+        <strong
+          title={value}
+        >
+          {value}
+        </strong>
+
+      </div>
+
+    </article>
+  );
+}
+
+
+/* ===========================================================
+   COMPONENTE — GRÁFICA DE PROCESAMIENTO
+   =========================================================== */
+
+/**
+ * Utiliza Recharts real.
+ *
+ * El gráfico se alimenta progresivamente mientras
+ * analysisStatus === ANALYZING.
+ *
+ * Actualmente representa avance visual de ejecución.
+ * No se presenta como una métrica científica del modelo.
+ */
+function VisionAnalysisTimeline({
+  status,
+  progress,
+  stage,
+  data,
+}: {
+  readonly status:
+    VisionAnalysisStatus;
+
+  readonly progress:
+    number;
+
+  readonly stage:
+    string;
+
+  readonly data:
+    ReadonlyArray<VisionTimelinePoint>;
+}) {
+  return (
+    <section
+      className={[
+        "visionAnalysisChart",
+        `visionAnalysisChart--${status.toLowerCase()}`,
+      ].join(" ")}
+    >
+
+      <header className="visionAnalysisChart__header">
 
         <div>
-          <strong>{status === "ANALYZING" ? "Analizando imagen" : status === "ERROR" ? "Análisis no disponible" : "Resultado preliminar"}</strong>
-          <p>{message ?? "Selecciona una imagen para generar un análisis visual preliminar."}</p>
+
+          <span
+            className="visionAnalysisChart__icon"
+            aria-hidden="true"
+          >
+            <ActivityIcon />
+          </span>
+
+          <div>
+
+            <small>
+              TELEMETRÍA DE PROCESAMIENTO
+            </small>
+
+            <strong>
+              Actividad de análisis
+            </strong>
+
+          </div>
+
         </div>
+
+
+        <div className="visionAnalysisChart__status">
+
+          <span
+            className={
+              status ===
+              "ANALYZING"
+                ? "is-live"
+                : ""
+            }
+          />
+
+          <div>
+
+            <small>
+              {stage}
+            </small>
+
+            <strong>
+              {progress}%
+            </strong>
+
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <div className="visionAnalysisChart__body">
+
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+        >
+
+          <AreaChart
+            data={[...data]}
+            margin={{
+              top: 10,
+              right: 6,
+              bottom: 0,
+              left: 6,
+            }}
+          >
+
+            <defs>
+
+              <linearGradient
+                id="visionAnalysisGradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+
+                <stop
+                  offset="0%"
+                  stopColor="#15b7a9"
+                  stopOpacity={0.62}
+                />
+
+                <stop
+                  offset="55%"
+                  stopColor="#a7d91e"
+                  stopOpacity={0.30}
+                />
+
+                <stop
+                  offset="100%"
+                  stopColor="#a7d91e"
+                  stopOpacity={0.03}
+                />
+
+              </linearGradient>
+
+            </defs>
+
+
+            <CartesianGrid
+              vertical={false}
+              stroke="rgba(61, 93, 76, 0.13)"
+              strokeDasharray="4 5"
+            />
+
+
+            <XAxis
+              dataKey="sample"
+              hide
+            />
+
+
+            <YAxis
+              domain={[0, 100]}
+              hide
+            />
+
+
+            <Tooltip
+              cursor={{
+                stroke:
+                  "rgba(21, 91, 68, 0.25)",
+                strokeDasharray:
+                  "4 4",
+              }}
+            />
+
+
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke="#15b7a9"
+              strokeWidth={2.6}
+              fill="url(#visionAnalysisGradient)"
+              dot={{
+                r: 2.6,
+                fill:
+                  "#a7d91e",
+                stroke:
+                  "#ffffff",
+                strokeWidth:
+                  1.4,
+              }}
+              activeDot={{
+                r: 4.8,
+                fill:
+                  "#15b7a9",
+                stroke:
+                  "#ffffff",
+                strokeWidth:
+                  2,
+              }}
+              isAnimationActive
+              animationDuration={180}
+            />
+
+          </AreaChart>
+
+        </ResponsiveContainer>
+
       </div>
+
+    </section>
+  );
+}
+
+
+/* ===========================================================
+   COMPONENTE — PLACEHOLDER DEL INSPECTOR
+   =========================================================== */
+
+function VisionResultPlaceholder({
+  status,
+  message,
+  progress,
+}: {
+  readonly status:
+    VisionAnalysisStatus;
+
+  readonly message:
+    string | null;
+
+  readonly progress:
+    number;
+}) {
+  return (
+    <>
+
+      {/* -------------------------------------
+          Resultado
+          ------------------------------------- */}
+
+      <Panel
+        title="Resultado preliminar"
+        showInfo={false}
+      >
+
+        <div className="visionResultRows visionResultRows--placeholder">
+
+          <ResultPlaceholderRow
+            label="Predicción"
+          />
+
+          <ResultPlaceholderRow
+            label="Confianza"
+          />
+
+          <ResultPlaceholderRow
+            label="Cultivo"
+          />
+
+          <ResultPlaceholderRow
+            label="Zona analizada"
+          />
+
+          <ResultPlaceholderRow
+            label="Estado"
+          />
+
+        </div>
+
+      </Panel>
+
+
+      {/* -------------------------------------
+          Métricas
+          ------------------------------------- */}
+
+      <Panel
+        title="Métricas visuales"
+        showInfo={false}
+      >
+
+        {status ===
+        "ANALYZING" ? (
+          <div className="visionMetricsAnalyzing">
+
+            <span className="visionMetricsAnalyzing__orb">
+              <VisionSpinner />
+            </span>
+
+            <strong>
+              Extrayendo señales visuales
+            </strong>
+
+            <p>
+              Analizando cobertura, áreas secas y patrones de estrés.
+            </p>
+
+            <div className="visionMetricsAnalyzing__progress">
+
+              <i>
+                <b
+                  style={{
+                    width: `${progress}%`,
+                  }}
+                />
+              </i>
+
+              <span>
+                {progress}%
+              </span>
+
+            </div>
+
+          </div>
+        ) : (
+          <div className="visionMetricsPlaceholder">
+
+            <ScanIcon />
+
+            <strong>
+              Sin métricas todavía
+            </strong>
+
+            <span>
+              Esperando análisis visual.
+            </span>
+
+          </div>
+        )}
+
+      </Panel>
+
+
+      {/* -------------------------------------
+          Notice
+          ------------------------------------- */}
+
+      <div
+        className={`visionPreliminaryNotice visionPreliminaryNotice--${status.toLowerCase()}`}
+      >
+
+        <span aria-hidden="true">
+
+          {status ===
+          "ANALYZING" ? (
+            <VisionSpinner />
+          ) : (
+            <ScanIcon />
+          )}
+
+        </span>
+
+        <div>
+
+          <strong>
+            {status ===
+            "ANALYZING"
+              ? "Procesando imagen"
+              : status ===
+                  "ERROR"
+                ? "Análisis no disponible"
+                : "Resultado preliminar"}
+          </strong>
+
+          <p>
+            {message ??
+              (
+                status ===
+                "ANALYZING"
+                  ? "Vision AI está evaluando la imagen seleccionada."
+                  : "Selecciona una imagen para generar un análisis visual preliminar."
+              )}
+          </p>
+
+        </div>
+
+      </div>
+
     </>
   );
 }
 
-function ResultPlaceholderRow({ label }: { readonly label: string }) {
+
+/* ===========================================================
+   COMPONENTE — ROW PLACEHOLDER
+   =========================================================== */
+
+function ResultPlaceholderRow({
+  label,
+}: {
+  readonly label:
+    string;
+}) {
   return (
     <div>
-      <strong>{label}</strong>
-      <span>—</span>
+
+      <strong>
+        {label}
+      </strong>
+
+      <span>
+        —
+      </span>
+
     </div>
   );
 }
 
-function normalizeConfidence(value: number): number {
-  return Math.round(value <= 1 ? value * 100 : value);
+
+/* ===========================================================
+   ICONOS INLINE
+   ===========================================================
+   Se mantienen dentro del componente para no introducir
+   nuevas dependencias ni rutas de assets en esta etapa.
+   =========================================================== */
+
+function UploadIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 15V4m0 0L8 8m4-4 4 4M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
-function formatPrediction(value: string): string {
-  return value.replaceAll("_", " ");
+
+function ScanIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+
+      <circle
+        cx="12"
+        cy="12"
+        r="4"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+
+      <circle
+        cx="12"
+        cy="12"
+        r="1.5"
+        fill="currentColor"
+      />
+    </svg>
+  );
 }
 
-function formatCrop(value: string): string {
-  if (value === "CORN") return "Maíz";
-  if (value === "ORANGE") return "Naranjo";
-  if (value === "RED_BEAN") return "Frijol rojo";
-  if (value === "CASSAVA") return "Yuca";
-  if (value === "SORGHUM") return "Sorgo";
 
-  return value.replaceAll("_", " ");
+function ActivityIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M3 12h4l2-6 4 12 2-6h6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
-function formatZone(value?: string | null): string {
-  if (!value) return "—";
 
-  return value.replace("zone-", "Zona ");
+function ZoneIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+
+      <circle
+        cx="12"
+        cy="10"
+        r="2"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+    </svg>
+  );
 }
 
-function getEvidenceRegion(index: number): string {
-  if (index === 0) return "Imagen general";
-  if (index === 1) return "Cobertura vegetal";
 
-  return "Áreas secas";
+function FitIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M8 4H4v4M16 4h4v4M20 16v4h-4M4 16v4h4"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
-function formatEvidenceStatus(status: string): string {
-  if (status === "NORMAL") return "Normal";
-  if (status === "WATCH") return "Vigilancia";
+
+function InspectorIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <rect
+        x="4"
+        y="4"
+        width="16"
+        height="16"
+        rx="3"
+        stroke="currentColor"
+        strokeWidth="1.7"
+      />
+
+      <path
+        d="M9 4v16M13 9h4M13 13h4"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+
+function HistoryIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6M4 4v4.6h4.6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M12 8v4l2.5 1.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+
+/**
+ * Loader SVG utilizado durante inferencia.
+ *
+ * La rotación y el glow los controlará vision-ai.css.
+ */
+function VisionSpinner() {
+  return (
+    <svg
+      className="visionSpinner"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="8"
+        stroke="currentColor"
+        strokeWidth="2"
+        opacity="0.22"
+      />
+
+      <path
+        d="M12 4a8 8 0 0 1 8 8"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+      />
+
+      <circle
+        cx="12"
+        cy="12"
+        r="3"
+        fill="currentColor"
+        opacity="0.18"
+      />
+    </svg>
+  );
+}
+
+
+/* ===========================================================
+   HELPERS — PROGRESO
+   =========================================================== */
+
+/**
+ * Incremento deliberadamente rápido.
+ *
+ * Se detiene alrededor de 94% mientras espera
+ * el resultado real del servicio.
+ *
+ * De esta forma:
+ * - nunca afirma que el modelo terminó antes de hacerlo;
+ * - la demo mantiene sensación de respuesta inmediata.
+ */
+function getNextAnalysisProgress(
+  current:
+    number,
+): number {
+  if (current >= 94) {
+    return 94;
+  }
+
+  if (current < 28) {
+    return Math.min(
+      current + 8,
+      94,
+    );
+  }
+
+  if (current < 58) {
+    return Math.min(
+      current + 5,
+      94,
+    );
+  }
+
+  if (current < 82) {
+    return Math.min(
+      current + 3,
+      94,
+    );
+  }
+
+  return Math.min(
+    current + 1,
+    94,
+  );
+}
+
+
+/**
+ * Etapas puramente visuales del proceso.
+ */
+function getAnalysisStage(
+  progress:
+    number,
+
+  status:
+    VisionAnalysisStatus,
+): string {
+  if (status === "RESULT") {
+    return "Análisis completado";
+  }
+
+  if (status === "ERROR") {
+    return "Proceso detenido";
+  }
+
+  if (status === "IDLE") {
+    return "Listo para analizar";
+  }
+
+  if (progress < 24) {
+    return "Preparando imagen";
+  }
+
+  if (progress < 48) {
+    return "Extrayendo regiones";
+  }
+
+  if (progress < 70) {
+    return "Evaluando señales";
+  }
+
+  if (progress < 88) {
+    return "Clasificando patrones";
+  }
+
+  return "Consolidando resultado";
+}
+
+
+/* ===========================================================
+   HELPERS — DATOS
+   =========================================================== */
+
+function normalizeConfidence(
+  value:
+    number,
+): number {
+  return Math.round(
+    value <= 1
+      ? value * 100
+      : value,
+  );
+}
+
+
+function formatPrediction(
+  value:
+    string,
+): string {
+  return value
+    .replaceAll(
+      "_",
+      " ",
+    )
+    .toLowerCase()
+    .replace(
+      /^\w/,
+      (character) =>
+        character.toUpperCase(),
+    );
+}
+
+
+function formatCrop(
+  value:
+    string,
+): string {
+  if (value === "CORN") {
+    return "Maíz";
+  }
+
+  if (value === "ORANGE") {
+    return "Naranjo";
+  }
+
+  if (value === "RED_BEAN") {
+    return "Frijol rojo";
+  }
+
+  if (value === "CASSAVA") {
+    return "Yuca";
+  }
+
+  if (value === "QUEQUISQUE") {
+    return "Quequisque";
+  }
+
+  if (value === "SORGHUM") {
+    return "Sorgo";
+  }
+
+  return value.replaceAll(
+    "_",
+    " ",
+  );
+}
+
+
+function formatZone(
+  value?:
+    string | null,
+): string {
+  if (!value) {
+    return "—";
+  }
+
+  return value.replace(
+    "zone-",
+    "Zona ",
+  );
+}
+
+
+function getEvidenceRegion(
+  index:
+    number,
+): string {
+  if (index === 0) {
+    return "Región prioritaria";
+  }
+
+  if (index === 1) {
+    return "Cobertura vegetal";
+  }
+
+  if (index === 2) {
+    return "Área de contraste";
+  }
+
+  return "Señal complementaria";
+}
+
+
+function formatEvidenceStatus(
+  status:
+    string,
+): string {
+  if (status === "NORMAL") {
+    return "Normal";
+  }
+
+  if (status === "WATCH") {
+    return "Vigilancia";
+  }
+
+  if (status === "CRITICAL") {
+    return "Crítica";
+  }
 
   return "Advertencia";
 }
 
-function getEvidenceTone(status: string): "SUCCESS" | "WARNING" | "DANGER" {
-  if (status === "NORMAL") return "SUCCESS";
-  if (status === "CRITICAL") return "DANGER";
+
+function getEvidenceTone(
+  status:
+    string,
+):
+  | "SUCCESS"
+  | "WARNING"
+  | "DANGER" {
+  if (status === "NORMAL") {
+    return "SUCCESS";
+  }
+
+  if (status === "CRITICAL") {
+    return "DANGER";
+  }
 
   return "WARNING";
 }
 
-function getPredictionTone(prediction: string): "SUCCESS" | "WARNING" | "DANGER" {
-  if (prediction === "HEALTHY") return "SUCCESS";
-  if (prediction === "UNKNOWN") return "WARNING";
+
+function getPredictionTone(
+  prediction:
+    string,
+):
+  | "SUCCESS"
+  | "WARNING"
+  | "DANGER" {
+  if (
+    prediction === "HEALTHY"
+  ) {
+    return "SUCCESS";
+  }
+
+  if (
+    prediction === "UNKNOWN"
+  ) {
+    return "WARNING";
+  }
 
   return "WARNING";
 }
 
-function getSeverityLabel(prediction: string): string {
-  if (prediction === "HEALTHY") return "Baja";
-  if (prediction === "UNKNOWN") return "Media";
+
+function getSeverityLabel(
+  prediction:
+    string,
+): string {
+  if (
+    prediction === "HEALTHY"
+  ) {
+    return "Baja";
+  }
+
+  if (
+    prediction === "UNKNOWN"
+  ) {
+    return "Media";
+  }
 
   return "Alta";
 }
 
-function formatDateTime(value: string): string {
-  return new Intl.DateTimeFormat("es-NI", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
-}
 
-/**
- * Vista de respaldo mientras se completa la refactorización de Vision AI.
- *
- * AppRouter importa todas las páginas al iniciar la aplicación, por lo que
- * este contrato debe seguir existiendo aunque la implementación principal
- * permanezca comentada temporalmente.
- */
-// export function VisionAiPage() {
-//   return (
-//     <section className="avState">
-//       <strong>Vision AI en refactorización</strong>
-//       <p>El resto de AgroVision continúa disponible.</p>
-//     </section>
-//   );
-// }
+function formatDateTime(
+  value:
+    string,
+): string {
+  return new Intl.DateTimeFormat(
+    "es-NI",
+    {
+      dateStyle: "short",
+      timeStyle: "short",
+    },
+  ).format(
+    new Date(value),
+  );
+}

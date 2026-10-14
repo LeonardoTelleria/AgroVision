@@ -1,515 +1,4234 @@
 /**
  * =========================================
- * Vision AI — Figma implementation
+ * AgroVision — Vision AI
+ * =========================================
+ *
+ * Sistema visual premium para el módulo estrella
+ * de análisis por visión artificial.
+ *
+ * Inspiración:
+ * - arquitectura espacial de Mapping GIS;
+ * - superficies glass de alta profundidad;
+ * - canvas protagonista;
+ * - inspector técnico flotante;
+ * - telemetría viva con Recharts;
+ * - feedback visual inmediato durante inferencia.
+ *
+ * Objetivos:
+ * - mantener perfecta coherencia con AgroVision;
+ * - evitar textos demasiado pequeños;
+ * - mantener contraste sobre glass;
+ * - evitar overflow;
+ * - responder correctamente en desktop, tablet y móvil;
+ * - no alterar lógica ni datos del AI Service.
+ *
+ * IMPORTANTE:
+ * - Recharts controla la gráfica;
+ * - CSS NO simula la gráfica;
+ * - CSS solo controla su contenedor y presentación.
  * =========================================
  */
 
+
+/* ===========================================================
+   1. TOKENS LOCALES
+   =========================================================== */
+
 .visionFigma {
-  gap: 10px;
-}
+  --vision-ink: #183c32;
+  --vision-ink-strong: #102f27;
+  --vision-ink-soft: #3f5f55;
+  --vision-muted: #657a72;
 
-.visionFigma__workspace {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1.72fr) minmax(300px, 0.92fr);
-  gap: 10px;
-}
+  --vision-accent: #26624b;
+  --vision-accent-soft: #4b8067;
 
-.visionFigma__left,
-.visionFigma__right {
+  --vision-lime: var(--av-lime-500);
+  --vision-lime-deep: var(--av-lime-700);
+
+  --vision-glass-border:
+    rgba(255, 255, 255, 0.68);
+
+  --vision-glass-border-soft:
+    rgba(255, 255, 255, 0.42);
+
+  --vision-glass:
+    rgba(235, 242, 227, 0.50);
+
+  --vision-glass-strong:
+    rgba(235, 241, 231, 0.64);
+
+  --vision-glass-light:
+    rgba(248, 251, 245, 0.52);
+
+  --vision-shadow:
+    0 22px 52px rgba(8, 31, 22, 0.16);
+
+  --vision-shadow-soft:
+    0 10px 30px rgba(8, 31, 22, 0.09);
+
+  --vision-inner-highlight:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+
+  width: 100%;
   min-width: 0;
+
   display: grid;
   align-content: start;
-  gap: 10px;
+
+  gap: 12px;
 }
 
-/* =========================================
-   Controls
-   ========================================= */
+.visionFigma,
+.visionFigma * {
+  box-sizing: border-box;
+}
+
+
+/* ===========================================================
+   2. TÍTULO
+   =========================================================== */
+
+.visionFigma .avScreenTitle {
+  margin: 0;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+}
+
+
+/* ===========================================================
+   3. METRIC CARDS
+   ===========================================================
+   Se conservan las MetricCard compartidas.
+   No se redefine su arquitectura.
+   =========================================================== */
+
+.visionFigma .avMetricGrid {
+  width: 100%;
+  min-width: 0;
+}
+
+.visionFigma .avMetricCard {
+  min-width: 0;
+}
+
+
+/* ===========================================================
+   4. WORKSPACE
+   =========================================================== */
+
+.visionFigma__workspace {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(330px, 360px);
+
+  align-items: start;
+
+  gap: 11px;
+}
+
+
+/* Inspector cerrado */
+
+.visionFigma__workspace.is-inspector-collapsed {
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto;
+}
+
+
+.visionFigma__left {
+  min-width: 0;
+
+  display: grid;
+  align-content: start;
+
+  gap: 11px;
+}
+
+
+/* ===========================================================
+   5. GLASS BASE
+   =========================================================== */
+
+.visionGlass {
+  border:
+    1px solid
+    var(--vision-glass-border);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(229, 239, 215, 0.54),
+      rgba(244, 247, 237, 0.43)
+    );
+
+  -webkit-backdrop-filter:
+    blur(34px)
+    saturate(150%)
+    contrast(94%)
+    brightness(1.05);
+
+  backdrop-filter:
+    blur(34px)
+    saturate(150%)
+    contrast(94%)
+    brightness(1.05);
+
+  box-shadow:
+    var(--vision-shadow-soft),
+    var(--vision-inner-highlight);
+}
+
+
+/* ===========================================================
+   6. HERO PANEL
+   =========================================================== */
+
+.visionHeroPanel {
+  min-width: 0;
+
+  overflow: visible !important;
+
+  border: 0 !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
+}
+
+
+/* -----------------------------------------
+   Header
+   ----------------------------------------- */
+
+.visionHeroPanel
+> .avPanel__header {
+  min-height: 42px;
+
+  margin: 0 0 8px;
+
+  padding:
+    0
+    4px;
+
+  border: 0;
+
+  background: transparent;
+
+  box-shadow: none;
+}
+
+.visionHeroPanel
+.avPanel__title h2 {
+  color: var(--av-text);
+
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+
+/* -----------------------------------------
+   Body
+   ----------------------------------------- */
+
+.visionHeroPanel
+> .avPanel__body {
+  min-width: 0;
+
+  padding: 0 !important;
+
+  overflow: visible !important;
+}
+
+
+/* ===========================================================
+   7. STAGE PRINCIPAL
+   =========================================================== */
+
+.visionAnalysisStage {
+  position: relative;
+
+  isolation: isolate;
+
+  width: 100%;
+  min-width: 0;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.50);
+
+  border-radius: 22px;
+
+  background: #244d38;
+
+  box-shadow:
+    0 24px 58px rgba(6, 30, 23, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+
+/* Glow cuando analiza */
+
+.visionAnalysisStage.is-analyzing {
+  border-color:
+    rgba(183, 225, 58, 0.52);
+
+  box-shadow:
+    0 26px 65px rgba(6, 30, 23, 0.18),
+    0 0 0 3px rgba(167, 217, 30, 0.07),
+    0 0 44px rgba(167, 217, 30, 0.13);
+}
+
+
+/* ===========================================================
+   8. IMAGE PREVIEW
+   =========================================================== */
+
+.visionImagePreview {
+  position: relative;
+
+  width: 100%;
+  height:
+    clamp(
+      475px,
+      57vh,
+      620px
+    );
+
+  min-height: 475px;
+
+  overflow: hidden;
+
+  border-radius: inherit;
+
+  background:
+    radial-gradient(
+      circle at 29% 43%,
+      rgba(183, 225, 58, 0.34),
+      transparent 21%
+    ),
+    radial-gradient(
+      circle at 62% 65%,
+      rgba(21, 183, 169, 0.20),
+      transparent 24%
+    ),
+    linear-gradient(
+      145deg,
+      #547c49 0%,
+      #2d5c3e 45%,
+      #153d30 100%
+    );
+}
+
+
+.visionImagePreview.has-image {
+  background:
+    #234d37;
+}
+
+
+.visionImagePreview > img {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+
+  filter:
+    saturate(1.06)
+    contrast(1.04)
+    brightness(0.92);
+
+  transform: scale(1.005);
+
+  transition:
+    filter 220ms ease,
+    transform 400ms ease;
+}
+
+
+.visionImagePreview.has-result
+> img {
+  filter:
+    saturate(1.09)
+    contrast(1.05)
+    brightness(0.94);
+}
+
+
+/* -----------------------------------------
+   Overlay atmosférico
+   ----------------------------------------- */
+
+.visionImagePreview::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 2;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(3, 25, 19, 0.11) 0%,
+      rgba(3, 25, 19, 0.015) 34%,
+      rgba(3, 25, 19, 0.04) 62%,
+      rgba(3, 25, 19, 0.30) 100%
+    );
+}
+
+
+/* -----------------------------------------
+   Estado analizando
+   ----------------------------------------- */
+
+.visionImagePreview.is-analyzing
+> img {
+  filter:
+    saturate(1.12)
+    contrast(1.03)
+    brightness(0.82);
+
+  transform: scale(1.012);
+}
+
+
+/* ===========================================================
+   9. EMPTY STATE DEL CANVAS
+   =========================================================== */
+
+.visionImagePreview__empty {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 5;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding:
+    90px
+    24px
+    120px;
+
+  color: #ffffff;
+
+  text-align: center;
+}
+
+
+.visionImagePreview__empty > span {
+  width: 58px;
+  height: 58px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 3px;
+
+  color:
+    rgba(255, 255, 255, 0.94);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.30);
+
+  border-radius: 18px;
+
+  background:
+    rgba(245, 249, 240, 0.12);
+
+  -webkit-backdrop-filter:
+    blur(20px)
+    saturate(135%);
+
+  backdrop-filter:
+    blur(20px)
+    saturate(135%);
+
+  box-shadow:
+    0 10px 28px rgba(6, 30, 23, 0.16);
+}
+
+
+.visionImagePreview__empty svg {
+  width: 28px;
+  height: 28px;
+}
+
+
+.visionImagePreview__empty strong {
+  color: #ffffff;
+
+  font-family: var(--av-font-heading);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+
+.visionImagePreview__empty small {
+  max-width: 310px;
+
+  color:
+    rgba(255, 255, 255, 0.80);
+
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+
+/* ===========================================================
+   10. CONTROLES GLASS FLOTANTES
+   =========================================================== */
 
 .visionFigma__controls {
+  position: absolute;
+
+  z-index: 20;
+
+  top: 16px;
+  left: 16px;
+
+  width:
+    min(
+      665px,
+      calc(100% - 248px)
+    );
+
+  min-width: 0;
+
   display: grid;
-  grid-template-columns: 0.8fr 0.95fr 0.72fr;
-  gap: 9px;
-  margin-bottom: 8px;
+
+  grid-template-columns:
+    minmax(145px, 1fr)
+    minmax(135px, 0.9fr)
+    minmax(135px, 0.72fr);
+
+  align-items: end;
+
+  gap: 8px;
+
+  padding: 10px;
+
+  border-radius: 16px;
 }
 
-.visionFigma__controls > label:not(.visionUploadButton) {
+
+/* Glass más brutal específicamente aquí */
+
+.visionFigma__controls.visionGlass {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(220, 232, 197, 0.47),
+      rgba(241, 245, 231, 0.40)
+    );
+
+  -webkit-backdrop-filter:
+    blur(38px)
+    saturate(158%)
+    contrast(96%)
+    brightness(1.06);
+
+  backdrop-filter:
+    blur(38px)
+    saturate(158%)
+    contrast(96%)
+    brightness(1.06);
+
+  box-shadow:
+    0 18px 44px rgba(7, 29, 20, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.70);
+}
+
+
+/* ===========================================================
+   11. LABELS DE CONTROLES
+   =========================================================== */
+
+.visionFigma__controls
+> label:not(.visionUploadButton) {
+  min-width: 0;
+
   display: grid;
-  gap: 3px;
+
+  gap: 5px;
 }
 
-.visionFigma__controls label > span {
-  color: var(--av-text-secondary);
-  font-size: 0.5rem;
+
+.visionFigma__controls
+label > span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #536d62;
+
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.visionFigma__controls select {
+
+/* ===========================================================
+   12. SELECTS
+   =========================================================== */
+
+.visionFigma__controls
+select {
   width: 100%;
-  height: 30px;
-  padding: 0 8px;
-  color: var(--av-text-secondary);
-  font-size: 0.55rem;
-  border: 1px solid var(--av-border);
-  border-radius: 5px;
+  min-width: 0;
+  height: 42px;
+
+  padding:
+    0
+    34px
+    0
+    12px;
+
+  color: #173b30;
+
+  font-size: 0.76rem;
+  font-weight: 650;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.66);
+
+  border-radius: 11px;
+
   outline: 0;
-  background: var(--av-neutral-50);
+
+  background:
+    rgba(250, 252, 247, 0.76);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.72),
+    0 2px 7px rgba(25, 51, 33, 0.04);
+
+  cursor: pointer;
+
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    box-shadow 130ms ease;
 }
 
-.visionFigma__controls select:focus {
-  border-color: var(--av-teal-300);
+
+.visionFigma__controls
+select:hover {
+  background:
+    rgba(255, 255, 255, 0.90);
 }
+
+
+.visionFigma__controls
+select:focus {
+  border-color:
+    rgba(21, 129, 92, 0.48);
+
+  background:
+    rgba(255, 255, 255, 0.93);
+
+  box-shadow:
+    0 0 0 3px
+      rgba(21, 129, 92, 0.09);
+}
+
+
+/* ===========================================================
+   13. UPLOAD BUTTON
+   =========================================================== */
 
 .visionUploadButton {
-  min-height: 49px;
-  align-self: end;
+  position: relative;
+
+  min-width: 0;
+  min-height: 42px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  color: var(--av-green-400);
-  border: 1px dashed var(--av-neutral-500);
-  border-radius: 6px;
-  background: var(--av-neutral-50);
+
+  gap: 8px;
+
+  padding:
+    0
+    14px;
+
+  overflow: hidden;
+
+  color: #ffffff;
+
+  border:
+    1px solid
+    rgba(16, 68, 52, 0.18);
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      100deg,
+      var(--av-green-300),
+      var(--av-green-400)
+    );
+
+  box-shadow:
+    0 6px 16px rgba(8, 31, 22, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
   cursor: pointer;
-  transition: border-color 130ms ease, background 130ms ease, transform 130ms ease;
+
+  transition:
+    transform 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
 }
+
 
 .visionUploadButton:hover {
   transform: translateY(-1px);
-  border-color: var(--av-teal-300);
-  background: var(--av-lime-50);
+
+  background:
+    linear-gradient(
+      100deg,
+      var(--av-green-200),
+      var(--av-green-300)
+    );
+
+  box-shadow:
+    0 9px 20px rgba(8, 31, 22, 0.17),
+    inset 0 1px 0 rgba(255, 255, 255, 0.17);
 }
 
+
 .visionUploadButton strong {
-  font-size: 0.55rem;
-  font-weight: 700;
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #ffffff;
+
+  font-size: 0.75rem;
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
 
 .visionUploadButton__icon {
   width: 18px;
   height: 18px;
+
+  flex:
+    0
+    0
+    18px;
+
+  display: grid;
+  place-items: center;
 }
+
+
+.visionUploadButton__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 
 .visionUploadButton input {
   position: absolute;
+
   width: 1px;
   height: 1px;
+
   opacity: 0;
 }
 
-/* =========================================
-   Image
-   ========================================= */
 
-.visionImagePreview {
-  position: relative;
-  height: 225px;
-  overflow: hidden;
-  border: 1px solid var(--av-border);
-  border-radius: 7px;
+/* Analizando */
+
+.visionUploadButton:has(
+  input:disabled
+) {
+  pointer-events: none;
+
   background:
-    radial-gradient(circle at 30% 52%, rgba(183, 225, 58, 0.23), transparent 22%),
-    linear-gradient(135deg, #557746 0%, #294f31 48%, #183b2c 100%);
+    linear-gradient(
+      100deg,
+      #46745b,
+      #285b46
+    );
+
+  box-shadow:
+    0 0 0 3px
+      rgba(167, 217, 30, 0.08),
+    0 7px 20px
+      rgba(7, 29, 20, 0.16);
 }
 
-.visionImagePreview.has-image {
-  background: #284d31;
+
+/* ===========================================================
+   14. ENGINE STATUS
+   =========================================================== */
+
+.visionEngineStatus {
+  position: absolute;
+
+  z-index: 20;
+
+  top: 16px;
+  right: 16px;
+
+  width: 210px;
+  min-width: 0;
+  min-height: 70px;
+
+  display: grid;
+
+  grid-template-columns:
+    37px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding:
+    9px
+    10px;
+
+  color: #173b30;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.64);
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(225, 235, 211, 0.52),
+      rgba(242, 246, 235, 0.43)
+    );
+
+  -webkit-backdrop-filter:
+    blur(36px)
+    saturate(150%)
+    contrast(95%)
+    brightness(1.05);
+
+  backdrop-filter:
+    blur(36px)
+    saturate(150%)
+    contrast(95%)
+    brightness(1.05);
+
+  box-shadow:
+    0 15px 38px rgba(7, 29, 20, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.67);
 }
 
-.visionImagePreview > img {
+
+.visionEngineStatus__icon {
+  width: 36px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--av-green-400);
+
+  border-radius: 11px;
+
+  background:
+    rgba(255, 255, 255, 0.47);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+
+.visionEngineStatus__icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+
+.visionEngineStatus > div {
+  min-width: 0;
+}
+
+
+.visionEngineStatus small {
+  display: block;
+
+  margin-bottom: 3px;
+
+  color: #6a7d73;
+
+  font-size: 0.58rem;
+  font-weight: 800;
+
+  letter-spacing: 0.07em;
+}
+
+
+.visionEngineStatus strong {
+  min-width: 0;
+
+  display: block;
+
+  overflow: hidden;
+
+  color: #173b30;
+
+  font-size: 0.70rem;
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.visionEngineStatus > b {
+  color: var(--av-green-500);
+
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+
+/* Activo */
+
+.visionEngineStatus--analyzing {
+  border-color:
+    rgba(183, 225, 58, 0.58);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(225, 237, 200, 0.62),
+      rgba(242, 246, 230, 0.47)
+    );
+
+  box-shadow:
+    0 0 0 3px
+      rgba(167, 217, 30, 0.08),
+    0 16px 42px
+      rgba(7, 29, 20, 0.18),
+    0 0 32px
+      rgba(167, 217, 30, 0.11);
+}
+
+
+.visionEngineStatus--error {
+  border-color:
+    rgba(227, 26, 22, 0.30);
+}
+
+
+/* ===========================================================
+   15. SPINNER
+   =========================================================== */
+
+.visionSpinner {
   width: 100%;
   height: 100%;
+
   display: block;
-  object-fit: cover;
+
+  transform-origin: center;
+
+  animation:
+    visionSpinnerRotate
+    760ms
+    linear
+    infinite;
+
+  filter:
+    drop-shadow(
+      0 0 7px
+      rgba(167, 217, 30, 0.26)
+    );
 }
 
-.visionImagePreview__empty {
+
+@keyframes visionSpinnerRotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* ===========================================================
+   16. SCAN BEAM
+   =========================================================== */
+
+.visionImagePreview__scanBeam {
   position: absolute;
-  inset: 0;
+
+  z-index: 8;
+
+  left: 2%;
+  right: 2%;
+
+  top: 15%;
+
+  height: 72px;
+
+  pointer-events: none;
+
+  opacity: 0.88;
+
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(167, 217, 30, 0.05) 22%,
+      rgba(167, 217, 30, 0.32) 49%,
+      rgba(94, 234, 212, 0.48) 50%,
+      rgba(167, 217, 30, 0.10) 55%,
+      transparent 100%
+    );
+
+  filter:
+    drop-shadow(
+      0 0 12px
+      rgba(167, 217, 30, 0.28)
+    );
+
+  animation:
+    visionScanBeamMove
+    1.8s
+    cubic-bezier(
+      0.45,
+      0,
+      0.55,
+      1
+    )
+    infinite
+    alternate;
+}
+
+
+.visionImagePreview__scanBeam::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  top: 50%;
+
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(225, 255, 172, 0.94),
+      rgba(95, 233, 215, 0.96),
+      rgba(225, 255, 172, 0.94),
+      transparent
+    );
+
+  box-shadow:
+    0 0 18px
+      rgba(167, 217, 30, 0.60);
+}
+
+
+@keyframes visionScanBeamMove {
+  from {
+    top: 14%;
+  }
+
+  to {
+    top: 72%;
+  }
+}
+
+
+/* ===========================================================
+   17. LOADER CENTRAL
+   =========================================================== */
+
+.visionAnalysisLoader {
+  position: absolute;
+
+  z-index: 22;
+
+  left: 50%;
+  top: 50%;
+
+  min-width: 250px;
+
   display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 4px;
-  color: #f8faf8;
+
+  grid-template-columns:
+    42px
+    minmax(0, 1fr)
+    auto;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding:
+    11px
+    13px;
+
+  color: #183c32;
+
+  border-radius: 16px;
+
+  transform:
+    translate(-50%, -50%);
+
+  box-shadow:
+    0 20px 52px rgba(6, 30, 23, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+
+  animation:
+    visionLoaderPulse
+    1.45s
+    ease-in-out
+    infinite;
 }
 
-.visionImagePreview__empty strong {
-  font-family: var(--av-font-heading);
-  font-size: 0.72rem;
+
+.visionAnalysisLoader__spinner {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 7px;
+
+  color: var(--av-green-400);
+
+  border-radius: 12px;
+
+  background:
+    rgba(255, 255, 255, 0.56);
 }
 
-.visionImagePreview__empty small {
-  color: var(--av-neutral-300);
-  font-size: 0.5rem;
+
+.visionAnalysisLoader > div {
+  min-width: 0;
 }
+
+
+.visionAnalysisLoader small {
+  display: block;
+
+  color: #6a7d73;
+
+  font-size: 0.59rem;
+  font-weight: 800;
+
+  letter-spacing: 0.08em;
+}
+
+
+.visionAnalysisLoader strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #173b30;
+
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+
+.visionAnalysisLoader > b {
+  color: var(--av-green-500);
+
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+
+@keyframes visionLoaderPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 20px 52px
+        rgba(6, 30, 23, 0.20),
+      0 0 0 0
+        rgba(167, 217, 30, 0.12);
+  }
+
+  50% {
+    box-shadow:
+      0 22px 58px
+        rgba(6, 30, 23, 0.23),
+      0 0 0 8px
+        rgba(167, 217, 30, 0.02);
+  }
+}
+
+
+/* ===========================================================
+   18. CONTROLES DEL CANVAS
+   =========================================================== */
 
 .visionImagePreview__mapControls {
   position: absolute;
-  left: 8px;
-  top: 8px;
-  z-index: 5;
+
+  z-index: 20;
+
+  left: 16px;
+  bottom: 116px;
+
   display: grid;
+
   overflow: hidden;
-  border-radius: 5px;
-  box-shadow: var(--av-shadow-card);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.62);
+
+  border-radius: 13px;
+
+  background:
+    rgba(235, 242, 229, 0.48);
+
+  -webkit-backdrop-filter:
+    blur(28px)
+    saturate(145%);
+
+  backdrop-filter:
+    blur(28px)
+    saturate(145%);
+
+  box-shadow:
+    0 12px 32px rgba(8, 31, 22, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.64);
 }
 
-.visionImagePreview__mapControls button {
-  width: 27px;
-  height: 27px;
+
+.visionImagePreview__mapControls
+button {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
   padding: 0;
-  color: var(--av-text);
+
+  color: #244d3c;
+
+  font-size: 0.86rem;
+  font-weight: 750;
+
   border: 0;
-  border-bottom: 1px solid var(--av-border);
-  background: rgba(248, 250, 248, 0.95);
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.44);
+
+  background: transparent;
+
   cursor: pointer;
+
+  transition:
+    background 130ms ease,
+    color 130ms ease;
 }
 
-.visionImagePreview__marker {
-  position: absolute;
-  z-index: 4;
-  width: 20px;
-  height: 20px;
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  font-size: 0.5rem;
-  font-weight: 700;
-  border-radius: 50%;
-  background: var(--av-green-700);
-}
 
-.visionImagePreview__marker--one {
-  left: 38%;
-  top: 8%;
-}
-
-.visionImagePreview__marker--two {
-  left: 64%;
-  top: 28%;
-}
-
-.visionImagePreview__marker--three {
-  left: 49%;
-  top: 67%;
-}
-
-.visionImagePreview__area {
-  position: absolute;
-  z-index: 3;
-  border: 1px dashed #ffffff;
-}
-
-.visionImagePreview__area--one {
-  left: 38%;
-  top: 13%;
-  width: 18%;
-  height: 41%;
-}
-
-.visionImagePreview__area--two {
-  left: 61%;
-  top: 31%;
-  width: 20%;
-  height: 37%;
-}
-
-.visionImagePreview__area--three {
-  left: 48%;
-  top: 67%;
-  width: 13%;
-  height: 28%;
-}
-
-.visionImagePreview__file {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  padding: 4px 6px;
-  color: #ffffff;
-  font-size: 0.46rem;
-  border-radius: 4px;
-  background: rgba(3, 35, 35, 0.83);
-}
-
-/* =========================================
-   Evidence
-   ========================================= */
-
-.visionEvidenceTable {
-  overflow: hidden;
-  border: 1px solid var(--av-border-soft);
-  border-radius: 5px;
-}
-
-.visionEvidenceTable__header,
-.visionEvidenceTable__row {
-  min-width: 690px;
-  display: grid;
-  grid-template-columns: 42px 23px 105px minmax(180px, 1fr) 90px 90px 12px;
-  align-items: center;
-  gap: 6px;
-  padding: 0 7px;
-}
-
-.visionEvidenceTable__header {
-  min-height: 25px;
-  color: var(--av-text-muted);
-  font-family: var(--av-font-heading);
-  font-size: 0.45rem;
-  font-weight: 700;
-  background: var(--av-neutral-100);
-}
-
-.visionEvidenceTable__row {
-  min-height: 31px;
-  color: var(--av-text-secondary);
-  font-size: 0.47rem;
-  border-top: 1px solid var(--av-border-soft);
-}
-
-.visionEvidenceTable__row:hover {
-  background: var(--av-lime-50);
-}
-
-.visionEvidenceTable__row b {
-  width: 17px;
-  height: 17px;
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  font-size: 0.43rem;
-  border-radius: 50%;
-  background: var(--av-green-300);
-}
-
-.visionEvidenceTable__row p {
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-/* =========================================
-   Result
-   ========================================= */
-
-.visionResultRows {
-  display: grid;
-  overflow: hidden;
-  border: 1px solid var(--av-border-soft);
-  border-radius: 5px;
-}
-
-.visionResultRow,
-.visionResultRows--placeholder > div {
-  min-height: 32px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 8px;
-  border-bottom: 1px solid var(--av-border-soft);
-}
-
-.visionResultRow:last-child,
-.visionResultRows--placeholder > div:last-child {
+.visionImagePreview__mapControls
+button:last-child {
   border-bottom: 0;
 }
 
-.visionResultRow strong,
-.visionResultRows--placeholder strong {
-  color: var(--av-text-secondary);
-  font-size: 0.51rem;
+
+.visionImagePreview__mapControls
+button:hover {
+  color: var(--av-green-500);
+
+  background:
+    rgba(255, 255, 255, 0.38);
 }
+
+
+.visionImagePreview__mapControls
+svg {
+  width: 17px;
+  height: 17px;
+}
+
+
+/* ===========================================================
+   19. MARKERS
+   =========================================================== */
+
+.visionImagePreview__marker {
+  position: absolute;
+
+  z-index: 15;
+
+  width: 30px;
+  height: 30px;
+
+  display: grid;
+  place-items: center;
+
+  color: #ffffff;
+
+  font-size: 0.7rem;
+  font-weight: 800;
+
+  border:
+    2px solid
+    rgba(255, 255, 255, 0.94);
+
+  border-radius: 50%;
+
+  background:
+    var(--av-green-400);
+
+  box-shadow:
+    0 6px 18px
+      rgba(6, 30, 23, 0.30),
+    0 0 0 5px
+      rgba(48, 183, 106, 0.12);
+}
+
+
+.visionImagePreview__marker--one {
+  left: 38%;
+  top: 31%;
+
+  background:
+    var(--av-danger);
+
+  box-shadow:
+    0 6px 18px
+      rgba(6, 30, 23, 0.30),
+    0 0 0 5px
+      rgba(227, 26, 22, 0.11);
+}
+
+
+.visionImagePreview__marker--two {
+  left: 64%;
+  top: 46%;
+
+  background:
+    var(--av-amber-500);
+
+  box-shadow:
+    0 6px 18px
+      rgba(6, 30, 23, 0.30),
+    0 0 0 5px
+      rgba(246, 173, 4, 0.12);
+}
+
+
+.visionImagePreview__marker--three {
+  left: 52%;
+  top: 66%;
+}
+
+
+/* ===========================================================
+   20. ÁREAS DE EVIDENCIA
+   =========================================================== */
+
+.visionImagePreview__area {
+  position: absolute;
+
+  z-index: 10;
+
+  border:
+    1.5px dashed
+    rgba(255, 255, 255, 0.90);
+
+  border-radius: 14px;
+
+  background:
+    rgba(167, 217, 30, 0.055);
+
+  box-shadow:
+    inset
+    0
+    0
+    0
+    1px
+    rgba(167, 217, 30, 0.07);
+}
+
+
+.visionImagePreview__area--one {
+  left: 31%;
+  top: 26%;
+
+  width: 23%;
+  height: 31%;
+
+  border-color:
+    rgba(255, 188, 180, 0.93);
+
+  background:
+    rgba(227, 26, 22, 0.08);
+}
+
+
+.visionImagePreview__area--two {
+  left: 58%;
+  top: 40%;
+
+  width: 23%;
+  height: 30%;
+
+  border-color:
+    rgba(255, 226, 142, 0.93);
+
+  background:
+    rgba(246, 173, 4, 0.07);
+}
+
+
+.visionImagePreview__area--three {
+  left: 45%;
+  top: 60%;
+
+  width: 18%;
+  height: 22%;
+}
+
+
+/* ===========================================================
+   21. RESULT CHIP
+   =========================================================== */
+
+.visionImagePreview__file {
+  position: absolute;
+
+  z-index: 20;
+
+  right: 16px;
+  bottom: 116px;
+
+  max-width: 220px;
+
+  padding:
+    7px
+    11px;
+
+  overflow: hidden;
+
+  color: #ffffff;
+
+  font-size: 0.68rem;
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.35);
+
+  border-radius: 10px;
+
+  background:
+    rgba(8, 54, 40, 0.60);
+
+  -webkit-backdrop-filter:
+    blur(22px)
+    saturate(145%);
+
+  backdrop-filter:
+    blur(22px)
+    saturate(145%);
+
+  box-shadow:
+    0 9px 28px rgba(6, 30, 23, 0.18);
+}
+
+
+/* ===========================================================
+   22. FLOATING STATS
+   =========================================================== */
+
+.visionCanvasStats {
+  position: absolute;
+
+  z-index: 20;
+
+  left: 66px;
+  right: 16px;
+  bottom: 16px;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+
+.visionCanvasStat {
+  min-width: 0;
+  min-height: 84px;
+
+  display: grid;
+
+  grid-template-columns:
+    38px
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 9px;
+
+  padding:
+    10px
+    12px;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.57);
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(218, 231, 197, 0.47),
+      rgba(241, 244, 229, 0.40)
+    );
+
+  -webkit-backdrop-filter:
+    blur(38px)
+    saturate(158%)
+    contrast(94%)
+    brightness(1.05);
+
+  backdrop-filter:
+    blur(38px)
+    saturate(158%)
+    contrast(94%)
+    brightness(1.05);
+
+  box-shadow:
+    0 17px 40px rgba(7, 29, 20, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.64);
+
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease;
+}
+
+
+.visionCanvasStat:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(255, 255, 255, 0.82);
+}
+
+
+.visionCanvasStat__icon {
+  width: 38px;
+  height: 38px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 11px;
+
+  border: 1px solid rgba(16, 67, 51, 0.48);
+
+  background:
+    rgba(235, 246, 235, 0.82);
+}
+
+
+.visionCanvasStat__icon
+svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+.visionCanvasStat > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+
+.visionCanvasStat
+> div
+> span {
+  overflow: hidden;
+
+  color: #e6f8ef;
+
+  font-size: 0.8rem;
+  font-weight: 650;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.visionCanvasStat strong {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #173b30;
+
+  font-family: var(--av-font-heading);
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1.1;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* Tone */
+
+.visionCanvasStat--green
+.visionCanvasStat__icon {
+  color: #174d32;
+
+  background:
+    rgba(222, 241, 223, 0.86);
+}
+
+
+.visionCanvasStat--teal
+.visionCanvasStat__icon {
+  color: #075b58;
+
+  background:
+    rgba(215, 240, 236, 0.86);
+}
+
+
+.visionCanvasStat--warning
+.visionCanvasStat__icon {
+  color: #75440b;
+
+  background:
+    rgba(255, 236, 200, 0.88);
+}
+
+
+/* ===========================================================
+   23. TELEMETRÍA / CHART
+   =========================================================== */
+
+.visionAnalysisChart {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(220px, 0.34fr)
+    minmax(0, 1fr);
+
+  align-items: stretch;
+
+  gap: 12px;
+
+  margin-top: 11px;
+
+  padding:
+    11px
+    12px;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(212, 222, 216, 0.92);
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(245, 249, 242, 0.98),
+      rgba(236, 244, 237, 0.95)
+    );
+
+  box-shadow:
+    0 8px 24px
+      rgba(21, 42, 39, 0.07);
+}
+
+
+/* Glow cuando está vivo */
+
+.visionAnalysisChart--analyzing {
+  border-color:
+    rgba(21, 183, 169, 0.24);
+
+  box-shadow:
+    0 8px 28px
+      rgba(21, 42, 39, 0.08),
+    0 0 30px
+      rgba(21, 183, 169, 0.055);
+}
+
+
+/* -----------------------------------------
+   Chart header
+   ----------------------------------------- */
+
+.visionAnalysisChart__header {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding:
+    4px
+    6px
+    4px
+    2px;
+}
+
+
+.visionAnalysisChart__header
+> div:first-child {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+
+.visionAnalysisChart__icon {
+  width: 37px;
+  height: 37px;
+
+  flex:
+    0
+    0
+    37px;
+
+  display: grid;
+  place-items: center;
+
+  color: #075b58;
+
+  border-radius: 10px;
+
+  border: 1px solid rgba(7, 91, 88, 0.35);
+
+  background:
+    rgba(215, 240, 236, 0.86);
+}
+
+
+.visionAnalysisChart__icon
+svg {
+  width: 20px;
+  height: 20px;
+}
+
+
+.visionAnalysisChart__header
+small {
+  display: block;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.58rem;
+  font-weight: 800;
+
+  letter-spacing: 0.065em;
+}
+
+
+.visionAnalysisChart__header
+strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color: var(--av-text);
+
+  font-family: var(--av-font-heading);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+
+/* -----------------------------------------
+   Live status
+   ----------------------------------------- */
+
+.visionAnalysisChart__status {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+.visionAnalysisChart__status
+> span {
+  width: 9px;
+  height: 9px;
+
+  flex:
+    0
+    0
+    9px;
+
+  border-radius: 50%;
+
+  background:
+    var(--av-neutral-400);
+}
+
+
+.visionAnalysisChart__status
+> span.is-live {
+  background:
+    var(--av-success);
+
+  box-shadow:
+    0 0 0 5px
+      rgba(48, 183, 106, 0.10);
+
+  animation:
+    visionLivePulse
+    1.15s
+    ease-in-out
+    infinite;
+}
+
+
+@keyframes visionLivePulse {
+  50% {
+    box-shadow:
+      0 0 0 9px
+        rgba(48, 183, 106, 0.015);
+  }
+}
+
+
+.visionAnalysisChart__status
+div {
+  display: flex;
+  align-items: baseline;
+
+  gap: 8px;
+}
+
+
+.visionAnalysisChart__status
+small {
+  color: var(--av-text-muted);
+
+  font-size: 0.64rem;
+  font-weight: 650;
+
+  letter-spacing: 0;
+}
+
+
+.visionAnalysisChart__status
+strong {
+  margin: 0;
+
+  color: var(--av-green-400);
+
+  font-size: 0.76rem;
+}
+
+
+/* -----------------------------------------
+   Chart body
+   ----------------------------------------- */
+
+.visionAnalysisChart__body {
+  width: 100%;
+  min-width: 0;
+  height: 128px;
+
+  overflow: hidden;
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.44),
+      rgba(255, 255, 255, 0.12)
+    );
+}
+
+
+.visionAnalysisChart__body
+.recharts-responsive-container {
+  min-width: 0;
+}
+
+
+.visionAnalysisChart__body
+.recharts-wrapper,
+.visionAnalysisChart__body
+.recharts-surface {
+  overflow: visible;
+}
+
+
+/* Tooltip por defecto de Recharts */
+
+.visionAnalysisChart
+.recharts-default-tooltip {
+  border:
+    1px solid
+    rgba(149, 214, 180, 0.75) !important;
+
+  border-radius:
+    10px !important;
+
+  background:
+    rgba(15, 48, 40, 0.96) !important;
+
+  color: #f3fff7 !important;
+
+  -webkit-backdrop-filter:
+    blur(18px)
+    saturate(140%);
+
+  backdrop-filter:
+    blur(18px)
+    saturate(140%);
+
+  box-shadow:
+    0 10px 28px
+      rgba(8, 31, 22, 0.30) !important;
+}
+
+.visionAnalysisChart .recharts-tooltip-label,
+.visionAnalysisChart .recharts-tooltip-item,
+.visionAnalysisChart .recharts-tooltip-item-name,
+.visionAnalysisChart .recharts-tooltip-item-value {
+  color: #f3fff7 !important;
+}
+
+
+/* ===========================================================
+   24. INSPECTOR
+   =========================================================== */
+
+.visionInspector {
+  position: sticky;
+
+  top: 68px;
+
+  width: 100%;
+  min-width: 0;
+
+  max-height:
+    calc(
+      100dvh - 86px
+    );
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.66);
+
+  border-radius: 22px;
+
+  background:
+    linear-gradient(
+      160deg,
+      rgba(235, 241, 232, 0.61),
+      rgba(217, 227, 214, 0.52)
+    );
+
+  -webkit-backdrop-filter:
+    blur(40px)
+    saturate(160%)
+    contrast(96%)
+    brightness(1.05);
+
+  backdrop-filter:
+    blur(40px)
+    saturate(160%)
+    contrast(96%)
+    brightness(1.05);
+
+  box-shadow:
+    0 24px 58px
+      rgba(8, 31, 22, 0.17),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.76);
+}
+
+
+/* ===========================================================
+   25. INSPECTOR HEADER
+   =========================================================== */
+
+.visionInspector__header {
+  min-height: 66px;
+
+  flex:
+    0
+    0
+    auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding:
+    10px
+    12px;
+
+  border-bottom:
+    1px solid
+    rgba(34, 71, 50, 0.08);
+}
+
+
+.visionInspector__header
+> div:first-child {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+}
+
+
+.visionInspector__headerIcon {
+  width: 39px;
+  height: 39px;
+
+  flex:
+    0
+    0
+    39px;
+
+  display: grid;
+  place-items: center;
+
+  color: #174d32;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(23, 77, 50, 0.30);
+
+  background:
+    rgba(255, 255, 255, 0.42);
+
+  box-shadow:
+    inset
+    0
+    1px
+    0
+    rgba(255, 255, 255, 0.65);
+}
+
+
+.visionInspector__headerIcon
+svg {
+  width: 21px;
+  height: 21px;
+}
+
+
+.visionInspector__header
+small {
+  display: block;
+
+  color: #71837a;
+
+  font-size: 0.58rem;
+  font-weight: 800;
+
+  letter-spacing: 0.07em;
+}
+
+
+.visionInspector__header
+strong {
+  display: block;
+
+  margin-top: 2px;
+
+  color: #173b30;
+
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+
+/* ===========================================================
+   26. INSPECTOR ACTIONS
+   =========================================================== */
+
+.visionInspector__actions {
+  flex:
+    0
+    0
+    auto;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+
+.visionInspector__source {
+  padding:
+    4px
+    7px;
+
+  color: #4f685d;
+
+  font-size: 0.60rem;
+  font-weight: 750;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 255, 255, 0.43);
+}
+
+
+.visionInspector__source.is-live {
+  color: var(--av-success-text);
+
+  background:
+    rgba(48, 183, 106, 0.11);
+}
+
+
+.visionInspector__source.is-fallback {
+  color: var(--av-warning-text);
+
+  background:
+    rgba(246, 173, 4, 0.12);
+}
+
+
+.visionInspector__close {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  padding: 0;
+
+  color: #436157;
+
+  font-size: 1.15rem;
+  line-height: 1;
+
+  border: 0;
+  border-radius: 10px;
+
+  background:
+    rgba(255, 255, 255, 0.35);
+
+  cursor: pointer;
+
+  transition:
+    background 130ms ease,
+    transform 130ms ease;
+}
+
+
+.visionInspector__close:hover {
+  transform: translateY(-1px);
+
+  background:
+    rgba(255, 255, 255, 0.64);
+}
+
+
+/* ===========================================================
+   27. INSPECTOR BODY
+   =========================================================== */
+
+.visionInspector__body {
+  min-height: 0;
+
+  flex: 1;
+
+  display: grid;
+  align-content: start;
+
+  gap: 9px;
+
+  padding:
+    10px;
+
+  overflow-y: auto;
+
+  overscroll-behavior: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color:
+    rgba(80, 111, 94, 0.35)
+    transparent;
+}
+
+
+.visionInspector__body::-webkit-scrollbar {
+  width: 5px;
+}
+
+
+.visionInspector__body::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background:
+    rgba(80, 111, 94, 0.34);
+}
+
+
+/* ===========================================================
+   28. PANELS INTERNOS DEL INSPECTOR
+   =========================================================== */
+
+.visionInspector
+.avPanel {
+ min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border: 1px solid var(--av-border);
+    border-radius: 16px;
+    background: #031410;
+    box-shadow: var(--av-shadow-card);
+}
+
+
+.visionInspector
+.avPanel
+> .avPanel__header {
+  min-height: 42px;
+
+  margin: 0;
+
+  padding:
+    5px
+    10px;
+
+  border-bottom:
+    1px solid
+    rgba(45, 78, 61, 0.08);
+
+  background:
+    rgba(255, 255, 255, 0.15);
+}
+
+
+.visionInspector
+.avPanel__title h2 {
+  color: #ffffff;
+
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+
+.visionInspector
+.avPanel
+> .avPanel__body {
+  padding:
+    9px
+    10px
+    10px;
+}
+
+
+/* ===========================================================
+   29. RESULT ROWS
+   =========================================================== */
+
+.visionResultRows {
+  display: grid;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(184, 201, 190, 0.55);
+
+  border-radius: 10px;
+
+  background:
+    rgba(255, 255, 255, 0.30);
+}
+
+
+.visionResultRow,
+.visionResultRows--placeholder
+> div {
+  min-height: 42px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(110px, 0.82fr)
+    minmax(0, 1fr);
+
+  align-items: center;
+
+  gap: 9px;
+
+  padding:
+    7px
+    9px;
+
+  border-bottom:
+    1px solid
+    rgba(184, 201, 190, 0.45);
+}
+
+
+.visionResultRow:last-child,
+.visionResultRows--placeholder
+> div:last-child {
+  border-bottom: 0;
+}
+
+
+.visionResultRow strong,
+.visionResultRows--placeholder
+strong {
+  color: #4d675d;
+
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
 
 .visionResultRow span,
-.visionResultRows--placeholder span {
-  color: var(--av-text-secondary);
-  font-size: 0.5rem;
+.visionResultRows--placeholder
+span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #15392e;
+
+  font-size: 0.71rem;
+  font-weight: 700;
+
+  text-align: right;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* =========================================
-   Metrics
-   ========================================= */
+
+/* ===========================================================
+   30. METRIC ROWS
+   =========================================================== */
 
 .visionMetricRows {
   display: grid;
 }
 
+
 .visionMetricRow {
-  min-height: 29px;
+  min-width: 0;
+  min-height: 42px;
+
   display: grid;
-  grid-template-columns: 110px minmax(80px, 1fr) 36px;
+
+  grid-template-columns:
+    minmax(105px, 0.95fr)
+    minmax(85px, 1.2fr)
+    46px;
+
   align-items: center;
+
   gap: 8px;
+
+  border-bottom:
+    1px solid
+    rgba(184, 201, 190, 0.40);
 }
+
+
+.visionMetricRow:last-child {
+  border-bottom: 0;
+}
+
 
 .visionMetricRow strong {
-  color: var(--av-text-secondary);
-  font-size: 0.5rem;
-  font-weight: 600;
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #425f54;
+
+  font-size: 0.66rem;
+  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+
 .visionMetricRow > span {
-  color: var(--av-text-secondary);
-  font-size: 0.48rem;
+  color: #183c32;
+
+  font-size: 0.67rem;
+  font-weight: 750;
+
+  text-align: right;
 }
+
+
+/* ===========================================================
+   31. METRIC PROGRESS
+   =========================================================== */
+
+.visionMetricProgress {
+  min-width: 0;
+}
+
 
 .visionMetricProgress i {
   width: 100%;
-  height: 5px;
+  height: 8px;
+
   display: block;
+
   overflow: hidden;
+
   border-radius: 999px;
-  background: var(--av-neutral-200);
+
+  background:
+    rgba(183, 198, 191, 0.60);
+
+  box-shadow:
+    inset
+    0
+    1px
+    2px
+    rgba(21, 42, 39, 0.06);
 }
+
 
 .visionMetricProgress b {
   height: 100%;
+
   display: block;
+
   border-radius: inherit;
-  background: var(--av-green-400);
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--av-green-300),
+      var(--av-teal-200)
+    );
+
+  box-shadow:
+    0 0 12px
+      rgba(48, 183, 106, 0.20);
+
+  transition:
+    width 420ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    );
 }
 
-.visionMetricProgress.is-emphasized b {
-  background: var(--av-lime-500);
+
+.visionMetricProgress.is-emphasized
+b {
+  background:
+    linear-gradient(
+      90deg,
+      var(--av-lime-600),
+      var(--av-lime-400)
+    );
+
+  box-shadow:
+    0 0 12px
+      rgba(167, 217, 30, 0.23);
 }
 
-/* =========================================
-   Preliminary notice
-   ========================================= */
+
+/* ===========================================================
+   32. PRELIMINARY NOTICE
+   =========================================================== */
 
 .visionPreliminaryNotice {
-  min-height: 68px;
+  min-width: 0;
+  min-height: 82px;
+
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr);
+
+  grid-template-columns:
+    40px
+    minmax(0, 1fr);
+
   align-items: center;
-  gap: 9px;
-  padding: 9px 11px;
-  border: 1px solid rgba(48, 183, 106, 0.34);
-  border-radius: 7px;
-  background: rgba(241, 251, 204, 0.38);
+
+  gap: 10px;
+
+  padding:
+    10px
+    11px;
+
+  border:
+    1px solid
+    rgba(48, 183, 106, 0.22);
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(232, 247, 226, 0.68),
+      rgba(241, 251, 204, 0.38)
+    );
+
+  box-shadow:
+    inset
+    0
+    1px
+    0
+    rgba(255, 255, 255, 0.48);
 }
+
 
 .visionPreliminaryNotice__icon,
-.visionPreliminaryNotice > span {
-  width: 35px;
-  height: 35px;
+.visionPreliminaryNotice
+> span {
+  width: 40px;
+  height: 40px;
+
   display: grid;
   place-items: center;
+
+  color: #ffffff;
+
   border-radius: 50%;
-  background: var(--av-green-500);
+
+  background:
+    var(--av-green-400);
+
+  box-shadow:
+    0 6px 14px rgba(21, 42, 39, 0.10);
 }
+
 
 .visionPreliminaryNotice strong {
-  color: var(--av-text);
-  font-family: var(--av-font-heading);
-  font-size: 0.54rem;
+  color: #173b30;
+
+  font-size: 0.72rem;
+  font-weight: 800;
 }
+
 
 .visionPreliminaryNotice p {
-  margin: 2px 0 0;
-  color: var(--av-text-secondary);
-  font-size: 0.47rem;
-  line-height: 1.3;
+  display: -webkit-box;
+
+  margin:
+    3px
+    0
+    0;
+
+  overflow: hidden;
+
+  color: #48655a;
+
+  font-size: 0.66rem;
+  font-weight: 500;
+  line-height: 1.38;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
+
 
 .visionPreliminaryNotice small {
-  color: var(--av-text-muted);
-  font-size: 0.43rem;
+  display: block;
+
+  margin-top: 4px;
+
+  color: #71847b;
+
+  font-size: 0.59rem;
 }
 
-.visionFallbackNotice {
-  display: grid;
-  gap: 2px;
-  padding: 7px 9px;
-  border: 1px solid rgba(224, 102, 26, 0.22);
-  border-radius: 5px;
-  background: var(--av-amber-50);
-}
 
-.visionFallbackNotice strong {
-  color: var(--av-warning-text);
-  font-size: 0.5rem;
-}
+/* ===========================================================
+   33. PLACEHOLDER ANALYZANDO
+   =========================================================== */
 
-.visionFallbackNotice span {
-  color: var(--av-text-muted);
-  font-size: 0.46rem;
-}
+.visionMetricsAnalyzing {
+  min-height: 170px;
 
-.visionMetricsPlaceholder,
-.visionCompactEmpty {
-  min-height: 65px;
-  display: grid;
-  place-content: center;
-  color: var(--av-text-muted);
-  font-size: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    18px;
+
   text-align: center;
 }
 
-.visionCenteredAction {
-  display: block;
-  margin: 7px auto 0;
+
+.visionMetricsAnalyzing__orb {
+  width: 52px;
+  height: 52px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 9px;
+
+  padding: 11px;
+
+  color: var(--av-green-400);
+
+  border:
+    1px solid
+    rgba(167, 217, 30, 0.24);
+
+  border-radius: 17px;
+
+  background:
+    rgba(241, 251, 204, 0.30);
+
+  box-shadow:
+    0 0 30px
+      rgba(167, 217, 30, 0.09);
 }
 
-/* =========================================
-   History
-   ========================================= */
 
-.visionConfidenceCell {
-  min-width: 90px;
+.visionMetricsAnalyzing strong {
+  color: #173b30;
+
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+
+.visionMetricsAnalyzing p {
+  max-width: 260px;
+
+  margin:
+    5px
+    0
+    13px;
+
+  color: #60766d;
+
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+
+.visionMetricsAnalyzing__progress {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    38px;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+
+.visionMetricsAnalyzing__progress
+i {
+  width: 100%;
+  height: 8px;
+
+  display: block;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background:
+    rgba(183, 198, 191, 0.54);
+}
+
+
+.visionMetricsAnalyzing__progress
+b {
+  height: 100%;
+
+  display: block;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--av-green-300),
+      var(--av-lime-500)
+    );
+
+  box-shadow:
+    0 0 14px
+      rgba(167, 217, 30, 0.22);
+
+  transition:
+    width 200ms linear;
+}
+
+
+.visionMetricsAnalyzing__progress
+span {
+  color: #34584b;
+
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+
+/* ===========================================================
+   34. EMPTY INSPECTOR
+   =========================================================== */
+
+.visionMetricsPlaceholder {
+  min-height: 150px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 16px;
+
+  color: #647a70;
+
+  text-align: center;
+}
+
+
+.visionMetricsPlaceholder
+svg {
+  width: 30px;
+  height: 30px;
+
+  margin-bottom: 4px;
+
+  color:
+    var(--av-green-300);
+}
+
+
+.visionMetricsPlaceholder
+strong {
+  color: #244c3d;
+
+  font-size: 0.75rem;
+}
+
+
+.visionMetricsPlaceholder
+span {
+  font-size: 0.65rem;
+}
+
+
+/* ===========================================================
+   35. FALLBACK
+   =========================================================== */
+
+.visionFallbackNotice {
+  display: grid;
+
+  gap: 3px;
+
+  padding:
+    9px
+    11px;
+
+  border:
+    1px solid
+    rgba(233, 130, 5, 0.20);
+
+  border-radius: 12px;
+
+  background:
+    rgba(254, 251, 232, 0.62);
+}
+
+
+.visionFallbackNotice strong {
+  color: var(--av-warning-text);
+
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+
+.visionFallbackNotice span {
+  color: #695f49;
+
+  font-size: 0.63rem;
+  line-height: 1.35;
+}
+
+
+/* ===========================================================
+   36. INSPECTOR TRIGGER
+   =========================================================== */
+
+.visionInspectorTrigger {
+  position: sticky;
+
+  top: 76px;
+
+  width: 54px;
+  height: 150px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding:
+    9px;
+
+  color: #214a3a;
+
+  border-radius: 16px;
+
+  cursor: pointer;
+}
+
+
+.visionInspectorTrigger
+svg {
+  width: 21px;
+  height: 21px;
+}
+
+
+.visionInspectorTrigger
+span {
+  writing-mode:
+    vertical-rl;
+
+  transform:
+    rotate(180deg);
+
+  font-size: 0.68rem;
+  font-weight: 750;
+}
+
+
+/* ===========================================================
+   37. EVIDENCE PANEL
+   =========================================================== */
+
+.visionEvidencePanel,
+.visionHistoryPanel {
+  min-width: 0;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(212, 222, 216, 0.92) !important;
+
+  border-radius: 15px !important;
+
+  background:
+    rgba(255, 255, 255, 0.96) !important;
+
+  box-shadow:
+    var(--vision-shadow-soft) !important;
+}
+
+
+.visionEvidencePanel
+> .avPanel__header,
+.visionHistoryPanel
+> .avPanel__header {
+  min-height: 43px;
+
+  margin: 0;
+
+  padding:
+    4px
+    14px;
+
+  border-bottom:
+    1px solid
+    var(--av-border-soft);
+
+  background: #031410;
+}
+
+
+.visionEvidencePanel
+.avPanel__title h2,
+.visionHistoryPanel
+.avPanel__title h2 {
+  color: #ffffff;
+
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+
+.visionEvidencePanel
+> .avPanel__body,
+.visionHistoryPanel
+> .avPanel__body {
+  padding:
+    11px
+    12px
+    12px;
+}
+
+
+/* ===========================================================
+   38. EVIDENCE GALLERY
+   =========================================================== */
+
+.visionEvidenceGallery {
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+
+.visionEvidenceCard {
+  min-width: 0;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    var(--av-border-soft);
+
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 12px
+      rgba(21, 42, 39, 0.055);
+
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease;
+}
+
+
+.visionEvidenceCard:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(167, 217, 30, 0.30);
+
+  box-shadow:
+    0 9px 19px
+      rgba(21, 42, 39, 0.08);
+}
+
+
+/* -----------------------------------------
+   Evidence media
+   ----------------------------------------- */
+
+.visionEvidenceCard__media {
+  position: relative;
+
+  width: 100%;
+  height: 108px;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      135deg,
+      #477047,
+      #244d38
+    );
+}
+
+
+.visionEvidenceCard__image {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  transform:
+    scale(1.10);
+
+  filter:
+    saturate(1.12)
+    contrast(1.05);
+}
+
+
+.visionEvidenceCard__image--1 {
+  object-position:
+    30% 30%;
+}
+
+
+.visionEvidenceCard__image--2 {
+  object-position:
+    70% 35%;
+}
+
+
+.visionEvidenceCard__image--3 {
+  object-position:
+    48% 72%;
+}
+
+
+.visionEvidenceCard__image--4 {
+  object-position:
+    center;
+}
+
+
+.visionEvidenceCard__media
+> b {
+  position: absolute;
+
+  left: 8px;
+  top: 8px;
+
+  width: 25px;
+  height: 25px;
+
+  display: grid;
+  place-items: center;
+
+  color: #ffffff;
+
+  font-size: 0.64rem;
+  font-weight: 800;
+
+  border:
+    2px solid
+    #ffffff;
+
+  border-radius: 50%;
+
+  background:
+    var(--av-green-400);
+
+  box-shadow:
+    0 4px 10px
+      rgba(6, 30, 23, 0.20);
+}
+
+
+/* -----------------------------------------
+   Evidence body
+   ----------------------------------------- */
+
+.visionEvidenceCard__body {
+  min-width: 0;
+
+  display: grid;
+
+  gap: 5px;
+
+  padding:
+    8px
+    9px
+    9px;
+}
+
+
+.visionEvidenceCard__top {
+  min-width: 0;
+
   display: flex;
   align-items: center;
-  gap: 5px;
+  justify-content: space-between;
+
+  gap: 6px;
 }
 
-.visionConfidenceCell i {
-  width: 50px;
-  height: 4px;
+
+.visionEvidenceCard__top
+> span {
+  color: var(--av-text-muted);
+
+  font-size: 0.59rem;
+  font-weight: 700;
+}
+
+
+.visionEvidenceCard__body
+> strong {
+  min-width: 0;
+
   overflow: hidden;
-  border-radius: 999px;
-  background: var(--av-neutral-200);
+
+  color: var(--av-text);
+
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.visionConfidenceCell b {
-  height: 100%;
-  display: block;
-  background: var(--av-green-400);
+
+.visionEvidenceCard__body
+> p {
+  display: -webkit-box;
+
+  min-height: 34px;
+
+  margin: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text-secondary);
+
+  font-size: 0.62rem;
+  line-height: 1.35;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
+
+
+.visionEvidenceCard__body
+footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  padding-top: 5px;
+
+  border-top:
+    1px solid
+    var(--av-border-soft);
+}
+
+
+.visionEvidenceCard__body
+footer span {
+  color: var(--av-text-muted);
+
+  font-size: 0.58rem;
+}
+
+
+.visionEvidenceCard__body
+footer b {
+  color: var(--av-green-500);
+
+  font-size: 0.64rem;
+}
+
+
+/* ===========================================================
+   39. COMPACT EMPTY
+   =========================================================== */
+
+.visionCompactEmpty {
+  min-height: 145px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  padding: 18px;
+
+  color: var(--av-text-muted);
+
+  text-align: center;
+}
+
+
+.visionCompactEmpty__icon {
+  width: 40px;
+  height: 40px;
+
+  display: grid;
+  place-items: center;
+
+  margin-bottom: 2px;
+
+  color: var(--av-green-300);
+
+  border-radius: 12px;
+
+  background:
+    rgba(48, 183, 106, 0.09);
+}
+
+
+.visionCompactEmpty__icon
+svg {
+  width: 21px;
+  height: 21px;
+}
+
+
+.visionCompactEmpty
+strong {
+  color: var(--av-text);
+
+  font-size: 0.76rem;
+}
+
+
+.visionCompactEmpty
+p {
+  max-width: 320px;
+
+  margin: 0;
+
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+
+
+/* ===========================================================
+   40. HISTORY TABLE
+   =========================================================== */
+
+.visionHistoryTable {
+  width: 100%;
+  min-width: 820px;
+}
+
+
+.visionHistoryTable th {
+  color: var(--av-text-muted);
+
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+
+.visionHistoryTable td {
+  color: var(--av-text-secondary);
+
+  font-size: 0.64rem;
+  font-weight: 500;
+}
+
 
 .visionHistoryPrediction {
-  color: var(--av-warning-text) !important;
+  color:
+    var(--av-warning-text) !important;
+
+  font-weight:
+    750 !important;
 }
 
-/* =========================================
-   Responsive
-   ========================================= */
 
-@media (max-width: 900px) {
+/* ===========================================================
+   41. CONFIDENCE CELL
+   =========================================================== */
+
+.visionConfidenceCell {
+  min-width: 112px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+}
+
+
+.visionConfidenceCell
+> span {
+  min-width: 34px;
+
+  color: var(--av-text);
+
+  font-weight: 750;
+}
+
+
+.visionConfidenceCell
+i {
+  width: 66px;
+  height: 7px;
+
+  display: block;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background:
+    var(--av-neutral-200);
+}
+
+
+.visionConfidenceCell
+b {
+  height: 100%;
+
+  display: block;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--av-green-300),
+      var(--av-lime-500)
+    );
+}
+
+
+/* ===========================================================
+   42. HISTORY ACTION
+   =========================================================== */
+
+.visionCenteredAction {
+  display: block;
+
+  margin:
+    10px
+    auto
+    0;
+}
+
+
+/* ===========================================================
+   43. FOCUS
+   =========================================================== */
+
+.visionFigma button:focus-visible,
+.visionFigma select:focus-visible,
+.visionFigma label:has(input:focus-visible) {
+  outline:
+    2px solid
+    rgba(21, 183, 169, 0.38);
+
+  outline-offset:
+    2px;
+}
+
+
+/* ===========================================================
+   Vision Evidence — ampliaciones
+   =========================================================== */
+
+.visionEvidenceCard__placeholder {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  place-items: center;
+
+  color: rgba(255, 255, 255, 0.85);
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--av-green-300),
+      var(--av-green-600)
+    );
+}
+
+.visionEvidenceCard__placeholder svg {
+  width: 30px;
+  height: 30px;
+}
+
+
+/* -----------------------------------------
+   Región visual dentro de la miniatura
+   ----------------------------------------- */
+
+.visionEvidenceCard__focus {
+  position: absolute;
+
+  pointer-events: none;
+
+  border:
+    1.5px dashed
+    rgba(255, 255, 255, 0.92);
+
+  border-radius: 7px;
+
+  background:
+    rgba(167, 217, 30, 0.07);
+
+  box-shadow:
+    0 0 0 1px
+    rgba(167, 217, 30, 0.08);
+}
+
+.visionEvidenceCard__focus--1 {
+  left: 23%;
+  top: 20%;
+
+  width: 34%;
+  height: 48%;
+
+  border-color:
+    rgba(255, 186, 177, 0.96);
+
+  background:
+    rgba(227, 26, 22, 0.07);
+}
+
+.visionEvidenceCard__focus--2 {
+  right: 14%;
+  top: 24%;
+
+  width: 37%;
+  height: 43%;
+
+  border-color:
+    rgba(255, 222, 131, 0.96);
+
+  background:
+    rgba(246, 173, 4, 0.07);
+}
+
+.visionEvidenceCard__focus--3 {
+  left: 31%;
+  bottom: 13%;
+
+  width: 38%;
+  height: 36%;
+}
+
+.visionEvidenceCard__focus--4 {
+  left: 18%;
+  top: 19%;
+
+  width: 62%;
+  height: 58%;
+}
+
+
+/* -----------------------------------------
+   Métrica
+   ----------------------------------------- */
+
+.visionEvidenceCard__metric {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 7px;
+
+  padding:
+    5px
+    7px;
+
+  border-radius: 7px;
+
+  background:
+    var(--av-neutral-50);
+}
+
+.visionEvidenceCard__metric span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: var(--av-text-muted);
+
+  font-size: 0.6rem;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visionEvidenceCard__metric b {
+  flex: 0 0 auto;
+
+  color: var(--av-text);
+
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+
+/* -----------------------------------------
+   Footer de evidencia
+   ----------------------------------------- */
+
+.visionEvidenceCard__body footer > div {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.visionEvidenceCard__body footer > div:last-child {
+  align-items: flex-end;
+}
+
+.visionEvidenceCard__body footer strong {
+  color: var(--av-text-secondary);
+
+  font-size: 0.61rem;
+  font-weight: 750;
+}
+
+/* ===========================================================
+   44. DESKTOP COMPACTO
+   =========================================================== */
+
+@media (max-width: 1240px) {
+
   .visionFigma__workspace {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(305px, 330px);
   }
 
-  .visionFigma__right {
-    grid-template-columns: 1fr 1fr;
+
+  .visionFigma__controls {
+    width:
+      min(
+        600px,
+        calc(100% - 220px)
+      );
   }
 
-  .visionPreliminaryNotice {
-    grid-column: 1 / -1;
+
+  .visionEngineStatus {
+    width: 190px;
   }
+
+
+  .visionAnalysisChart {
+    grid-template-columns:
+      210px
+      minmax(0, 1fr);
+  }
+
+
+  .visionEvidenceGallery {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
 }
 
-@media (max-width: 650px) {
-  .visionFigma__controls,
-  .visionFigma__right {
+
+/* ===========================================================
+   45. TABLET GRANDE
+   =========================================================== */
+
+@media (max-width: 1050px) {
+
+  .visionFigma__workspace,
+  .visionFigma__workspace.is-inspector-collapsed {
     grid-template-columns: 1fr;
   }
+
+
+  .visionInspector {
+    position: relative;
+
+    top: auto;
+
+    max-height: none;
+
+    display: grid;
+
+    grid-template-rows:
+      auto
+      auto;
+  }
+
+
+  .visionInspector__body {
+    overflow: visible;
+  }
+
+
+  .visionInspectorTrigger {
+    position: static;
+
+    width: 100%;
+    height: 48px;
+
+    flex-direction: row;
+
+    border-radius: 13px;
+  }
+
+
+  .visionInspectorTrigger
+  span {
+    writing-mode: horizontal-tb;
+
+    transform: none;
+  }
+
 
   .visionImagePreview {
-    height: 190px;
+    height:
+      clamp(
+        500px,
+        58vh,
+        620px
+      );
   }
+
+
+  .visionEvidenceGallery {
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+  }
+
+}
+
+
+/* ===========================================================
+   46. TABLET
+   =========================================================== */
+
+@media (max-width: 860px) {
+
+  .visionImagePreview {
+    height: 520px;
+    min-height: 520px;
+  }
+
+
+  .visionFigma__controls {
+    width:
+      calc(
+        100% - 32px
+      );
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+
+  .visionUploadButton {
+    grid-column:
+      1 / -1;
+  }
+
+
+  .visionEngineStatus {
+    top: 136px;
+
+    width: 195px;
+  }
+
+
+  .visionCanvasStats {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+  }
+
+
+  .visionAnalysisChart {
+    grid-template-columns: 1fr;
+
+    gap: 6px;
+  }
+
+
+  .visionAnalysisChart__header {
+    flex-direction: row;
+    align-items: center;
+  }
+
+
+  .visionAnalysisChart__body {
+    height: 120px;
+  }
+
+
+  .visionEvidenceGallery {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+}
+
+
+/* ===========================================================
+   47. MOBILE
+   =========================================================== */
+
+@media (max-width: 680px) {
+
+  .visionFigma {
+    gap: 9px;
+  }
+
+
+  /* ---------------------------------------
+     Stage
+     --------------------------------------- */
+
+  .visionAnalysisStage {
+    border-radius: 16px;
+  }
+
+
+  .visionImagePreview {
+    height: 540px;
+    min-height: 540px;
+  }
+
+
+  /* ---------------------------------------
+     Controles
+     --------------------------------------- */
+
+  .visionFigma__controls {
+    top: 10px;
+    left: 10px;
+
+    width:
+      calc(
+        100% - 20px
+      );
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 7px;
+
+    padding: 8px;
+
+    border-radius: 13px;
+  }
+
+
+  .visionFigma__controls
+  select {
+    height: 40px;
+
+    font-size: 0.72rem;
+  }
+
+
+  .visionUploadButton {
+    min-height: 40px;
+
+    grid-column:
+      1 / -1;
+  }
+
+
+  /* ---------------------------------------
+     Engine
+     --------------------------------------- */
+
+  .visionEngineStatus {
+    top: 132px;
+    left: 10px;
+    right: 10px;
+
+    width: auto;
+
+    min-height: 58px;
+
+    grid-template-columns:
+      34px
+      minmax(0, 1fr)
+      auto;
+
+    border-radius: 13px;
+  }
+
+
+  .visionEngineStatus__icon {
+    width: 33px;
+    height: 33px;
+  }
+
+
+  /* ---------------------------------------
+     Loader
+     --------------------------------------- */
+
+  .visionAnalysisLoader {
+    top: 49%;
+
+    width:
+      calc(
+        100% - 48px
+      );
+
+    min-width: 0;
+  }
+
+
+  /* ---------------------------------------
+     Controls
+     --------------------------------------- */
+
+  .visionImagePreview__mapControls {
+    left: 10px;
+    bottom: 118px;
+  }
+
+
+  .visionImagePreview__file {
+    right: 10px;
+    bottom: 118px;
+  }
+
+
+  /* ---------------------------------------
+     Stats móviles
+
+     Scroll horizontal evita cards comprimidas.
+     --------------------------------------- */
+
+  .visionCanvasStats {
+    left: 52px;
+    right: 10px;
+    bottom: 10px;
+
+    display: flex;
+
+    gap: 6px;
+
+    overflow-x: auto;
+
+    scrollbar-width: none;
+  }
+
+
+  .visionCanvasStats::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  .visionCanvasStat {
+    width: 155px;
+    min-width: 155px;
+    min-height: 82px;
+
+    flex:
+      0
+      0
+      155px;
+  }
+
+
+  /* ---------------------------------------
+     Chart
+     --------------------------------------- */
+
+  .visionAnalysisChart {
+    padding:
+      10px;
+
+    border-radius: 13px;
+  }
+
+
+  .visionAnalysisChart__header {
+    align-items: flex-start;
+
+    gap: 10px;
+  }
+
+
+  .visionAnalysisChart__status {
+    align-items: flex-start;
+  }
+
+
+  .visionAnalysisChart__status
+  div {
+    flex-direction: column;
+
+    gap: 2px;
+  }
+
+
+  .visionAnalysisChart__body {
+    height: 110px;
+  }
+
+
+  /* ---------------------------------------
+     Inspector
+     --------------------------------------- */
+
+  .visionInspector {
+    border-radius: 16px;
+  }
+
+
+  .visionInspector__header {
+    min-height: 58px;
+
+    padding:
+      8px
+      10px;
+  }
+
+
+  .visionInspector__headerIcon {
+    width: 35px;
+    height: 35px;
+
+    flex-basis: 35px;
+  }
+
+
+  .visionInspector__body {
+    padding:
+      8px;
+  }
+
+
+  /* ---------------------------------------
+     Evidence gallery
+     --------------------------------------- */
+
+  .visionEvidenceGallery {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 7px;
+  }
+
+
+  .visionEvidenceCard__media {
+    height: 96px;
+  }
+
+}
+
+
+/* ===========================================================
+   48. MOBILE PEQUEÑO
+   =========================================================== */
+
+@media (max-width: 440px) {
+
+  .visionImagePreview {
+    height: 520px;
+    min-height: 520px;
+  }
+
+
+  .visionFigma__controls
+  label > span {
+    font-size: 0.62rem;
+  }
+
+
+  .visionFigma__controls
+  select {
+    font-size: 0.67rem;
+  }
+
+
+  .visionEngineStatus {
+    top: 128px;
+  }
+
+
+  .visionAnalysisLoader {
+    width:
+      calc(
+        100% - 28px
+      );
+
+    grid-template-columns:
+      38px
+      minmax(0, 1fr)
+      auto;
+
+    padding:
+      9px
+      10px;
+  }
+
+
+  .visionAnalysisLoader__spinner {
+    width: 36px;
+    height: 36px;
+  }
+
+
+  .visionAnalysisLoader
+  strong {
+    font-size: 0.70rem;
+  }
+
+
+  .visionAnalysisChart__header {
+    flex-direction: column;
+  }
+
+
+  .visionEvidenceGallery {
+    grid-template-columns: 1fr;
+  }
+
+
+  .visionEvidenceCard {
+    display: grid;
+
+    grid-template-columns:
+      128px
+      minmax(0, 1fr);
+  }
+
+
+  .visionEvidenceCard__media {
+    height: 100%;
+    min-height: 132px;
+  }
+
+
+  .visionEvidenceCard__body
+  > p {
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+  }
+
+
+  .visionResultRow,
+  .visionResultRows--placeholder
+  > div {
+    grid-template-columns:
+      minmax(95px, 0.8fr)
+      minmax(0, 1fr);
+  }
+
+
+  .visionMetricRow {
+    grid-template-columns:
+      minmax(90px, 0.85fr)
+      minmax(70px, 1fr)
+      43px;
+  }
+
+}
+
+
+/* ===========================================================
+   49. POCA ALTURA
+   =========================================================== */
+
+@media (max-height: 760px)
+and (min-width: 681px) {
+
+  .visionImagePreview {
+    height: 455px;
+    min-height: 455px;
+  }
+
+
+  .visionCanvasStat {
+    min-height: 75px;
+  }
+
+
+  .visionAnalysisChart__body {
+    height: 105px;
+  }
+
+}
+
+
+/* ===========================================================
+   50. FALLBACK SIN BACKDROP-FILTER
+   =========================================================== */
+
+@supports not (
+  backdrop-filter:
+    blur(1px)
+) {
+
+  .visionGlass,
+  .visionFigma__controls,
+  .visionEngineStatus,
+  .visionAnalysisLoader,
+  .visionImagePreview__mapControls,
+  .visionCanvasStat,
+  .visionInspector {
+    background:
+      rgba(
+        239,
+        244,
+        235,
+        0.94
+      );
+  }
+
+}
+
+
+/* ===========================================================
+   51. REDUCED MOTION
+   =========================================================== */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .visionSpinner,
+  .visionImagePreview__scanBeam,
+  .visionAnalysisLoader,
+  .visionAnalysisChart__status
+  > span.is-live {
+    animation: none;
+  }
+
+
+  .visionUploadButton,
+  .visionCanvasStat,
+  .visionEvidenceCard,
+  .visionImagePreview > img,
+  .visionMetricProgress b {
+    transition: none;
+  }
+
 }

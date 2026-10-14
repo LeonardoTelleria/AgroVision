@@ -1,130 +1,130 @@
-"""
-Analizador visual preliminar.
+"""Adaptador entre el contrato HTTP y la inferencia neuronal real."""
 
-Este módulo utiliza reglas heurísticas sencillas para simular una inspección visual mediante inteligencia artificial.
-Sus predicciones solo pretenden servir como indicio preliminar para el motor de riesgo prescriptivo
-y no deben interpretarse como diagnósticos agronómicos definitivos.
-"""
-
+from app.inference import ModelLoader, VisionInferenceEngine
 from app.schemas import (
     VisionAnalyzeRequest,
     VisionAnalyzeResponse,
     VisionEvidence,
+    VisionModelsStatusResponse,
+    VisionModelStatus,
+    VisionTopClass,
     VisionVisualMetrics,
 )
 
 
+model_loader = ModelLoader()
+inference_engine = VisionInferenceEngine(model_loader)
+
+
+def warm_models() -> None:
+    model_loader.warm()
+
+
+def get_models_status() -> VisionModelsStatusResponse:
+    return VisionModelsStatusResponse(
+        models=[
+            VisionModelStatus(
+                cropType=item.crop_type,
+                available=item.available,
+                cached=item.cached,
+                state=item.state,
+                modelId=item.model_id,
+                modelVersion=item.model_version,
+                architecture=item.architecture,
+                classNames=list(item.class_names),
+                artifactFormat=item.artifact_format,
+                message=item.message,
+            )
+            for item in model_loader.statuses()
+        ],
+        abstentionThreshold=inference_engine.abstention_threshold,
+    )
+
+
 def analyze_image(request: VisionAnalyzeRequest) -> VisionAnalyzeResponse:
-    """
-    Realiza un análisis visual preliminar utilizando reglas heurísticas sencillas.
-
-    Este módulo muestra la arquitectura del Servicio de IA y no constituye
-    un modelo de inteligencia artificial entrenado ni un diagnóstico agronómico definitivo.
-    """
-
-    image_name = request.image_file_name.lower()
-
-    if "dry" in image_name:
-        prediction = "DRY_AREA"
-        confidence = 0.81
-        explanation = (
-            "Visual patterns compatible with dry areas were detected. "
-            "Field verification is recommended."
-        )
-        recommendation = (
-            "Inspect irrigation coverage and evaluate soil moisture conditions."
-        )
-
-    elif "chlorosis" in image_name:
-        prediction = "CHLOROSIS"
-        confidence = 0.79
-        explanation = (
-            "Visual patterns compatible with chlorosis were identified. "
-            "This preliminary observation should be confirmed in the field."
-        )
-        recommendation = (
-            "Evaluate nutrient availability and inspect affected plants."
-        )
-
-    elif "spot" in image_name:
-        prediction = "LEAF_SPOT"
-        confidence = 0.76
-        explanation = (
-            "Visual patterns compatible with leaf spot symptoms were detected. "
-            "Technical field validation is recommended."
-        )
-        recommendation = (
-            "Inspect affected leaves and evaluate whether additional agronomic assessment is required."
-        )
-
-    elif "water" in image_name:
-        prediction = "WATER_STRESS"
-        confidence = 0.83
-        explanation = (
-            "Visual signals compatible with water stress were detected. "
-            "Field validation is recommended."
-        )
-        recommendation = (
-            "Inspect irrigation conditions and verify soil moisture before applying corrective actions."
-        )
-
-    elif "healthy" in image_name:
-        prediction = "HEALTHY"
-        confidence = 0.84
-        explanation = (
-            "No significant visual anomalies were detected during the preliminary inspection."
-        )
-        recommendation = (
-            "Continue routine monitoring and periodic field inspections."
-        )
-
-    else:
-        prediction = "UNKNOWN"
-        confidence = 0.62
-        explanation = (
-            "The available image does not provide sufficient visual information for a preliminary classification."
-        )
-        recommendation = (
-            "Capture a clearer image or perform a manual field inspection."
-        )
-
-    metric_map = {
-        "HEALTHY": "visual_health",
-        "WATER_STRESS": "water_stress_signal",
-        "CHLOROSIS": "chlorosis_signal",
-        "DRY_AREA": "dry_area_signal",
-        "LEAF_SPOT": "leaf_spot_signal",
-        "UNKNOWN": "visual_classification",
-    }
-
-    metric = metric_map[prediction]
-
-    evidence = [
-        VisionEvidence(
-            metric=metric,
-            value=prediction,
-            unit=None,
-            explanation=explanation,
-        )
-    ]
-
+    result = inference_engine.predict(request.image_bytes, request.crop_type)
+    explanation, recommendation = _guidance(
+        result.crop_type,
+        result.detected_class,
+        result.prediction,
+        result.confidence,
+        inference_engine.abstention_threshold,
+    )
     return VisionAnalyzeResponse(
-        prediction=prediction,
-        confidence=confidence,
-        metrics=[metric],
+        prediction=result.prediction,
+        detectedClass=result.detected_class,
+        confidence=result.confidence,
+        modelId=result.model_id,
+        modelVersion=result.model_version,
+        architecture=result.architecture,
+        cropType=request.crop_type,
+        topClasses=[
+            VisionTopClass(className=item.class_name, score=item.score)
+            for item in result.top_classes
+        ],
+        inferenceMs=result.inference_ms,
+        metrics=["model_softmax"],
         visualMetrics=VisionVisualMetrics(
             greenCoveragePercentage=None,
             dryAreaPercentage=None,
-            chlorosisSuspected=prediction == "CHLOROSIS",
-            leafSpotSuspected=prediction == "LEAF_SPOT",
-            stressPatternDetected=prediction in {
-                "WATER_STRESS",
-                "DRY_AREA",
-                "CHLOROSIS",
-                "LEAF_SPOT",
-            },
+            chlorosisSuspected=None,
+            leafSpotSuspected=None,
+            stressPatternDetected=None,
         ),
-        evidence=evidence,
+        evidence=[
+            VisionEvidence(
+                metric="model_classification",
+                value=result.detected_class,
+                unit=None,
+                explanation=(
+                    f"EfficientNet-B0 asignó la clase técnica '{result.detected_class}' "
+                    f"con puntuación softmax {result.confidence:.4f}. "
+                    "Esta puntuación no es precisión estadística ni probabilidad calibrada."
+                ),
+            )
+        ],
         explanation=explanation,
         recommendation=recommendation,
+    )
+
+
+def _guidance(
+    crop_type: str,
+    detected_class: str,
+    prediction: str,
+    confidence: float,
+    threshold: float,
+) -> tuple[str, str]:
+    labels = {
+        "blight": "tizón foliar",
+        "common_rust": "roya común",
+        "gray_leaf_spot": "mancha gris de la hoja",
+        "black_spot": "mancha negra",
+        "canker": "cancro cítrico",
+        "greening": "greening/HLB",
+        "melanose": "melanosis",
+        "healthy": "hoja saludable",
+    }
+    readable = labels.get(detected_class, detected_class.replace("_", " "))
+    citrus_note = (
+        " El dataset de cítricos no garantiza que todas las muestras correspondan "
+        "exclusivamente a Citrus sinensis."
+        if crop_type == "ORANGE" else ""
+    )
+    if prediction == "UNKNOWN":
+        return (
+            f"La clase con mayor puntuación fue {readable} ({confidence:.1%}), por debajo "
+            f"del umbral provisional de abstención ({threshold:.0%}).{citrus_note}",
+            "Toma otra fotografía nítida de una sola hoja, con iluminación uniforme, y solicita revisión de campo.",
+        )
+    if prediction == "HEALTHY":
+        return (
+            f"El modelo clasificó la imagen como {readable} con puntuación softmax {confidence:.1%}. "
+            f"El resultado es orientativo y no sustituye una inspección agronómica.{citrus_note}",
+            "Continúa el monitoreo rutinario y verifica en campo si aparecen síntomas nuevos.",
+        )
+    return (
+        f"El modelo detectó un patrón compatible con {readable} con puntuación softmax {confidence:.1%}. "
+        f"No constituye un diagnóstico definitivo.{citrus_note}",
+        "Confirma los síntomas con inspección de campo y personal agronómico antes de aplicar cualquier tratamiento.",
     )

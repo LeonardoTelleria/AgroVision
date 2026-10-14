@@ -471,3 +471,4 @@ export const agroVisionZones: ZoneFeatureCollection = {
     // Zonas agrícolas.
     features: [agroVisionZone01, agroVisionZone02, agroVisionZone03, agroVisionZone04, agroVisionZone05, agroVisionZone06],
 };
+

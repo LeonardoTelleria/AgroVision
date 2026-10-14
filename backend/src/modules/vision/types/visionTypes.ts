@@ -4,6 +4,7 @@ import type { EvidenceItem } from "../../analysis/types/evidenceTypes";
 
 export type VisionPrediction =
   | "HEALTHY"
+  | "VISUAL_ANOMALY"
   | "WATER_STRESS"
   | "CHLOROSIS"
   | "DRY_AREA"
@@ -23,9 +24,9 @@ export type VisionCropType =
 export interface VisionVisualMetrics {
   readonly greenCoveragePercentage: number | null;
   readonly dryAreaPercentage: number | null;
-  readonly chlorosisSuspected: boolean;
-  readonly leafSpotSuspected: boolean;
-  readonly stressPatternDetected: boolean;
+  readonly chlorosisSuspected: boolean | null;
+  readonly leafSpotSuspected: boolean | null;
+  readonly stressPatternDetected: boolean | null;
 }
 
 /** Archivo y metadatos ya validados que el controller entrega al service. */
@@ -51,12 +52,24 @@ export interface AiVisionEvidence {
 
 export interface AiVisionAnalyzeResponse {
   readonly prediction: VisionPrediction;
+  readonly detectedClass: string;
   readonly confidence: number;
+  readonly modelId: string;
+  readonly modelVersion: string;
+  readonly architecture: string;
+  readonly cropType: VisionCropType;
+  readonly topClasses: ReadonlyArray<VisionTopClass>;
+  readonly inferenceMs: number;
   readonly metrics: ReadonlyArray<string>;
   readonly visualMetrics: VisionVisualMetrics;
   readonly evidence: ReadonlyArray<AiVisionEvidence>;
   readonly explanation: string;
   readonly recommendation: string;
+}
+
+export interface VisionTopClass {
+  readonly className: string;
+  readonly score: number;
 }
 
 /** Respuesta normalizada que consume VisionAiPage. */
@@ -66,7 +79,13 @@ export interface VisionAnalyzeResponse {
   readonly zoneId: string | null;
   readonly cropType: VisionCropType;
   readonly prediction: VisionPrediction;
+  readonly detectedClass: string;
   readonly confidence: number;
+  readonly modelId: string;
+  readonly modelVersion: string;
+  readonly architecture: string;
+  readonly topClasses: ReadonlyArray<VisionTopClass>;
+  readonly inferenceMs: number;
   readonly visualMetrics: VisionVisualMetrics;
   readonly explanation: string;
   readonly recommendedAction: string;

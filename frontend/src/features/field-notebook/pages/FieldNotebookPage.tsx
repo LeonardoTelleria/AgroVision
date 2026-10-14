@@ -1,3 +1,4 @@
+
 /**
  * =========================================
  * FieldNotebookPage
@@ -79,6 +80,12 @@ export function FieldNotebookPage() {
 
         setNotebookData(data);
         setRecords(data.records);
+
+      } catch (error: unknown) {
+        console.error(
+          "[AgroVision] Error al cargar Cuaderno de campo:",
+          error,
+        );
       } finally {
         setIsLoading(false);
       }
@@ -176,17 +183,21 @@ export function FieldNotebookPage() {
       <section className="avMetricGrid">
         <MetricCard
           title="Registros recientes"
-          value="100%"
+          value={records.length}
           description={`${records.length} actividades registradas.`}
-          progress={100}
+          progress={records.length > 0 ? 100 : 0}
           actionLabel="Ver todos los registros"
         />
 
         <MetricCard
           title="Observaciones pendientes"
-          value="25%"
+          value={notebookData.pendingObservations}
           description="Requiere seguimiento."
-          progress={25}
+          progress={
+            records.length > 0
+              ? (notebookData.pendingObservations / records.length) * 100
+              : 0
+          }
           tone="AMBER"
           showRing
           actionLabel="Ver listado completo"
@@ -194,9 +205,13 @@ export function FieldNotebookPage() {
 
         <MetricCard
           title="Acciones aplicadas"
-          value="75%"
+          value={notebookData.appliedActions}
           description="Intervenciones documentadas."
-          progress={75}
+          progress={
+            records.length > 0
+              ? (notebookData.appliedActions / records.length) * 100
+              : 0
+          }
           tone="TEAL"
           showRing
           actionLabel="Ver intervenciones"

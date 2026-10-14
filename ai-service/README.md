@@ -13,20 +13,21 @@ python -m uvicorn main:app --host 127.0.0.1 --port 8000
 ## Endpoints
 
 - `GET /health`
+- `GET /models/status`
 - `POST /vision/analyze`
 
 El análisis recibe `image`, `cropType`, `fieldId`, `zoneId` e `imageFileName`. Se admiten JPEG, PNG y WebP de hasta 10 MB.
 
 ## Contrato de salida
 
-El servicio devuelve predicción, confianza, métricas técnicas, métricas visuales, evidencia, explicación y recomendación. No devuelve `ApiResponse`: esa envoltura y los datos de inspección pertenecen al backend.
+El servicio devuelve predicción, clase específica, top-3 softmax, versión y arquitectura del modelo, latencia, métricas técnicas, evidencia, explicación y recomendación. Las métricas visuales que el clasificador no calcula son `null`. La envoltura `ApiResponse` y los datos de inspección pertenecen al backend.
 
 ## Estado del analizador
 
-La recepción multipart está preparada, pero `visionAnalyser.py` continúa usando la heurística temporal. No existe todavía un modelo entrenado ni carga de pesos en FastAPI.
+`visionAnalyser.py` usa inferencia neuronal real: `CORN` y `ORANGE` disponen de modelos entrenados locales y `RED_BEAN` responde 503 mientras no tenga pesos. El loader verifica integridad, prefiere TorchScript válido, usa el checkpoint registrado como respaldo y mantiene cada modelo en caché. La disponibilidad concreta de esta instalación se consulta con `/models/status`.
 
 ## Entrenamiento y registro
 
-`training/` contiene el motor reproducible de EfficientNet-B0, evaluación y exportación. `model_registry/registry.json` mantiene los tres cultivos en `NOT_TRAINED` hasta que existan checkpoints reales. PyTorch se instala únicamente en el entorno de entrenamiento mediante `requirements-training.txt`; no forma parte del runtime base del API.
+`training/` contiene el motor reproducible de EfficientNet-B0, evaluación y exportación. El registro inicial incluye entradas `NOT_TRAINED`; los modelos entrenados se agregan localmente junto a sus checkpoints. El proceso de FastAPI necesita PyTorch/Torchvision instalados en su entorno, aunque permanezcan separados de `requirements.txt`.
 
-Instrucciones: `docs/ai/TRAINING_GUIDE.md` y `docs/ai/MODEL_REGISTRY.md`.
+Instrucciones: `docs/ai/INFERENCE_INTEGRATION.md`, `docs/ai/TRAINING_GUIDE.md` y `docs/ai/MODEL_REGISTRY.md`.

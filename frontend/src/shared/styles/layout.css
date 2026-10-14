@@ -1686,13 +1686,13 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 .weatherModal__currentStats span {
   color: var(--weather-muted);
-  font-size: 0.51rem;
+  font-size: 1.1rem;
 }
 
 .weatherModal__currentStats strong {
   margin-top: 4px;
   color: rgba(255, 255, 255, 0.84);
-  font-size: 0.68rem;
+  font-size: 1.3rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -1722,7 +1722,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 .weatherModal__sectionHeaderInline strong {
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.66rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
@@ -1754,7 +1754,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 .weatherModal__hourLabel {
   color: rgba(255, 255, 255, 0.52);
-  font-size: 0.5rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
@@ -1762,14 +1762,14 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 .weatherModal__hourTemp {
   margin-top: 7px;
   color: rgba(255, 255, 255, 0.88);
-  font-size: 0.8rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
 .weatherModal__hourRain {
   margin-top: 5px;
   color: rgba(101, 190, 222, 0.72);
-  font-size: 0.47rem;
+  font-size: 0.8rem;
 }
 
 /* =========================================
@@ -1794,7 +1794,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 .weatherModal__widgetTitle strong {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.62rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
@@ -1959,7 +1959,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 .weatherModal__forecastHeader strong {
   color: rgba(255, 255, 255, 0.82);
-  font-size: 0.63rem;
+  font-size: 1.5rem;
   font-weight: 600;
 }
 
@@ -1981,7 +1981,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   grid-template-columns: 82px 26px minmax(0, 1fr) 56px 36px;
   align-items: center;
 
-  gap: 8px;
+  gap: 12px;
   min-height: 35px;
   padding: 5px 2px;
 
@@ -1995,7 +1995,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 .weatherModal__forecastDate {
   overflow: hidden;
   color: rgba(255, 255, 255, 0.55);
-  font-size: 0.47rem;
+  font-size: 0.8rem;
   text-overflow: ellipsis;
   text-transform: capitalize;
   white-space: nowrap;
@@ -2005,7 +2005,7 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 .weatherModal__forecastCondition {
   overflow: hidden;
   color: rgba(255, 255, 255, 0.38);
-  font-size: 0.43rem;
+  font-size:0.8rem;
   line-height: 1.1;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2021,17 +2021,17 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
 
 .weatherModal__forecastTemperature strong {
   color: rgba(255, 255, 255, 0.84);
-  font-size: 0.56rem;
+  font-size: 0.9rem;
 }
 
 .weatherModal__forecastTemperature span {
   color: rgba(255, 255, 255, 0.3);
-  font-size: 0.47rem;
+  font-size: 0.9rem;
 }
 
 .weatherModal__forecastRain {
   color: rgba(101, 190, 222, 0.67);
-  font-size: 0.43rem;
+  font-size: 0.8rem;
   text-align: right;
 }
 
@@ -2256,6 +2256,499 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   }
 }
 
+/* =========================================================
+   AGROVISION — APP ENTRY MOTION SYSTEM
+   =========================================================
+ *
+ * Secuencia:
+ *
+ * 01. Sidebar
+ * 02. Brand
+ * 03. Toggle
+ * 04. Navegación en cascada
+ * 05. Weather
+ * 06. Topbar
+ *
+ * IMPORTANTE:
+ * Estas reglas solo funcionan cuando App.tsx añade:
+ *
+ * .is-app-entering
+ *
+ * Después de la carga inicial la clase desaparece,
+ * por lo que las rutas SPA no vuelven a animarse.
+ *
+ * ========================================================= */
+
+
+/* =========================================================
+   1. SIDEBAR — ENTRADA PRINCIPAL
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.sidebar {
+  animation:
+    agrovisionSidebarEnter
+    420ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    both;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* =========================================================
+   2. LOGO
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.sidebar__brand {
+  animation:
+    agrovisionSidebarItemEnter
+    330ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    90ms
+    both;
+}
+
+
+/* =========================================================
+   3. BOTÓN COLLAPSE
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.sidebar__toggle {
+  animation:
+    agrovisionToggleEnter
+    300ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    145ms
+    both;
+}
+
+
+/* =========================================================
+   4. ROUTES — CASCADA
+   =========================================================
+ *
+ * Aproximadamente 45 ms entre cada ruta.
+ *
+ * Resultado:
+ *
+ * Dashboard
+ *   ↓
+ * Cultivos
+ *   ↓
+ * Alertas
+ *   ↓
+ * Recomendaciones
+ *   ↓
+ * Reportes
+ *   ↓
+ * Vision AI
+ *   ↓
+ * Mapping
+ *   ↓
+ * Cuaderno de campo
+ *
+ * ========================================================= */
+
+.agrovisionApp.is-app-entering
+.sidebar__link {
+  animation:
+    agrovisionNavItemEnter
+    300ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    both;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(1) {
+  animation-delay:
+    155ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(2) {
+  animation-delay:
+    195ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(3) {
+  animation-delay:
+    235ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(4) {
+  animation-delay:
+    275ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(5) {
+  animation-delay:
+    315ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(6) {
+  animation-delay:
+    355ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(7) {
+  animation-delay:
+    395ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(8) {
+  animation-delay:
+    435ms;
+}
+
+
+/* Soporte si después agregamos más rutas */
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(9) {
+  animation-delay:
+    475ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.sidebar__link:nth-child(10) {
+  animation-delay:
+    515ms;
+}
+
+
+/* =========================================================
+   5. WEATHER
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.sidebar__weatherZone {
+  animation:
+    agrovisionWeatherEnter
+    410ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    430ms
+    both;
+}
+
+
+/* =========================================================
+   6. TOPBAR
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.topbar {
+  animation:
+    agrovisionTopbarEnter
+    430ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    155ms
+    both;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* =========================================================
+   7. TOPBAR CONTENT
+   =========================================================
+ *
+ * El contenedor cae completo.
+ * Luego sus dos grupos aparecen con un delay mínimo.
+ */
+
+.agrovisionApp.is-app-entering
+.topbar__searchContainer {
+  animation:
+    agrovisionTopbarContentEnter
+    300ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    260ms
+    both;
+}
+
+
+.agrovisionApp.is-app-entering
+.topbar__actions {
+  animation:
+    agrovisionTopbarContentEnter
+    300ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    305ms
+    both;
+}
+
+
+/* =========================================================
+   KEYFRAMES — SIDEBAR
+   ========================================================= */
+
+@keyframes agrovisionSidebarEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        -100%,
+        0,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — ELEMENTOS SIDEBAR
+   ========================================================= */
+
+@keyframes agrovisionSidebarItemEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        -14px,
+        0,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — NAV
+   ========================================================= */
+
+@keyframes agrovisionNavItemEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        -18px,
+        0,
+        0
+      );
+  }
+
+  65% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — TOGGLE
+   ========================================================= */
+
+@keyframes agrovisionToggleEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      scale(0.72);
+  }
+
+  72% {
+    opacity: 1;
+
+    transform:
+      scale(1.06);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      scale(1);
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — WEATHER
+   ========================================================= */
+
+@keyframes agrovisionWeatherEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        0,
+        14px,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — TOPBAR
+   ========================================================= */
+
+@keyframes agrovisionTopbarEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        0,
+        -32px,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — TOPBAR CONTENT
+   ========================================================= */
+
+@keyframes agrovisionTopbarContentEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        0,
+        -8px,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
 /* =========================================
    Responsive desktop
    ========================================= */
@@ -2451,6 +2944,482 @@ aside.sidebar nav.sidebar__nav button.sidebar__link.is-active .sidebar__icon {
   }
   .sidebar__weatherBtn {
     height: 24px;
+  }
+}
+
+/* =========================================================
+   AGROVISION — SHARED CARD ENTRY MOTION
+   =========================================================
+ *
+ * Sistema de entrada inicial para:
+ *
+ * - título;
+ * - MetricCards;
+ * - filtros;
+ * - Panel;
+ * - estados.
+ *
+ * Se activa únicamente cuando App.tsx añade:
+ *
+ * .is-app-entering
+ *
+ * No se ejecuta durante navegación SPA normal.
+ *
+ * ========================================================= */
+
+
+/* =========================================================
+   1. TÍTULO DE LA PANTALLA
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avScreenTitle {
+  animation:
+    avPageTitleEnter
+    340ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    280ms
+    both;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* =========================================================
+   2. METRIC CARDS — CASCADA PRINCIPAL
+   =========================================================
+ *
+ * Card 1 → 340 ms
+ * Card 2 → 400 ms
+ * Card 3 → 460 ms
+ *
+ * La diferencia es deliberadamente pequeña.
+ * Debe sentirse rápida, no teatral.
+ */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avMetricCard {
+  animation:
+    avCardCascadeEnter
+    390ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    both;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avMetricGrid
+> .avMetricCard:nth-child(1) {
+  animation-delay:
+    340ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avMetricGrid
+> .avMetricCard:nth-child(2) {
+  animation-delay:
+    405ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avMetricGrid
+> .avMetricCard:nth-child(3) {
+  animation-delay:
+    470ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avMetricGrid
+> .avMetricCard:nth-child(4) {
+  animation-delay:
+    535ms;
+}
+
+
+/* =========================================================
+   3. FILTER BAR
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avFilterBar {
+  animation:
+    avCardCascadeEnter
+    360ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    515ms
+    both;
+}
+
+
+/* =========================================================
+   4. PANELS
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel {
+  animation:
+    avPanelCascadeEnter
+    400ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    both;
+
+  will-change:
+    transform,
+    opacity;
+}
+
+
+/* ---------------------------------------------------------
+   Cascada según posición dentro de su contenedor
+   --------------------------------------------------------- */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel:nth-child(1) {
+  animation-delay:
+    535ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel:nth-child(2) {
+  animation-delay:
+    590ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel:nth-child(3) {
+  animation-delay:
+    645ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel:nth-child(4) {
+  animation-delay:
+    700ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel:nth-child(5) {
+  animation-delay:
+    755ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel:nth-child(6) {
+  animation-delay:
+    810ms;
+}
+
+
+/* =========================================================
+   5. PANEL BODY
+   =========================================================
+ *
+ * Pequeño reveal interno.
+ *
+ * Es deliberadamente muy sutil para evitar que el contenido
+ * parezca separado del panel.
+ */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avPanel
+> .avPanel__body {
+  animation:
+    avPanelContentReveal
+    360ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    620ms
+    both;
+}
+
+
+/* =========================================================
+   6. ESTADOS / PLACEHOLDER
+   ========================================================= */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avState {
+  animation:
+    avPanelCascadeEnter
+    390ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    460ms
+    both;
+}
+
+
+/* =========================================================
+   7. ROWS COMPACTOS
+   =========================================================
+ *
+ * No se hace una animación agresiva.
+ * Solo entran ligeramente para acompañar el panel.
+ */
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avCompactRow {
+  animation:
+    avInnerItemEnter
+    300ms
+    cubic-bezier(
+      0.16,
+      1,
+      0.3,
+      1
+    )
+    both;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avCompactRow:nth-child(1) {
+  animation-delay:
+    650ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avCompactRow:nth-child(2) {
+  animation-delay:
+    685ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avCompactRow:nth-child(3) {
+  animation-delay:
+    720ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avCompactRow:nth-child(4) {
+  animation-delay:
+    755ms;
+}
+
+
+.agrovisionApp.is-app-entering
+.agrovisionContent
+.avCompactRow:nth-child(n + 5) {
+  animation-delay:
+    790ms;
+}
+
+
+/* =========================================================
+   KEYFRAMES — TITLE
+   ========================================================= */
+
+@keyframes avPageTitleEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        -18px,
+        0,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — METRIC CARDS
+   ========================================================= */
+
+@keyframes avCardCascadeEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        -30px,
+        0,
+        0
+      )
+      scale(0.988);
+  }
+
+  72% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — PANELS
+   ========================================================= */
+
+@keyframes avPanelCascadeEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        -22px,
+        0,
+        0
+      )
+      scale(0.993);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — PANEL CONTENT
+   ========================================================= */
+
+@keyframes avPanelContentReveal {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        0,
+        6px,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+/* =========================================================
+   KEYFRAMES — INNER ITEMS
+   ========================================================= */
+
+@keyframes avInnerItemEnter {
+  from {
+    opacity: 0;
+
+    transform:
+      translate3d(
+        -9px,
+        0,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
   }
 }
 

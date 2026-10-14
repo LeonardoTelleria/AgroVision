@@ -30,11 +30,15 @@ export default defineConfig(({ mode }) => {
   // Los endpoints ya incluyen /api; el proxy utiliza únicamente el origen.
   const env = loadEnv(mode, process.cwd(), "VITE_");
   const apiOrigin = new URL(env.VITE_API_BASE_URL || "http://localhost:3000", "http://localhost:3000").origin;
+  const visionApiOrigin = env.VITE_VISION_API_BASE_URL
+    ? new URL(env.VITE_VISION_API_BASE_URL).origin
+    : apiOrigin;
 
   return {
     plugins: [react()],
     server: {
       proxy: {
+        "/api/vision": { target: visionApiOrigin, changeOrigin: true },
         "/api": { target: apiOrigin, changeOrigin: true },
       },
     },

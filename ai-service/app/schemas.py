@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 VisionPrediction = Literal[
     "HEALTHY",
+    "VISUAL_ANOMALY",
     "WATER_STRESS",
     "CHLOROSIS",
     "DRY_AREA",
@@ -42,9 +43,9 @@ class VisionAnalyzeRequest(BaseModel):
 class VisionVisualMetrics(BaseModel):
     greenCoveragePercentage: float | None = Field(default=None, ge=0, le=100)
     dryAreaPercentage: float | None = Field(default=None, ge=0, le=100)
-    chlorosisSuspected: bool
-    leafSpotSuspected: bool
-    stressPatternDetected: bool
+    chlorosisSuspected: bool | None = None
+    leafSpotSuspected: bool | None = None
+    stressPatternDetected: bool | None = None
 
 
 class VisionEvidence(BaseModel):
@@ -54,13 +55,43 @@ class VisionEvidence(BaseModel):
     explanation: str
 
 
+class VisionTopClass(BaseModel):
+    className: str = Field(min_length=1)
+    score: float = Field(ge=0, le=1)
+
+
 class VisionAnalyzeResponse(BaseModel):
     """Resultado técnico que el backend transforma a VisionInspection."""
 
     prediction: VisionPrediction
+    detectedClass: str = Field(min_length=1)
     confidence: float = Field(ge=0, le=1)
+    modelId: str = Field(min_length=1)
+    modelVersion: str = Field(min_length=1)
+    architecture: str = Field(min_length=1)
+    cropType: VisionCropType
+    topClasses: list[VisionTopClass] = Field(min_length=1, max_length=3)
+    inferenceMs: float = Field(ge=0)
     metrics: list[str]
     visualMetrics: VisionVisualMetrics
     evidence: list[VisionEvidence] = Field(min_length=1)
     explanation: str
     recommendation: str
+
+
+class VisionModelStatus(BaseModel):
+    cropType: str
+    available: bool
+    cached: bool
+    state: str
+    modelId: str | None = None
+    modelVersion: str | None = None
+    architecture: str | None = None
+    classNames: list[str] = Field(default_factory=list)
+    artifactFormat: str | None = None
+    message: str | None = None
+
+
+class VisionModelsStatusResponse(BaseModel):
+    models: list[VisionModelStatus]
+    abstentionThreshold: float = Field(ge=0, le=1)

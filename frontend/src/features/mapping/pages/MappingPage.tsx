@@ -44,7 +44,8 @@
 
 // Conservamos la selección de dominio y snapshots estables entre renders.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useFields } from "../../fields/context/useFields";
 
 // Calculamos superficies, longitudes y límites a partir de las geometrías recibidas.
 
@@ -76,7 +77,12 @@ import { enrichZonesWithInsights } from "../services/zoneInsightMapAdapter";
 
 // Consumimos las geometrías desde su único punto de salida.
 
-import { farmsGeoJSON, fieldsGeoJSON, zonesGeoJSON } from "../utils/geojson";
+import {
+  farmsGeoJSON,
+  fieldsGeoJSON,
+  zonesGeoJSON,
+  bindFieldsToGeometry,
+} from "../utils/geojson";
 
 import { agroVisionRoverTrajectory } from "../data/roverTrajectoryData";
 
@@ -118,7 +124,30 @@ export function MappingPage() {
 
   // Un filtro vacío representa todos los campos de la finca.
 
-  const [fieldId, setFieldId] = useState("");
+  
+/**
+ * La selección del campo se comparte con Topbar.
+ * El ID procede del registro real en PostgreSQL.
+ */
+const {
+  fields: persistedFields,
+  selectedFieldId,
+  selectField: selectGlobalField,
+} = useFields();
+
+const fieldId =
+  selectedFieldId === null
+    ? ""
+    : `field-${String(selectedFieldId).padStart(3, "0")}`;
+
+/**
+ * Combinamos propiedades reales de Neon
+ * con las geometrías disponibles en el mapa.
+ */
+  const mappedFields = useMemo(
+    () => bindFieldsToGeometry(persistedFields),
+    [persistedFields],
+  );
 
   // Dashboard puede abrir esta vista con una zona concreta mediante su query string.
 
@@ -157,8 +186,17 @@ export function MappingPage() {
 
   // Consultamos una sola vez cada zona del dataset, independientemente del filtro visual.
 
-  const zoneIds = useMemo(() => zonesGeoJSON.features.map((zone) => zone.properties.zoneId), []);
-
+    const zoneIds = useMemo(
+      () =>
+        zonesGeoJSON.features
+          .filter(
+            (zone) =>
+              !fieldId ||
+              String(zone.properties.fieldId) === fieldId,
+          )
+          .map((zone) => zone.properties.zoneId),
+      [fieldId],
+    );
   const analysis = useZoneInsights(zoneIds, "", refreshKey);
 
   // Validamos las relaciones zoneId/fieldId antes de presentar información de riesgo.
@@ -179,9 +217,8 @@ export function MappingPage() {
 
     () => ({
 
-      ...fieldsGeoJSON,
-
-      features: fieldsGeoJSON.features.filter(
+      ...mappedFields,
+      features: mappedFields.features.filter(
 
         (field) => !fieldId || String(field.properties.fieldId) === fieldId,
 
@@ -189,7 +226,7 @@ export function MappingPage() {
 
     }),
 
-    [fieldId],
+    [fieldId, mappedFields],
 
   );
 
@@ -211,11 +248,17 @@ export function MappingPage() {
 
   );
 
+  const visibleSelectedZoneId = selectedZoneId && zones.features.some(
+    (zone) => zone.properties.zoneId === selectedZoneId,
+  )
+    ? selectedZoneId
+    : null;
+
 
 
   // La selección utiliza la misma colección enriquecida que recibe MapLibre.
 
-  const selected = zones.features.find((zone) => zone.properties.zoneId === selectedZoneId);
+  const selected = zones.features.find((zone) => zone.properties.zoneId === visibleSelectedZoneId);
 
   const selectedInsight = analysis.insights.find(
 
@@ -322,22 +365,62 @@ export function MappingPage() {
   }
 
 
+  
+/**
+ * Enfoca automáticamente el lote seleccionado,
+ * incluso cuando la selección viene desde Topbar.
+ */
+useEffect(() => {
+  if (!map) return;
+
+  const visibleFields = mappedFields.features.filter(
+    (field) =>
+      !fieldId ||
+      String(field.properties.fieldId) === fieldId,
+  );
+
+  if (visibleFields.length === 0) return;
+
+  fitGisGeometry(
+    map,
+    {
+      type: "FeatureCollection",
+      features: visibleFields,
+    },
+    450,
+  );
+}, [fieldId, map, mappedFields]);
 
   /** Cambia el campo y presenta sus límites utilizando la cámara existente. */
 
-  function selectField(id: string): void {
-
-    setFieldId(id);
-
+ 
+/**
+ * Selecciona una parcela mediante FieldsContext.
+ *
+ * Topbar y Mapping comparten el mismo ID.
+ */
+function selectField(id: string): void {
+  if (!id) {
+    selectGlobalField(null);
     setSelectedZoneId(null);
-
-    // El encuadre utiliza el siguiente filtro antes del próximo render de React.
-
-    const features = fieldsGeoJSON.features.filter((field) => !id || String(field.properties.fieldId) === id);
-
-    if (features.length) focusGeometry({ type: "FeatureCollection", features });
-
+    return;
   }
+
+  const numericId = Number(
+    id.replace(/^field-/, ""),
+  );
+
+  if (
+    !Number.isSafeInteger(numericId) ||
+    numericId <= 0
+  ) {
+    return;
+  }
+
+  selectGlobalField(numericId);
+  setSelectedZoneId(null);
+}
+
 
 
 
@@ -541,7 +624,7 @@ export function MappingPage() {
 
             key={zone.properties.zoneId}
 
-            aria-pressed={selectedZoneId === zone.properties.zoneId}
+            aria-pressed={visibleSelectedZoneId === zone.properties.zoneId}
 
             onClick={() => {
 
@@ -625,12 +708,16 @@ export function MappingPage() {
             {routeSource === "draft" ? "Ruta dibujada" : routeSource === "demo" ? "Ruta demo" : "Sin recorrido activo"}
           </small>
 
+          {fieldId && !trajectory && (
+            <small>La ruta demo cubre toda la finca. Actívala para mostrar todos los campos o dibuja una ruta en esta parcela.</small>
+          )}
+
           <div className="gisRouteCard__actions">
             <button
               type="button"
-              disabled={Boolean(fieldId)}
               onClick={() => {
-                // Recuperamos el recorrido de demostración y reanudamos el movimiento.
+                // La ruta demo no pertenece a una parcela individual.
+                if (fieldId) selectField("");
                 setRouteSource("demo");
                 setAnimateRover(true);
               }}
@@ -701,7 +788,7 @@ export function MappingPage() {
 
         sidePanel={inspector}
 
-        selectedZoneId={selectedZoneId}
+        selectedZoneId={visibleSelectedZoneId}
 
         animateRover={animateRover}
 

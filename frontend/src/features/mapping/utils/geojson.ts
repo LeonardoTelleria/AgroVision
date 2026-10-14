@@ -1,98 +1,68 @@
 /**
- * =========================================
- * GeoJSON Data
- * =========================================
+ * AgroVision Intelligence — Salida cartográfica compartida.
  *
- * Punto de salida de los datos geográficos utilizados por las capas GIS de AgroVision.
- *
- * Responsabilidad:
- * - exponer las colecciones GeoJSON;
- * - mantener una estructura estable para MapLibre;
- * - centralizar el acceso a farm, fields y zones;
- * - evitar duplicar geometrías o propiedades.
- *
- * Fuente de datos:
- *
- * mappingGeoData.ts
- *        ↓
- *     geojson.ts
- *        ↓
- *     MapLibre
- *
- * Este archivo NO:
- * - crea coordenadas;
- * - modifica geometrías;
- * - calcula riesgos;
- * - controla la cámara;
- * - define estilos visuales.
- * =========================================
-*/
+ * La geometría de referencia se conserva independiente de los datos
+ * agrícolas. Los nombres y propiedades de campo se toman de PostgreSQL
+ * cuando están disponibles mediante FieldsContext.
+ */
 
-// Importamos los datos GIS definidos en el archivo fuente
-import { agroVisionFarms, agroVisionFields, agroVisionZones } from "../data/mappingGeoData"
-
-// Importamos los tipos de colecciones GIS
+import { agroVisionFarms } from "../data/mappingGeoData";
+import {
+  expandedAgroVisionFields,
+  expandedAgroVisionZones,
+} from "../data/expandedFieldGeometry";
 import type {
-    FarmFeatureCollection,
-    FieldFeatureCollection,
-    ZoneFeatureCollection,
-} from  "../types/mappingGeo.types";
+  FarmFeatureCollection,
+  FieldFeatureCollection,
+  ZoneFeatureCollection,
+} from "../types/mappingGeo.types";
+import type { Field } from "../../fields/types/field.types";
 
-/**
- * =========================================
- * FARM GEOJSON
- * =========================================
-*/ 
-// exponemos la colección de fincas como GEOJSON listo para MapLibre
 export const farmsGeoJSON: FarmFeatureCollection = agroVisionFarms;
+export const fieldsGeoJSON: FieldFeatureCollection = expandedAgroVisionFields;
+export const zonesGeoJSON: ZoneFeatureCollection = expandedAgroVisionZones;
 
-/**
- * =========================================
- * FIELD GEOJSON
- * =========================================
-*/ 
-// Exponemos la colección de fields como GeoJSON listo para MapLibre.
-export const fieldsGeoJSON: FieldFeatureCollection = agroVisionFields;
-
-/**
- * =========================================
- * ZONE GEOJSON
- * =========================================
-*/ 
-// Exponemos la colección de zonas como GeoJSON listo para MapLibre.
-export const zonesGeoJSON: ZoneFeatureCollection = agroVisionZones;
-
-/**
- * =========================================
- * GIS DATASET
- * =========================================
-*/ 
-// Agrupamos todas las coleccione espaciales disponibles
 export const agroVisionGeoJSON = {
-    // coleccion espacial de fincas, fields y zonas
-    farms: farmsGeoJSON,
-    fields: fieldsGeoJSON,
-    zones: zonesGeoJSON
+  farms: farmsGeoJSON,
+  fields: fieldsGeoJSON,
+  zones: zonesGeoJSON,
 } as const;
 
+/**
+ * Vincula cada polígono con el registro REAL de la parcela utilizando su ID.
+ * No modifica la geometría ni mezcla propiedades de campos diferentes.
+ * Cuando aún no ha respondido Neon, conserva únicamente los datos
+ * descriptivos de la geometría referencial, no inventa KPIs.
+ */
+export function bindFieldsToGeometry(
+  persistedFields: ReadonlyArray<Field>,
+): FieldFeatureCollection {
+  const byId = new Map(
+    persistedFields.map((field) => [
+      `field-${String(field.id).padStart(3, "0")}`,
+      field,
+    ]),
+  );
 
-/** 
- * mappingGeo.types.ts
-        │
-        │ contratos
-        ▼
-   mappingGeoData.ts
-        │
-        │ datos + geometrías
-        ▼
-    geojson.ts
-        │
-        │ GeoJSON listo
-        ▼
-   fieldLayer.ts
-   zoneLayer.ts
-   ...
-        │
-        ▼
-     MapLibre
-*/
+  return {
+    ...fieldsGeoJSON,
+    features: fieldsGeoJSON.features.map((feature) => {
+      const persisted = byId.get(String(feature.properties.fieldId));
+      if (!persisted) return feature;
+
+      return {
+        ...feature,
+        properties: {
+          ...feature.properties,
+          farmId: `farm-${String(persisted.farmId).padStart(3, "0")}`,
+          name: persisted.name,
+          areaSquareMeters: persisted.areaSquareMeters,
+          soilType: persisted.soilType,
+          irrigationType: persisted.irrigationType,
+          status: persisted.status,
+          createdAt: persisted.createdAt,
+        },
+      };
+    }),
+  };
+}

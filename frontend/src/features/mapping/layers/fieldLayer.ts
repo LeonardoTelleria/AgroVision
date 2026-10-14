@@ -78,8 +78,8 @@ export const FIELD_FILL_LAYER: FillLayerSpecification = {
     // Configuración visual de la superficie.
     paint: {
         // Color base del área agrícola.
-        "fill-color": "#a3e635",
-        "fill-opacity": 0.16,
+        "fill-color": "#7ab71a",
+        "fill-opacity": 0.20,
         // Añadimos un pequeño contorno visual interno al relleno para mejorar la lectura.
         "fill-outline-color": "#a3e635",
     },
