@@ -7,7 +7,7 @@
 * Finalidad:
 * - definir el contrato visual que consume la UI;
 * - representar predicción, confianza, métricas y evidencia;
-* - diferenciar resultado real de backend vs fallback local;
+* - conservar el origen real del resultado;
 *
 * Regla:
 * - AI Service analiza imagen.
@@ -20,6 +20,7 @@ import type { CropType } from "../../crops/types/cropProfile.types";
 // predicciones visuales permitidas.
 export type VisionPrediction =
   | "HEALTHY"
+  | "VISUAL_ANOMALY"
   | "WATER_STRESS"
   | "CHLOROSIS"
   | "DRY_AREA"
@@ -34,15 +35,14 @@ export type VisionEvidenceStatus =
   | "CRITICAL";
 
 
-//Indica de donde salio el resultado mostrado , sea backend o fallback.
-export type VisionAnalysisSource = "BACKEND" | "FALLBACK";
+// El flujo de producción solo acepta resultados del backend.
+export type VisionAnalysisSource = "BACKEND";
 
 // Estados visuales dentro de la pagina , sirve para que la pantalla no quede en blanco.
 export type VisionAnalysisStatus =
   | "IDLE"
   | "ANALYZING"
   | "RESULT"
-  | "FALLBACK"
   | "ERROR";
 
 // métricas visuales explicables.
@@ -50,9 +50,14 @@ export type VisionAnalysisStatus =
 export interface VisualMetrics {
     readonly greenCoveragePercentage?: number | null;
     readonly dryAreaPercentage?: number | null;
-    readonly chlorosisSuspected?: boolean;
-    readonly leafSpotSuspected?: boolean;
-    readonly stressPatternDetected?: boolean;
+    readonly chlorosisSuspected?: boolean | null;
+    readonly leafSpotSuspected?: boolean | null;
+    readonly stressPatternDetected?: boolean | null;
+}
+
+export interface VisionTopClass {
+    readonly className: string;
+    readonly score: number;
 }
 
 // evidencia específica generada desde Vision AI.
@@ -74,7 +79,13 @@ export interface VisionInspection {
     readonly cropType: CropType;
 
     readonly prediction: VisionPrediction;
+    readonly detectedClass: string;
     readonly confidence: number;
+    readonly modelId: string;
+    readonly modelVersion: string;
+    readonly architecture: string;
+    readonly topClasses: ReadonlyArray<VisionTopClass>;
+    readonly inferenceMs: number;
     readonly visualMetrics: VisualMetrics;
 
     readonly explanation: string;
@@ -92,7 +103,7 @@ export interface VisionInspection {
 * Archivo requerido por el contrato multipart.
 *
 * imageFileName:
-* Permite mantener flujo simulado aunque no se suba archivo.
+* Nombre de la fotografía enviada con el archivo multipart.
 */
 export interface VisionAnalyzeRequest {
     readonly cropType: CropType;
@@ -104,7 +115,7 @@ export interface VisionAnalyzeRequest {
 
 
 //Resultado final que recibe la pagina.
-// no se coloca dentro de `VisionInspection`para poder indicar si la respuesta vino del backend o de fallback como respaldo 
+// La procedencia se conserva fuera del contrato de inspección.
 export interface VisionAnalysisResult {
     readonly inspection: VisionInspection;
     readonly source: VisionAnalysisSource;

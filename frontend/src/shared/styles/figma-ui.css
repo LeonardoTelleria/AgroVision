@@ -738,6 +738,68 @@
     height: 124px;
   }
 }
+
+/* =========================================
+   Reduced motion
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .agrovisionMain,
+  .sidebar,
+  .sidebar__toggle,
+  .sidebar__link,
+  .sidebar__brand,
+  .sidebar__weatherZone,
+  .sidebar__weatherBtn,
+  .topbar,
+  .topbar__searchContainer,
+  .topbar__actions,
+  .topbar__search,
+  .topbar__selectButton,
+  .topbar__iconButton,
+  .topbar__profileButton {
+    transition: none !important;
+  }
+
+
+  .topbar__popover {
+    animation: none !important;
+  }
+
+
+  .agrovisionApp.is-app-entering
+  .sidebar,
+
+  .agrovisionApp.is-app-entering
+  .sidebar__brand,
+
+  .agrovisionApp.is-app-entering
+  .sidebar__toggle,
+
+  .agrovisionApp.is-app-entering
+  .sidebar__link,
+
+  .agrovisionApp.is-app-entering
+  .sidebar__weatherZone,
+
+  .agrovisionApp.is-app-entering
+  .topbar,
+
+  .agrovisionApp.is-app-entering
+  .topbar__searchContainer,
+
+  .agrovisionApp.is-app-entering
+  .topbar__actions {
+    animation: none !important;
+
+    opacity: 1 !important;
+
+    transform: none !important;
+  }
+
+}
+
 @media (prefers-reduced-motion: reduce) {
   .avMetricCard,
   .avMetricCard__action span,

@@ -96,7 +96,7 @@ export interface RoverController {
 // =========================================
 
 // Conservamos la velocidad y la frecuencia visual originales.
-const ROVER_SPEED_KMH = 12;
+const ROVER_SPEED_KMH = 40;
 const ROVER_FRAME_TIME = 1000 / 30;
 
 // Asociamos un controlador vigente a cada mapa.
@@ -163,8 +163,8 @@ export const addRoverLayer = (map: Map, initialCoordinates: LngLat): boolean => 
         type: "circle",
         source: ROVER_SOURCE_ID,
         paint: {
-            "circle-radius": 7,
-            "circle-color": "#123C35",
+            "circle-radius": 8,
+            "circle-color": "#d4160c",
             "circle-stroke-color": "#FFFFFF",
             "circle-stroke-width": 2,
         },

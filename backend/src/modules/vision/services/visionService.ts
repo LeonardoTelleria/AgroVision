@@ -17,7 +17,7 @@ const AI_REQUEST_TIMEOUT_MS = 20_000;
 export class VisionServiceError extends Error {
   public constructor(
     message: string,
-    public readonly statusCode: 400 | 413 | 415 | 422 | 502 | 504 = 502,
+    public readonly statusCode: 400 | 413 | 415 | 422 | 502 | 503 | 504 = 502,
   ) {
     super(message);
     this.name = "VisionServiceError";
@@ -29,6 +29,11 @@ export class VisionService {
     request: VisionAnalyzeRequest,
   ): Promise<VisionAnalyzeResponse> {
     const aiResult = await requestAiAnalysis(request);
+    if (aiResult.cropType !== request.cropType) {
+      throw new VisionServiceError(
+        "El AI Service devolvió un modelo de cultivo distinto al solicitado.",
+      );
+    }
 
     return {
       inspectionId: randomUUID(),
@@ -36,7 +41,13 @@ export class VisionService {
       zoneId: request.zoneId,
       cropType: request.cropType,
       prediction: aiResult.prediction,
+      detectedClass: aiResult.detectedClass,
       confidence: aiResult.confidence,
+      modelId: aiResult.modelId,
+      modelVersion: aiResult.modelVersion,
+      architecture: aiResult.architecture,
+      topClasses: aiResult.topClasses,
+      inferenceMs: aiResult.inferenceMs,
       visualMetrics: aiResult.visualMetrics,
       explanation: aiResult.explanation,
       recommendedAction: aiResult.recommendation,
@@ -98,7 +109,7 @@ async function requestAiAnalysis(
     const detail = await readResponseDetail(response);
     const statusCode = getUpstreamStatusCode(response.status);
     throw new VisionServiceError(
-      `El AI Service rechazó el análisis (${response.status})${detail}.`,
+      `El AI Service rechazó el análisis (${response.status})${detail}${detail.endsWith(".") ? "" : "."}`,
       statusCode,
     );
   }
@@ -126,12 +137,13 @@ async function requestAiAnalysis(
 
 function getUpstreamStatusCode(
   statusCode: number,
-): 400 | 413 | 415 | 422 | 502 {
+): 400 | 413 | 415 | 422 | 502 | 503 {
   if (
     statusCode === 400 ||
     statusCode === 413 ||
     statusCode === 415 ||
-    statusCode === 422
+    statusCode === 422 ||
+    statusCode === 503
   ) {
     return statusCode;
   }

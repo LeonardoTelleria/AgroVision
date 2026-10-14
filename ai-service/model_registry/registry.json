@@ -18,8 +18,16 @@
       "preprocessing": {
         "inputSize": 224,
         "resizeSize": 256,
-        "mean": [0.485, 0.456, 0.406],
-        "std": [0.229, 0.224, 0.225]
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
       },
       "metrics": null,
       "trainedAt": null,
@@ -42,8 +50,16 @@
       "preprocessing": {
         "inputSize": 224,
         "resizeSize": 256,
-        "mean": [0.485, 0.456, 0.406],
-        "std": [0.229, 0.224, 0.225]
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
       },
       "metrics": null,
       "trainedAt": null,
@@ -68,13 +84,491 @@
       "preprocessing": {
         "inputSize": 224,
         "resizeSize": 256,
-        "mean": [0.485, 0.456, 0.406],
-        "std": [0.229, 0.224, 0.225]
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
       },
       "metrics": null,
       "trainedAt": null,
       "frameworkVersion": null,
       "checksum": null
+    },
+    {
+      "modelId": "agrovision-efficientnet-b0-corn",
+      "modelVersion": "corn-1.0.0",
+      "status": "EXPORTED",
+      "architecture": "efficientnet_b0",
+      "cropType": "CORN",
+      "classNames": [
+        "blight",
+        "common_rust",
+        "gray_leaf_spot",
+        "healthy"
+      ],
+      "datasetVersion": "v1",
+      "checkpointPath": "../checkpoints/CORN/corn-1.0.0/best.pt",
+      "preprocessing": {
+        "inputSize": 224,
+        "resizeSize": 256,
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
+      },
+      "metrics": {
+        "validation": {
+          "sampleCount": 628,
+          "accuracy": 0.9442675159235668,
+          "macroPrecision": 0.923542588470552,
+          "macroRecall": 0.9362244897959184,
+          "macroF1": 0.927604111821263,
+          "f1ByClass": {
+            "blight": 0.9046153846153846,
+            "common_rust": 0.9923664122137404,
+            "gray_leaf_spot": 0.8191489361702127,
+            "healthy": 0.9942857142857142
+          },
+          "perClass": {
+            "blight": {
+              "precision": 0.9607843137254902,
+              "recall": 0.8546511627906976,
+              "f1": 0.9046153846153846,
+              "support": 172
+            },
+            "common_rust": {
+              "precision": 0.9898477157360406,
+              "recall": 0.9948979591836735,
+              "f1": 0.9923664122137404,
+              "support": 196
+            },
+            "gray_leaf_spot": {
+              "precision": 0.7549019607843137,
+              "recall": 0.8953488372093024,
+              "f1": 0.8191489361702127,
+              "support": 86
+            },
+            "healthy": {
+              "precision": 0.9886363636363636,
+              "recall": 1.0,
+              "f1": 0.9942857142857142,
+              "support": 174
+            }
+          },
+          "confusionMatrix": [
+            [
+              147,
+              0,
+              24,
+              1
+            ],
+            [
+              0,
+              195,
+              1,
+              0
+            ],
+            [
+              6,
+              2,
+              77,
+              1
+            ],
+            [
+              0,
+              0,
+              0,
+              174
+            ]
+          ],
+          "loss": 0.38769997703801296
+        },
+        "test": {
+          "classification": {
+            "sampleCount": 628,
+            "accuracy": 0.9522292993630573,
+            "macroPrecision": 0.937511678604796,
+            "macroRecall": 0.9476447555766492,
+            "macroF1": 0.9419606388534465,
+            "f1ByClass": {
+              "blight": 0.9208211143695014,
+              "common_rust": 0.9740932642487047,
+              "gray_leaf_spot": 0.8729281767955801,
+              "healthy": 1.0
+            },
+            "perClass": {
+              "blight": {
+                "precision": 0.9289940828402367,
+                "recall": 0.9127906976744186,
+                "f1": 0.9208211143695014,
+                "support": 172
+              },
+              "common_rust": {
+                "precision": 0.9894736842105263,
+                "recall": 0.9591836734693877,
+                "f1": 0.9740932642487047,
+                "support": 196
+              },
+              "gray_leaf_spot": {
+                "precision": 0.8315789473684211,
+                "recall": 0.9186046511627907,
+                "f1": 0.8729281767955801,
+                "support": 86
+              },
+              "healthy": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1": 1.0,
+                "support": 174
+              }
+            },
+            "confusionMatrix": [
+              [
+                157,
+                2,
+                13,
+                0
+              ],
+              [
+                5,
+                188,
+                3,
+                0
+              ],
+              [
+                7,
+                0,
+                79,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                174
+              ]
+            ],
+            "loss": 0.18732657841151687
+          },
+          "latency": {
+            "samples": 50,
+            "meanMs": 55.68635600066045,
+            "p50Ms": 52.9813999964972,
+            "p95Ms": 72.05806000711164,
+            "minMs": 43.576199997914955,
+            "maxMs": 83.09100000769831
+          }
+        }
+      },
+      "trainedAt": "2026-10-09T12:46:35.984560+00:00",
+      "frameworkVersion": {
+        "torch": "2.13.0+cpu",
+        "torchvision": "0.28.0+cpu"
+      },
+      "checksum": "413ed8b4a664c47aec86f1bfd3d61f8465346df420ffea893c5f99ad8e0c8911",
+      "export": {
+        "schemaVersion": "1.0",
+        "modelId": "agrovision-efficientnet-b0-corn",
+        "modelVersion": "corn-1.0.0",
+        "architecture": "efficientnet_b0",
+        "cropType": "CORN",
+        "classNames": [
+          "blight",
+          "common_rust",
+          "gray_leaf_spot",
+          "healthy"
+        ],
+        "datasetVersion": "v1",
+        "format": "torchscript",
+        "artifactPath": "model.torchscript.pt",
+        "preprocessing": {
+          "inputSize": 224,
+          "resizeSize": 256,
+          "mean": [
+            0.485,
+            0.456,
+            0.406
+          ],
+          "std": [
+            0.229,
+            0.224,
+            0.225
+          ]
+        },
+        "frameworkVersion": {
+          "torch": "2.14.0+cpu",
+          "torchvision": "0.29.0+cpu"
+        },
+        "checkpointChecksum": "413ed8b4a664c47aec86f1bfd3d61f8465346df420ffea893c5f99ad8e0c8911",
+        "artifactChecksum": "5c6b9850d3463ae4117661301c429692908c1378be3ca11285a431b313365a0f",
+        "exportedAt": "2026-10-09T15:02:14.732459+00:00"
+      }
+    },
+    {
+      "modelId": "agrovision-efficientnet-b0-orange",
+      "modelVersion": "orange-1.0.0",
+      "status": "EXPORTED",
+      "architecture": "efficientnet_b0",
+      "cropType": "ORANGE",
+      "classNames": [
+        "black_spot",
+        "canker",
+        "greening",
+        "healthy",
+        "melanose"
+      ],
+      "datasetVersion": "v1",
+      "checkpointPath": "../checkpoints/ORANGE/orange-1.0.0/best.pt",
+      "preprocessing": {
+        "inputSize": 224,
+        "resizeSize": 256,
+        "mean": [
+          0.485,
+          0.456,
+          0.406
+        ],
+        "std": [
+          0.229,
+          0.224,
+          0.225
+        ]
+      },
+      "metrics": {
+        "validation": {
+          "sampleCount": 93,
+          "accuracy": 0.9032258064516129,
+          "macroPrecision": 0.9400000000000001,
+          "macroRecall": 0.9348089330024814,
+          "macroF1": 0.9357117943096318,
+          "f1ByClass": {
+            "black_spot": 0.8571428571428571,
+            "canker": 0.9361702127659575,
+            "greening": 0.8852459016393444,
+            "healthy": 1.0,
+            "melanose": 1.0
+          },
+          "perClass": {
+            "black_spot": {
+              "precision": 0.8,
+              "recall": 0.9230769230769231,
+              "f1": 0.8571428571428571,
+              "support": 26
+            },
+            "canker": {
+              "precision": 1.0,
+              "recall": 0.88,
+              "f1": 0.9361702127659575,
+              "support": 25
+            },
+            "greening": {
+              "precision": 0.9,
+              "recall": 0.8709677419354839,
+              "f1": 0.8852459016393444,
+              "support": 31
+            },
+            "healthy": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 9
+            },
+            "melanose": {
+              "precision": 1.0,
+              "recall": 1.0,
+              "f1": 1.0,
+              "support": 2
+            }
+          },
+          "confusionMatrix": [
+            [
+              24,
+              0,
+              2,
+              0,
+              0
+            ],
+            [
+              2,
+              22,
+              1,
+              0,
+              0
+            ],
+            [
+              4,
+              0,
+              27,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              9,
+              0
+            ],
+            [
+              0,
+              0,
+              0,
+              0,
+              2
+            ]
+          ],
+          "loss": 0.7540296431510679
+        },
+        "test": {
+          "classification": {
+            "sampleCount": 92,
+            "accuracy": 0.9239130434782609,
+            "macroPrecision": 0.8737777777777778,
+            "macroRecall": 0.9353460159911773,
+            "macroF1": 0.8976948593645109,
+            "f1ByClass": {
+              "black_spot": 0.9019607843137256,
+              "canker": 0.9795918367346939,
+              "greening": 0.9180327868852459,
+              "healthy": 0.8888888888888888,
+              "melanose": 0.8
+            },
+            "perClass": {
+              "black_spot": {
+                "precision": 0.92,
+                "recall": 0.8846153846153846,
+                "f1": 0.9019607843137256,
+                "support": 26
+              },
+              "canker": {
+                "precision": 0.96,
+                "recall": 1.0,
+                "f1": 0.9795918367346939,
+                "support": 24
+              },
+              "greening": {
+                "precision": 0.9333333333333333,
+                "recall": 0.9032258064516129,
+                "f1": 0.9180327868852459,
+                "support": 31
+              },
+              "healthy": {
+                "precision": 0.8888888888888888,
+                "recall": 0.8888888888888888,
+                "f1": 0.8888888888888888,
+                "support": 9
+              },
+              "melanose": {
+                "precision": 0.6666666666666666,
+                "recall": 1.0,
+                "f1": 0.8,
+                "support": 2
+              }
+            },
+            "confusionMatrix": [
+              [
+                23,
+                1,
+                2,
+                0,
+                0
+              ],
+              [
+                0,
+                24,
+                0,
+                0,
+                0
+              ],
+              [
+                2,
+                0,
+                28,
+                1,
+                0
+              ],
+              [
+                0,
+                0,
+                0,
+                8,
+                1
+              ],
+              [
+                0,
+                0,
+                0,
+                0,
+                2
+              ]
+            ],
+            "loss": 0.4091351770836374
+          },
+          "latency": {
+            "samples": 50,
+            "meanMs": 1139.6610320001491,
+            "p50Ms": 269.3455999906291,
+            "p95Ms": 5396.90785000566,
+            "minMs": 126.58779999765102,
+            "maxMs": 22820.16719999956
+          }
+        }
+      },
+      "trainedAt": "2026-10-09T13:12:38.149427+00:00",
+      "frameworkVersion": {
+        "torch": "2.13.0+cpu",
+        "torchvision": "0.28.0+cpu"
+      },
+      "checksum": "052d9d89ffa5a279e8d23f244c493affac04bb1873ac906c981987232c1344c8",
+      "export": {
+        "schemaVersion": "1.0",
+        "modelId": "agrovision-efficientnet-b0-orange",
+        "modelVersion": "orange-1.0.0",
+        "architecture": "efficientnet_b0",
+        "cropType": "ORANGE",
+        "classNames": [
+          "black_spot",
+          "canker",
+          "greening",
+          "healthy",
+          "melanose"
+        ],
+        "datasetVersion": "v1",
+        "format": "torchscript",
+        "artifactPath": "model.torchscript.pt",
+        "preprocessing": {
+          "inputSize": 224,
+          "resizeSize": 256,
+          "mean": [
+            0.485,
+            0.456,
+            0.406
+          ],
+          "std": [
+            0.229,
+            0.224,
+            0.225
+          ]
+        },
+        "frameworkVersion": {
+          "torch": "2.14.0+cpu",
+          "torchvision": "0.29.0+cpu"
+        },
+        "checkpointChecksum": "052d9d89ffa5a279e8d23f244c493affac04bb1873ac906c981987232c1344c8",
+        "artifactChecksum": "cae090ea2aa160fa01be210f1a94c980aa7c68ab30367314ad268a75235dd30d",
+        "exportedAt": "2026-10-09T14:58:17.329637+00:00"
+      }
     }
   ]
 }

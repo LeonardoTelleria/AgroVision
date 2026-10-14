@@ -100,10 +100,10 @@ export const createTrajectoryLayer = (): LineLayerSpecification => {
             // Grosor adaptativo por zoom.
             "line-width": [
                 "interpolate", ["linear"], ["zoom"],
-                8, 2,
-                12, 3,
-                16, 4,
-                20, 5,
+                8, 3,
+                12, 4,
+                16, 5,
+                20, 6,
             ],
 
             // Opacidad principal.

@@ -1,19 +1,4 @@
-/** 
- * =========================================
- * Vision AI Services
- * ========================================= 
- * 
- * Servicio Frt para el análisis visual 
- * 
- * Finalidad:
- * - ocultar a visionAiPage si el resultado viene ya sea de bakcend o del mock local
- * - preparar POST /api/vision/analyze;
- * - mantener la UI desacoplada del mock.
- *
- * Regla:
- * La página no debe saber si el resultado viene de backend o mock ya que esa decisión se controla aquí.
-*/
-
+/** Cliente real React -> Express para Vision AI. No genera clasificaciones ficticias. */
 
 import { API_ENDPOINTS } from "../../../shared/api/endpoints";
 import type {
@@ -23,19 +8,14 @@ import type {
     VisionEvidenceItem,
     VisionInspection,
     VisionPrediction,
+    VisionTopClass,
 } from "../types/visionAI.types";
-import { analyzeVisionMock } from "./visionAIMock";
 
 
-// endpoint oficial que backend deberá entregar, documentado en shared/api/endpoints.ts
 export const VISION_ANALYSIS_ENDPOINT = API_ENDPOINTS.visionAnalyze;
+const VISION_REQUEST_TIMEOUT_MS = 30_000;
 
-/**
- * Forma flexible esperada desde backend.
- *
- * Se permite VisionInspection directo o envuelto en { inspection }.
- * Esto evita romper la UI si backend cambia ligeramente el payload inicial.
-*/
+
 export class VisionRequestError extends Error {
     public constructor(message: string) {
         super(message);
@@ -43,125 +23,62 @@ export class VisionRequestError extends Error {
     }
 }
 
-/**
- * Aqui se ejecuta el análisis visual.
- * 
- * Funcionamiento:
- * - intenta enviar la request al backend;
- * - si backend responde bien, adapta el resultado;
- * - si backend falla, usa fallback local;
- * - nunca deja la pantalla rota o en blanco por un error de red.  
-*/
 
 export async function analyzeVisionImage(request: VisionAnalyzeRequest): Promise<VisionAnalysisResult> {
+    let response: Response;
     try {
-        // Se construye payload compatible con subida real o simulada.
-        const payload = buildVisionPayload(request);
-
-        // Se intenta consumir backend real.
-        const response = await fetch(VISION_ANALYSIS_ENDPOINT, {
-        method: "POST",
-        body: payload,
+        response = await fetch(VISION_ANALYSIS_ENDPOINT, {
+            method: "POST",
+            body: buildVisionPayload(request),
+            signal: AbortSignal.timeout(VISION_REQUEST_TIMEOUT_MS),
         });
-
-        // Si backend responde 404, 500 o error HTTP, usamos fallback.
-        if (isClientRequestError(response.status)) {
-            throw new VisionRequestError(await readApiErrorMessage(response));
-        }
-
-        if (!response.ok) {
-            return buildFallbackResult(request, `Backend no disponible. Estado HTTP: ${response.status}.`);
-        }
-
-        const payloadJson: unknown = await response.json();
-
-        if (!isApiResponse(payloadJson)) {
-            return buildFallbackResult(
-                request,
-                "Backend respondió con un ApiResponse inválido.",
-            );
-        }
-
-        // El contrato exige success y data.
-        if (!payloadJson.success || !payloadJson.data) {
-            return buildFallbackResult(
-                request, "Backend respondió sin data válida para Vision AI."
-            );
-        }
-
-        // Se extrae VisionInspection aunque backend lo devuelva envuelto.
-        const inspection = extractVisionInspection(payloadJson.data);
-
-        // Si no se pudo normalizar, usamos fallback seguro.
-        if (!inspection) {
-            return buildFallbackResult(request, "La respuesta del backend no coincide con VisionInspection.");
-        }
-
-        return {
-            // Se adapta para evitar mutaciones accidentales.
-            inspection: adaptVisionInspection(inspection),
-            // Indica que la fuente fue backend real.
-            source: "BACKEND",
-            // No hay razón de fallback cuando backend respondió correctamente.
-            fallbackReason: null,
-        };
     } catch (error: unknown) {
-        if (error instanceof VisionRequestError) {
-            throw error;
+        if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+            throw new VisionRequestError("El análisis agotó el tiempo máximo. Puedes volver a intentarlo.");
         }
-
-        // Error de red, CORS, backend apagado o JSON inválido.
-        return buildFallbackResult(
-            request, "No se pudo conectar con el servicio backend. Se usó fallback local en su lugar."
-        );
+        throw new VisionRequestError("No fue posible conectar con Vision AI. Verifica los servicios e inténtalo de nuevo.");
     }
+    if (!response.ok) {
+        throw new VisionRequestError(await readApiErrorMessage(response));
+    }
+    let payloadJson: unknown;
+    try {
+        payloadJson = await response.json();
+    } catch {
+        throw new VisionRequestError("El backend devolvió una respuesta no válida.");
+    }
+    if (!isApiResponse(payloadJson) || !payloadJson.success || !payloadJson.data) {
+        throw new VisionRequestError("El backend respondió sin un resultado válido de Vision AI.");
+    }
+    const inspection = extractVisionInspection(payloadJson.data);
+    if (!inspection) {
+        throw new VisionRequestError("La respuesta real no coincide con el contrato de Vision AI.");
+    }
+    return {
+        inspection: adaptVisionInspection(inspection),
+        source: "BACKEND",
+        fallbackReason: null,
+    };
 }
 
-/**
- * Construye el payload para POST /api/vision/analyze.
- *
- * Funcionamiento:
- * - usa FormData porque Vision AI puede requerir imagen;
- * - adjunta siempre la imagen requerida por el contrato;
- * - conserva imageFileName como metadato de trazabilidad.
-*/
+
 function buildVisionPayload(request: VisionAnalyzeRequest): FormData {
     const formData = new FormData();
-
-    // Cultivo seleccionado por la UI.
     formData.append("cropType", request.cropType);
-    // Field del caso demo o del flujo real.
     formData.append("fieldId", request.fieldId);
-    // zoneId puede venir null/undefined; de modo que solo se envía si existe.
-    if (request.zoneId) {
-        formData.append("zoneId", request.zoneId);
-    }
-
-    // Nombre de archivo para trazabilidad visual.
+    if (request.zoneId) formData.append("zoneId", request.zoneId);
     formData.append("imageFileName", request.imageFileName);
     formData.append("image", request.imageFile);
-
     return formData;
 }
 
-/**
- * Extrae VisionInspection desde el payload del backend.
- *
- * Soporta dos formas:
- * - data = VisionInspection
- * - data = { inspection: VisionInspection }
- */
+
 function extractVisionInspection(payload: unknown): VisionInspection | null {
-  // Caso 1: backend devuelve VisionInspection directo.
-    if (isVisionInspection(payload)) {
-        return payload;
-    }
-    // Caso 2: backend devuelve objeto envuelto.
-    if (isRecord(payload) && isVisionInspection(payload.inspection)) {
-        return payload.inspection;
-    }
+    if (isVisionInspection(payload)) return payload;
+    if (isRecord(payload) && isVisionInspection(payload.inspection)) return payload.inspection;
     return null;
 }
+
 
 function isApiResponse(payload: unknown): payload is ApiResponse<unknown> {
     return isRecord(payload)
@@ -172,25 +89,35 @@ function isApiResponse(payload: unknown): payload is ApiResponse<unknown> {
         && typeof payload.timestamp === "string";
 }
 
-function isVisionInspection(payload: unknown): payload is VisionInspection {
-    if (!isRecord(payload) || !isRecord(payload.visualMetrics)) {
-        return false;
-    }
 
+function isVisionInspection(payload: unknown): payload is VisionInspection {
+    if (!isRecord(payload) || !isRecord(payload.visualMetrics)) return false;
     return typeof payload.inspectionId === "string"
         && typeof payload.fieldId === "string"
         && (typeof payload.zoneId === "string" || payload.zoneId === null)
         && isCropType(payload.cropType)
         && isVisionPrediction(payload.prediction)
+        && typeof payload.detectedClass === "string"
+        && payload.detectedClass.length > 0
         && typeof payload.confidence === "number"
         && Number.isFinite(payload.confidence)
         && payload.confidence >= 0
         && payload.confidence <= 1
+        && typeof payload.modelId === "string"
+        && typeof payload.modelVersion === "string"
+        && typeof payload.architecture === "string"
+        && Array.isArray(payload.topClasses)
+        && payload.topClasses.length >= 1
+        && payload.topClasses.length <= 3
+        && payload.topClasses.every(isTopClass)
+        && typeof payload.inferenceMs === "number"
+        && Number.isFinite(payload.inferenceMs)
+        && payload.inferenceMs >= 0
         && isNullablePercentage(payload.visualMetrics.greenCoveragePercentage)
         && isNullablePercentage(payload.visualMetrics.dryAreaPercentage)
-        && typeof payload.visualMetrics.chlorosisSuspected === "boolean"
-        && typeof payload.visualMetrics.leafSpotSuspected === "boolean"
-        && typeof payload.visualMetrics.stressPatternDetected === "boolean"
+        && isNullableBoolean(payload.visualMetrics.chlorosisSuspected)
+        && isNullableBoolean(payload.visualMetrics.leafSpotSuspected)
+        && isNullableBoolean(payload.visualMetrics.stressPatternDetected)
         && typeof payload.explanation === "string"
         && typeof payload.recommendedAction === "string"
         && Array.isArray(payload.evidence)
@@ -198,25 +125,42 @@ function isVisionInspection(payload: unknown): payload is VisionInspection {
         && typeof payload.createdAt === "string";
 }
 
-function isCropType(payload: unknown): boolean {
-    return payload === "CORN"
-        || payload === "RED_BEAN"
-        || payload === "CASSAVA"
-        || payload === "QUEQUISQUE"
-        || payload === "ORANGE"
-        || payload === "SORGHUM"
-        || payload === "PEANUT"
-        || payload === "GENERAL";
+
+function isTopClass(payload: unknown): payload is VisionTopClass {
+    return isRecord(payload)
+        && typeof payload.className === "string"
+        && typeof payload.score === "number"
+        && Number.isFinite(payload.score)
+        && payload.score >= 0
+        && payload.score <= 1;
 }
+
+
+function isCropType(payload: unknown): boolean {
+    return payload === "CORN" || payload === "RED_BEAN" || payload === "CASSAVA"
+        || payload === "QUEQUISQUE" || payload === "ORANGE" || payload === "SORGHUM"
+        || payload === "PEANUT" || payload === "GENERAL";
+}
+
+
+function isVisionPrediction(payload: unknown): payload is VisionPrediction {
+    return payload === "HEALTHY" || payload === "VISUAL_ANOMALY" || payload === "WATER_STRESS"
+        || payload === "CHLOROSIS" || payload === "DRY_AREA" || payload === "LEAF_SPOT"
+        || payload === "UNKNOWN";
+}
+
 
 function isNullablePercentage(payload: unknown): boolean {
     return payload === null || (
-        typeof payload === "number"
-        && Number.isFinite(payload)
-        && payload >= 0
-        && payload <= 100
+        typeof payload === "number" && Number.isFinite(payload) && payload >= 0 && payload <= 100
     );
 }
+
+
+function isNullableBoolean(payload: unknown): boolean {
+    return payload === null || typeof payload === "boolean";
+}
+
 
 function isVisionEvidenceItem(payload: unknown): payload is VisionEvidenceItem {
     return isRecord(payload)
@@ -228,89 +172,41 @@ function isVisionEvidenceItem(payload: unknown): payload is VisionEvidenceItem {
         && typeof payload.explanation === "string";
 }
 
+
 function isEvidenceStatus(payload: unknown): boolean {
-    return payload === "NORMAL"
-        || payload === "WATCH"
-        || payload === "WARNING"
-        || payload === "CRITICAL";
+    return payload === "NORMAL" || payload === "WATCH" || payload === "WARNING" || payload === "CRITICAL";
 }
 
+
 function isEvidenceValue(payload: unknown): boolean {
-    return payload === null
-        || typeof payload === "string"
-        || typeof payload === "boolean"
+    return payload === null || typeof payload === "string" || typeof payload === "boolean"
         || (typeof payload === "number" && Number.isFinite(payload));
 }
 
-function isVisionPrediction(payload: unknown): payload is VisionPrediction {
-    return payload === "HEALTHY"
-        || payload === "WATER_STRESS"
-        || payload === "CHLOROSIS"
-        || payload === "DRY_AREA"
-        || payload === "LEAF_SPOT"
-        || payload === "UNKNOWN";
-}
 
 function isRecord(payload: unknown): payload is Record<string, unknown> {
     return typeof payload === "object" && payload !== null;
 }
 
-function isClientRequestError(statusCode: number): boolean {
-    return statusCode === 400
-        || statusCode === 413
-        || statusCode === 415
-        || statusCode === 422;
-}
 
-async function readApiErrorMessage(response: Response): Promise<string> {
-    try {
-        const payload: unknown = await response.json();
-
-        if (isApiResponse(payload) && payload.error) {
-            return payload.error;
-        }
-    } catch {
-        // La respuesta inválida se sustituye por un mensaje controlado.
-    }
-
-    return `La imagen no pudo procesarse. Estado HTTP: ${response.status}.`;
-}
-
-
-/**
- * Construye resultado fallback.
- *
- * Funcionamiento:
- * - genera un VisionInspection local usando analyzeVisionMock;
- * - adapta el resultado;
- * - marca source como FALLBACK;
- * - conserva reason para mostrar aviso en UI.
-*/
-function buildFallbackResult( request: VisionAnalyzeRequest, reason: string ): VisionAnalysisResult {
-    const fallbackInspection = analyzeVisionMock(request);
-
-    return {
-        inspection: adaptVisionInspection(fallbackInspection),
-        source: "FALLBACK",
-        fallbackReason: reason,
-    };
-}
-
-/**
- * Normaliza VisionInspection antes de enviarlo a la UI.
- *
- * Funcionamiento:
- * - clona visualMetrics;
- * - clona evidence;
- * - evita que componentes muten referencias originales.
-*/
-function  adaptVisionInspection(source: VisionInspection): VisionInspection {
+function adaptVisionInspection(source: VisionInspection): VisionInspection {
     return {
         ...source,
-        visualMetrics: {
-            ...source.visualMetrics,
-        },
+        visualMetrics: { ...source.visualMetrics },
+        topClasses: source.topClasses.map((item) => ({ ...item })),
         evidence: [...source.evidence],
     };
 }
 
+
+async function readApiErrorMessage(response: Response): Promise<string> {
+    try {
+        const payload: unknown = await response.json();
+        if (isApiResponse(payload) && payload.error) return payload.error;
+        if (isRecord(payload) && typeof payload.detail === "string") return payload.detail;
+    } catch {
+        // Se usa el mensaje controlado de abajo.
+    }
+    if (response.status === 503) return "El modelo seleccionado no está disponible en Vision AI.";
+    return `No fue posible completar el análisis. Estado HTTP: ${response.status}.`;
+}

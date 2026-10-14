@@ -129,13 +129,43 @@ export function DashboardPage() {
       subtitle: 'Lote 3C • Trigo',
       timeLabel: 'Ayer, 18:30',
     },
+    {
+    icon: hidricStressIcon, // Cambia aquí el icono
+    circleClass: 'alertIconCircle alertIconCircle--water', // Cambia aquí el color
+    subtitle: 'Lote 7B • Soja',
+    timeLabel: 'Hoy, 07:40',
+  },
   ];
 
   /* Muestra como máximo tres alertas críticas. */
-  const criticalAlerts = summary.alerts.criticalAlerts.slice(0, 3);
+  
+/**
+ * Alertas críticas del Dashboard.
+ *
+ * Si PostgreSQL devuelve solamente una alerta,
+ * agregamos otra simulada para completar el diseño.
+ *
+ * Si ya existen dos o más alertas reales,
+ * no añadimos la simulada.
+ */
+const criticalAlerts = [
+  ...summary.alerts.criticalAlerts.slice(0, 3),
+
+  ...(summary.alerts.criticalAlerts.length === 1
+    ? [
+        {
+          ...summary.alerts.criticalAlerts[0],
+          id: "alert-dashboard-simulada-002",
+          title: "Riesgo de enfermedad foliar (simulado)",
+          message: "Se recomienda realizar una inspección preventiva del cultivo.",
+        },
+      ]
+    : []),
+].slice(0, 3);
+               
 
   return (
-    <section className="avScreen dashboardFigma">
+    <section className="avScreen dashboardFigma">                              
       <h1 className="avScreenTitle">Resumen del cultivo</h1>
 
       <section className="avMetricGrid">
@@ -186,8 +216,6 @@ export function DashboardPage() {
             <div className="dashboardGisPanel__map">
               <MappingGIS
                 variant="compact"
-                trajectory={null}
-                animateRover={false}
                 selectedZoneId={selectedMapZone?.zoneId ?? zoneId}
                 onZoneSelect={setSelectedMapZone}
               >
@@ -280,7 +308,7 @@ export function DashboardPage() {
               <div className="zoneInsightRows">
                 <ZoneInsightDonut criticalZones={3} totalZones={18} />
                 <div className="zoneInsightRows avZoneInsightRowsExtended">
-                  <InfoRow label="Total Zonas" value="18" />
+          
                   <InfoRow label="Score de riesgo" value="5" />{' '}
                   {/* highlight activa el color de riesgo */}
                   <InfoRow label="Evidencia principal" value="10" />
@@ -729,11 +757,11 @@ function SatelliteMetric({
     NDWI: [
       { value: 0.31 },
       { value: 0.3 },
-      { value: 0.35 },
-      { value: 0.33 },
-      { value: 0.4 },
+      { value: 0.10 },
       { value: 0.42 },
-      { value: 0.45 },
+      { value: 0.4 },
+      { value: 0.11 },
+      { value: 0.9 },
     ],
     GNDVI: [
       { value: 0.13 },

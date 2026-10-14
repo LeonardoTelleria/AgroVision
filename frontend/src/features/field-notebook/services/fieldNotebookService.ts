@@ -18,220 +18,297 @@
  * La UI nunca consume mocks directamente.
  */
 
+
+/**
+ * =========================================
+ * AgroVision - Field Notebook Service
+ * =========================================
+ *
+ * Lectura:
+ * PostgreSQL -> Prisma -> Express -> NotebookPage
+ *
+ * Transforma las entradas persistidas al
+ * formato de la interfaz existente.
+ *
+ * No utiliza registros simulados para GET.
+ */
+
 import { API_ENDPOINTS } from "../../../shared/api/endpoints";
-import spottedPlant from "../../../assets/images/image-mock-plant2.jpg";
-import irrigationImage from "../../../assets/images/riegoPorGoteo.png";
-import cropImage from "../../../assets/images/image-mock-plant4.png";
-import monitoringImage from "../../../assets/images/monitoreoMapp.png";
-import pestDetected from "../../../assets/images/plagaDetectada.png";
-import reportFert from "../../../assets/images/reporteFert.png";
-import planManejo from "../../../assets/images/planManejo.png";
+import { apiGet } from "../../../shared/api/apiClient";
+
 import type {
   ApiResponse,
   FieldNotebookData,
   FieldNotebookRecord,
+  FieldNotebookEventType,
   FieldObservationForm,
+  FieldNotebookEvidenceFile,
 } from "../types/fieldNotebook.types";
 
-const evidencePreviewByName: Readonly<Record<string, string>> = {
-  "Manchas-hojas.jpg": spottedPlant,
-  "Riego-zone-03.jpg": irrigationImage,
-  "Estado-cultivo.jpg": cropImage,
-  "Monitoreo-NDVI.jpg": monitoringImage,
-  "Plaga detectada.jpg": pestDetected,
-  "Plan-Manejo.pdf": planManejo,
-  "Reporte-Fert.pdf": reportFert,
-};
+/**
+ * Contrato de entrada del backend.
+ *
+ * El campo cropType procede de la relación
+ * real con la tabla crops.
+ */
+interface PersistedNotebookEntry {
+  readonly id: string;
+  readonly fieldId: string;
+  readonly zoneId: string;
+  readonly cropId: string;
+  readonly cropType: string;
+  readonly activityType: string;
+  readonly description: string;
+  readonly problemObserved: string;
+  readonly actionTaken: string;
+  readonly responsibleUser: string;
+  readonly createdAt: string;
+  readonly evidence?: ReadonlyArray<{
+    readonly id: string;
+    readonly type: string;
+    readonly description: string;
+    readonly url?: string;
+  }>;
+}
+
+const NOTEBOOK_ENDPOINT = API_ENDPOINTS.fieldNotebook;
 
 /**
- * Endpoint centralizado.
- *
- * No escribimos "/api/field-notebook"
- * directamente dentro de páginas o componentes.
+ * Comprueba la estructura mínima de una
+ * entrada recibida desde PostgreSQL.
  */
-const FIELD_NOTEBOOK_ENDPOINT = API_ENDPOINTS.fieldNotebook;
-
-/**
- * Fallback visual alineado con el caso demo.
- *
- * Se utiliza únicamente cuando backend
- * todavía no responde.
- */
-const fieldNotebookFallback: FieldNotebookData = {
-  totalRecords: 4,
-  pendingObservations: 1,
-  appliedActions: 3,
-  registeredZones: 2,
-  registeredEvidence: 4,
-
-  records: [
-    {
-      id: "notebook-001",
-      createdAt: "2026-06-29T15:00:00.000Z",
-      responsible: "Juan Pérez",
-      fieldId: "field-001",
-      zoneId: "zone-03",
-      cropType: "ORANGE",
-      eventType: "INSPECTION",
-      evidenceCount: 2,
-      note: "Se detectan manchas y reducción localizada de vigor.",
-    },
-    {
-      id: "notebook-002",
-      createdAt: "2026-06-30T17:00:00.000Z",
-      responsible: "María López",
-      fieldId: "field-001",
-      zoneId: "zone-03",
-      cropType: "ORANGE",
-      eventType: "IRRIGATION",
-      evidenceCount: 1,
-      note: "Riego correctivo aplicado en la zona crítica.",
-    },
-    {
-      id: "notebook-003",
-      createdAt: "2026-07-01T08:00:00.000Z",
-      responsible: "Juan Pérez",
-      fieldId: "field-001",
-      zoneId: "zone-03",
-      cropType: "ORANGE",
-      eventType: "FERTILIZATION",
-      evidenceCount: 1,
-      note: "Aplicación registrada y pendiente de seguimiento.",
-    },
-    {
-      id: "notebook-004",
-      createdAt: "2026-07-01T10:15:00.000Z",
-      responsible: "Ana Torres",
-      fieldId: "field-001",
-      zoneId: "zone-02",
-      cropType: "ORANGE",
-      eventType: "PEST_CONTROL",
-      evidenceCount: 2,
-      note: "Aplicación de insecticida documentada.",
-    },
-  ],
-
-  linkedItems: [
-    {
-      id: "alert-001",
-      type: "ALERT",
-      title: "Anomalía visual detectada",
-      zoneId: "zone-03",
-      priority: "HIGH",
-      createdAt: "2026-06-29T15:10:00.000Z",
-    },
-    {
-      id: "recommendation-001",
-      type: "RECOMMENDATION",
-      title: "Verificar visualmente la zona crítica",
-      zoneId: "zone-03",
-      priority: "MEDIUM",
-      createdAt: "2026-06-29T15:20:00.000Z",
-    },
-    {
-      id: "report-zone-03",
-      type: "REPORT",
-      title: "Reporte prescriptivo de zone-03",
-      zoneId: "zone-03",
-      priority: "LOW",
-      createdAt: "2026-06-29T16:00:00.000Z",
-    },
-  ],
-
-  evidenceFiles: [
-    {
-      id: "evidence-001",
-      type: "IMAGE",
-      name: "Hojas Manchadas.jpg",
-      sizeLabel: "1.2 MB",
-      previewUrl: spottedPlant,
-    },
-    {
-      id: "evidence-002",
-      type: "IMAGE",
-      name: "Plaga detectada.jpg",
-      sizeLabel: "1.1 MB",
-      previewUrl: pestDetected,
-    },
-    {
-      id: "evidence-003",
-      type: "IMAGE",
-      name: "Riego por goteo.jpg",
-      sizeLabel: "2.3 MB",
-      previewUrl: irrigationImage,
-    },
-    {
-      id: "evidence-004",
-      type: "PDF",
-      name: "Reporte-prescriptivo.pdf",
-      sizeLabel: "580 KB",
-      previewUrl: reportFert,
-    },
-    {
-      id: "evidence-005",
-      type: "IMAGE",
-      name: "Monitoreo-NDVI.jpg",
-      sizeLabel: "1.6 MB",
-      previewUrl: monitoringImage,
-    },
-    {
-      id: "evidence-006",
-      type: "PDF",
-      name: "Plan-de-manejo.pdf",
-      sizeLabel: "1.4 MB",
-      previewUrl: planManejo,
-    },
-  ],
-};
-
-/**
- * Obtiene información del Cuaderno de campo.
- *
- * 1. intenta backend;
- * 2. valida HTTP;
- * 3. valida ApiResponse;
- * 4. usa fallback si el endpoint todavía no responde.
- */
-export async function getFieldNotebookData(): Promise<FieldNotebookData> {
-  try {
-    const response = await fetch(FIELD_NOTEBOOK_ENDPOINT);
-
-    if (!response.ok) {
-      return cloneFallbackData();
-    }
-
-    const json = (await response.json()) as ApiResponse<FieldNotebookData>;
-
-    if (!json.success || !json.data) {
-      return cloneFallbackData();
-    }
-
-    return {
-      ...json.data,
-      evidenceFiles: json.data.evidenceFiles.map((file) => ({
-        ...file,
-        previewUrl: file.previewUrl ?? evidencePreviewByName[file.name] ?? null,
-      })),
-    };
-  } catch {
-    return cloneFallbackData();
+function isPersistedEntry(
+  value: unknown,
+): value is PersistedNotebookEntry {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value)
+  ) {
+    return false;
   }
+
+  const entry = value as Record<string, unknown>;
+
+  return (
+    typeof entry.id === "string" &&
+    typeof entry.fieldId === "string" &&
+    typeof entry.zoneId === "string" &&
+    typeof entry.cropId === "string" &&
+    typeof entry.cropType === "string" &&
+    typeof entry.activityType === "string" &&
+    typeof entry.description === "string" &&
+    typeof entry.problemObserved === "string" &&
+    typeof entry.actionTaken === "string" &&
+    typeof entry.responsibleUser === "string" &&
+    typeof entry.createdAt === "string" &&
+    (
+      entry.evidence === undefined ||
+      Array.isArray(entry.evidence)
+    )
+  );
 }
 
 /**
- * Registra una observación.
- *
- * Se intenta POST real.
- * Si backend aún no está disponible se genera
- * un registro local compatible para mantener la demo funcional.
+ * Adapta categorías adicionales de la BD
+ * a los cuatro tipos visuales soportados
+ * actualmente por NotebookPage.
  */
+function mapEventType(
+  activityType: string,
+): FieldNotebookEventType {
+  switch (activityType) {
+    case "IRRIGATION":
+      return "IRRIGATION";
+
+    case "FERTILIZATION":
+    case "SOIL_CORRECTION":
+      return "FERTILIZATION";
+
+    case "PEST_CONTROL":
+    case "DISEASE_CONTROL":
+      return "PEST_CONTROL";
+
+    case "INSPECTION":
+      return "INSPECTION";
+
+    default:
+      return "INSPECTION";
+  }
+}
+
+function isDirectEventType(
+  activityType: string,
+): boolean {
+  return [
+    "IRRIGATION",
+    "FERTILIZATION",
+    "PEST_CONTROL",
+    "INSPECTION",
+  ].includes(activityType);
+}
+
+/**
+ * Convierte una entrada real en una fila
+ * compatible con la tabla del Cuaderno.
+ */
+function adaptNotebookEntry(
+  entry: PersistedNotebookEntry,
+): FieldNotebookRecord {
+  const eventType = mapEventType(entry.activityType);
+
+  const details = [
+    entry.description,
+    entry.problemObserved,
+    entry.actionTaken,
+  ]
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const note = details.join(" | ");
+
+  // Cuando la UI no tiene una categoría específica,
+  // conservamos el código original en la descripción.
+  const normalizedNote = isDirectEventType(entry.activityType)
+    ? note
+    : `[${entry.activityType}] ${note}`;
+
+  return {
+    id: entry.id,
+    createdAt: entry.createdAt,
+    responsible: entry.responsibleUser,
+    fieldId: entry.fieldId,
+    zoneId: entry.zoneId,
+    cropType: entry.cropType,
+    eventType,
+    evidenceCount: entry.evidence?.length ?? 0,
+    note: normalizedNote || "Sin descripción registrada.",
+  };
+}
+
+/**
+ * Utiliza únicamente archivos que realmente
+ * tengan metadatos en la respuesta.
+ */
+function collectEvidenceFiles(
+  entries: ReadonlyArray<PersistedNotebookEntry>,
+): FieldNotebookEvidenceFile[] {
+  const files: FieldNotebookEvidenceFile[] = [];
+
+  for (const entry of entries) {
+    for (const item of entry.evidence ?? []) {
+      if (
+        item.type !== "image" &&
+        item.type !== "document"
+      ) {
+        continue;
+      }
+
+      files.push({
+        id: item.id,
+        type: item.type === "image" ? "IMAGE" : "PDF",
+        name: item.description || "Archivo adjunto",
+        sizeLabel: "Tamaño no disponible",
+        previewUrl: item.url ?? null,
+      });
+    }
+  }
+
+  return files;
+}
+
+/**
+ * GET /api/field-notebook
+ *
+ * Construye los datos de la pantalla a
+ * partir de los registros de PostgreSQL.
+ */
+export async function getFieldNotebookData():
+  Promise<FieldNotebookData> {
+  const response = await apiGet<unknown>(
+    NOTEBOOK_ENDPOINT,
+  );
+
+  if (
+    !Array.isArray(response) ||
+    !response.every(isPersistedEntry)
+  ) {
+    throw new Error(
+      "El Cuaderno de campo devolvió un contrato inválido.",
+    );
+  }
+
+  const entries = [...response].sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() -
+      new Date(a.createdAt).getTime(),
+  );
+
+  const records = entries.map(adaptNotebookEntry);
+
+  const pendingObservations = entries.filter(
+    (entry) =>
+      /pendiente|pending/i.test(
+        `${entry.description} ${entry.actionTaken}`,
+      ),
+  ).length;
+
+  const appliedActions = entries.filter(
+    (entry) =>
+      entry.actionTaken.trim().length > 0 &&
+      !/pendiente|pending/i.test(entry.actionTaken),
+  ).length;
+
+  const registeredZones = new Set(
+    entries.map(
+      (entry) => `${entry.fieldId}:${entry.zoneId}`,
+    ),
+  ).size;
+
+  const registeredEvidence = entries.reduce(
+    (total, entry) =>
+      total + (entry.evidence?.length ?? 0),
+    0,
+  );
+
+  return {
+    totalRecords: records.length,
+    pendingObservations,
+    appliedActions,
+    registeredZones,
+    registeredEvidence,
+    records,
+
+    // Sin asociaciones persistidas expuestas
+    // por el endpoint actual.
+    linkedItems: [],
+
+    evidenceFiles: collectEvidenceFiles(entries),
+  };
+}
+
+/**
+ * =========================================
+ * Creación de observaciones (compatibilidad)
+ * =========================================
+ *
+ * Se conserva la función utilizada por el
+ * formulario actual.
+ *
+ * La lectura GET ya es real, pero la ruta POST
+ * todavía debe implementarse para garantizar
+ * que nuevas observaciones se guarden en Neon.
+ */
+
 export async function createFieldObservation(
   form: FieldObservationForm,
 ): Promise<FieldNotebookRecord> {
   try {
-    const response = await fetch(FIELD_NOTEBOOK_ENDPOINT, {
+    const response = await fetch(NOTEBOOK_ENDPOINT, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         fieldId: "field-001",
         cropType: form.cropType,
@@ -245,26 +322,18 @@ export async function createFieldObservation(
     });
 
     if (response.ok) {
-      const json = (await response.json()) as ApiResponse<FieldNotebookRecord>;
+      const payload =
+        (await response.json()) as ApiResponse<FieldNotebookRecord>;
 
-      if (json.success && json.data) {
-        return json.data;
+      if (payload.success && payload.data) {
+        return payload.data;
       }
     }
   } catch {
-    // Backend todavía puede no estar disponible.
+    // Conserva compatibilidad con el flujo local
+    // hasta implementar la persistencia de POST.
   }
 
-  return buildLocalRecord(form);
-}
-
-/**
- * Genera un registro local cuando POST no está disponible.
- *
- * Esto mantiene funcional el botón
- * "Guardar observación" durante el MVP.
- */
-function buildLocalRecord(form: FieldObservationForm): FieldNotebookRecord {
   return {
     id: `notebook-local-${Date.now()}`,
     createdAt: new Date(form.date).toISOString(),
@@ -272,35 +341,8 @@ function buildLocalRecord(form: FieldObservationForm): FieldNotebookRecord {
     fieldId: "field-001",
     zoneId: form.zoneId,
     cropType: form.cropType,
-    eventType: mapActionToEventType(form.action),
+    eventType: mapEventType(form.action),
     evidenceCount: 0,
-    note: form.observation,
-  };
-}
-
-/**
- * Convierte la acción del formulario
- * al tipo de evento que usa el historial.
- */
-function mapActionToEventType(
-  action: FieldObservationForm["action"],
-): FieldNotebookRecord["eventType"] {
-  if (action === "IRRIGATION") return "IRRIGATION";
-  if (action === "FERTILIZATION") return "FERTILIZATION";
-  if (action === "PEST_CONTROL") return "PEST_CONTROL";
-
-  return "INSPECTION";
-}
-
-/**
- * Devuelve nuevas referencias para evitar
- * que la UI modifique directamente el fallback base.
- */
-function cloneFallbackData(): FieldNotebookData {
-  return {
-    ...fieldNotebookFallback,
-    records: [...fieldNotebookFallback.records],
-    linkedItems: [...fieldNotebookFallback.linkedItems],
-    evidenceFiles: [...fieldNotebookFallback.evidenceFiles],
+    note: `[Sin sincronizar con PostgreSQL] ${form.observation}`,
   };
 }
